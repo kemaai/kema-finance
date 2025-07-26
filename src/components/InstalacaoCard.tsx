@@ -4,13 +4,16 @@ import { Scissors, Edit, Trash2, ChevronDown, ChevronUp, Calendar, DollarSign, M
 
 interface Instalacao {
   id: string;
-  numeroPedido: string;
-  dataInstalacao: string;
-  arquitetoNome: string;
-  ambiente: string;
+  user_id: string;
+  numero_pedido: string;
   endereco: string;
-  valorTotal: number;
-  status: 'Agendado' | 'Em Andamento' | 'Concluído' | 'Cancelado';
+  ambiente: string;
+  arquiteto_nome: string;
+  data_instalacao: string;
+  valor_total: number;
+  status: string;
+  created_at: string;
+  updated_at: string;
 }
 
 interface InstalacaoCardProps {
@@ -38,8 +41,8 @@ export const InstalacaoCard: React.FC<InstalacaoCardProps> = ({ instalacao, onEd
       <div className="p-4">
         <div className="flex items-start justify-between mb-3">
           <div className="flex-1 min-w-0">
-            <h3 className="font-semibold text-foreground truncate">#{instalacao.numeroPedido}</h3>
-            <p className="text-sm text-muted-foreground truncate">{instalacao.arquitetoNome}</p>
+            <h3 className="font-semibold text-foreground truncate">#{instalacao.numero_pedido}</h3>
+            <p className="text-sm text-muted-foreground truncate">{instalacao.arquiteto_nome}</p>
           </div>
           <span className={`px-2 py-1 rounded-full text-xs font-medium whitespace-nowrap ml-2 ${getStatusColor(instalacao.status)}`}>
             {instalacao.status}
@@ -50,7 +53,7 @@ export const InstalacaoCard: React.FC<InstalacaoCardProps> = ({ instalacao, onEd
           <div>
             <div className="flex items-center gap-1 mb-1">
               <Calendar className="w-3 h-3 text-muted-foreground" />
-              <p className="text-xs text-muted-foreground">{new Date(instalacao.dataInstalacao).toLocaleDateString('pt-BR')}</p>
+              <p className="text-xs text-muted-foreground">{new Date(instalacao.data_instalacao).toLocaleDateString('pt-BR')}</p>
             </div>
             <div className="flex items-center gap-1 mb-1">
               <MapPin className="w-3 h-3 text-muted-foreground" />
@@ -58,7 +61,7 @@ export const InstalacaoCard: React.FC<InstalacaoCardProps> = ({ instalacao, onEd
             </div>
             <div className="flex items-center gap-1">
               <DollarSign className="w-3 h-3 text-muted-foreground" />
-              <p className="text-sm font-bold text-foreground">R$ {instalacao.valorTotal.toFixed(2)}</p>
+              <p className="text-sm font-bold text-foreground">R$ {instalacao.valor_total.toFixed(2)}</p>
             </div>
           </div>
           
@@ -102,7 +105,7 @@ export const InstalacaoCard: React.FC<InstalacaoCardProps> = ({ instalacao, onEd
             <div className="grid grid-cols-2 gap-3 text-sm">
               <div>
                 <span className="text-muted-foreground">Metragem Estimada:</span>
-                <p className="font-medium">{(instalacao.valorTotal / 20).toFixed(1)} m²</p>
+                <p className="font-medium">{(instalacao.valor_total / 20).toFixed(1)} m²</p>
               </div>
               <div>
                 <span className="text-muted-foreground">Valor por m²:</span>

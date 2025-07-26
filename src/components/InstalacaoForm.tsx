@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { X, Save } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -8,51 +8,78 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 
 interface Instalacao {
   id: string;
-  numeroPedido: string;
-  dataInstalacao: string;
-  arquitetoNome: string;
-  ambiente: string;
+  user_id: string;
+  numero_pedido: string;
   endereco: string;
-  valorTotal: number;
-  status: 'Agendado' | 'Em Andamento' | 'Concluído' | 'Cancelado';
+  ambiente: string;
+  arquiteto_nome: string;
+  data_instalacao: string;
+  valor_total: number;
+  status: string;
+  created_at: string;
+  updated_at: string;
 }
 
 interface InstalacaoFormProps {
-  onSave: (instalacao: Instalacao) => void;
+  instalacao?: Instalacao | null;
+  onSubmit: (instalacao: Instalacao | Omit<Instalacao, 'id' | 'created_at' | 'updated_at' | 'user_id'>) => void;
   onCancel: () => void;
-  instalacao?: Instalacao;
+  isLoading?: boolean;
 }
 
 export const InstalacaoForm: React.FC<InstalacaoFormProps> = ({
-  onSave,
+  instalacao,
+  onSubmit,
   onCancel,
-  instalacao
+  isLoading = false
 }) => {
   const [formData, setFormData] = useState({
-    numeroPedido: instalacao?.numeroPedido || '',
-    dataInstalacao: instalacao?.dataInstalacao || '',
-    arquitetoNome: instalacao?.arquitetoNome || '',
-    ambiente: instalacao?.ambiente || '',
-    endereco: instalacao?.endereco || '',
-    metragem: instalacao ? instalacao.valorTotal / 20 : 0, // Assumindo R$ 20 por m²
-    status: instalacao?.status || 'Agendado' as const
+    numero_pedido: '',
+    data_instalacao: '',
+    arquiteto_nome: '',
+    ambiente: '',
+    endereco: '',
+    valor_total: 0,
+    status: 'Agendado' as const
   });
+
+  useEffect(() => {
+    if (instalacao) {
+      setFormData({
+        numero_pedido: instalacao.numero_pedido || '',
+        data_instalacao: instalacao.data_instalacao || '',
+        arquiteto_nome: instalacao.arquiteto_nome || '',
+        ambiente: instalacao.ambiente || '',
+        endereco: instalacao.endereco || '',
+        valor_total: instalacao.valor_total || 0,
+        status: instalacao.status || 'Agendado'
+      });
+    } else {
+      setFormData({
+        numero_pedido: '',
+        data_instalacao: '',
+        arquiteto_nome: '',
+        ambiente: '',
+        endereco: '',
+        valor_total: 0,
+        status: 'Agendado'
+      });
+    }
+  }, [instalacao]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
-    const instalacaoData: Instalacao = {
-      id: instalacao?.id || `inst_${Date.now()}`,
-      numeroPedido: formData.numeroPedido,
-      dataInstalacao: formData.dataInstalacao,
-      arquitetoNome: formData.arquitetoNome,
-      ambiente: formData.ambiente,
-      endereco: formData.endereco,
-      valorTotal: formData.metragem * 20, // R$ 20 por m²
-      status: formData.status
-    };
-
-    onSave(instalacaoData);
+    if (instalacao) {
+      // Editing existing instalacao
+      onSubmit({
+        ...instalacao,
+        ...formData
+      });
+    } else {
+      // Creating new instalacao
+      onSubmit(formData);
+    }
   };
 
   const handleInputChange = (field: string, value: string | number) => {
@@ -62,132 +89,132 @@ export const InstalacaoForm: React.FC<InstalacaoFormProps> = ({
     }));
   };
 
+  const metragem = formData.valor_total / 20;
+
   return (
-    <div className="min-h-screen bg-background p-4 md:p-6">
-      <Card className="w-full max-w-2xl mx-auto">
-        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
-          <CardTitle className="text-lg md:text-xl font-semibold">
-            {instalacao ? 'Editar Instalação' : 'Nova Instalação'}
-          </CardTitle>
-          <Button variant="ghost" size="sm" onClick={onCancel}>
-            <X className="w-4 h-4" />
-          </Button>
-        </CardHeader>
-        
-        <CardContent>
-          <form onSubmit={handleSubmit} className="space-y-4 md:space-y-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="numeroPedido">Número do Pedido</Label>
-                <Input
-                  id="numeroPedido"
-                  type="text"
-                  placeholder="Ex: PED-2024-001"
-                  value={formData.numeroPedido}
-                  onChange={(e) => handleInputChange('numeroPedido', e.target.value)}
-                  required
-                  className="w-full"
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="dataInstalacao">Data da Instalação</Label>
-                <Input
-                  id="dataInstalacao"
-                  type="date"
-                  value={formData.dataInstalacao}
-                  onChange={(e) => handleInputChange('dataInstalacao', e.target.value)}
-                  required
-                  className="w-full"
-                />
-              </div>
-            </div>
-
+    <Card className="w-full max-w-2xl mx-auto">
+      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
+        <CardTitle className="text-lg md:text-xl font-semibold">
+          {instalacao ? 'Editar Instalação' : 'Nova Instalação'}
+        </CardTitle>
+        <Button variant="ghost" size="sm" onClick={onCancel}>
+          <X className="w-4 h-4" />
+        </Button>
+      </CardHeader>
+      
+      <CardContent>
+        <form onSubmit={handleSubmit} className="space-y-4 md:space-y-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="arquitetoNome">Nome do Arquiteto</Label>
+              <Label htmlFor="numero_pedido">Número do Pedido</Label>
               <Input
-                id="arquitetoNome"
+                id="numero_pedido"
                 type="text"
-                placeholder="Digite o nome do arquiteto"
-                value={formData.arquitetoNome}
-                onChange={(e) => handleInputChange('arquitetoNome', e.target.value)}
+                placeholder="Ex: PED-2024-001"
+                value={formData.numero_pedido}
+                onChange={(e) => handleInputChange('numero_pedido', e.target.value)}
                 required
                 className="w-full"
               />
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="ambiente">Ambiente</Label>
+              <Label htmlFor="data_instalacao">Data da Instalação</Label>
               <Input
-                id="ambiente"
-                type="text"
-                placeholder="Ex: Sala de estar, Quarto, etc."
-                value={formData.ambiente}
-                onChange={(e) => handleInputChange('ambiente', e.target.value)}
+                id="data_instalacao"
+                type="date"
+                value={formData.data_instalacao}
+                onChange={(e) => handleInputChange('data_instalacao', e.target.value)}
                 required
                 className="w-full"
               />
             </div>
+          </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="endereco">Endereço</Label>
-              <Input
-                id="endereco"
-                type="text"
-                placeholder="Digite o endereço completo da instalação"
-                value={formData.endereco}
-                onChange={(e) => handleInputChange('endereco', e.target.value)}
-                required
-                className="w-full"
-              />
-            </div>
+          <div className="space-y-2">
+            <Label htmlFor="arquiteto_nome">Nome do Arquiteto</Label>
+            <Input
+              id="arquiteto_nome"
+              type="text"
+              placeholder="Digite o nome do arquiteto"
+              value={formData.arquiteto_nome}
+              onChange={(e) => handleInputChange('arquiteto_nome', e.target.value)}
+              required
+              className="w-full"
+            />
+          </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="metragem">Metragem (m²)</Label>
-              <Input
-                id="metragem"
-                type="number"
-                step="0.1"
-                min="0"
-                placeholder="0.0"
-                value={formData.metragem}
-                onChange={(e) => handleInputChange('metragem', parseFloat(e.target.value) || 0)}
-                required
-                className="w-full"
-              />
-              <p className="text-xs text-muted-foreground">
-                Valor: R$ {(formData.metragem * 20).toFixed(2)} (R$ 20,00 por m²)
-              </p>
-            </div>
+          <div className="space-y-2">
+            <Label htmlFor="ambiente">Ambiente</Label>
+            <Input
+              id="ambiente"
+              type="text"
+              placeholder="Ex: Sala de estar, Quarto, etc."
+              value={formData.ambiente}
+              onChange={(e) => handleInputChange('ambiente', e.target.value)}
+              required
+              className="w-full"
+            />
+          </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="status">Status</Label>
-              <select
-                id="status"
-                value={formData.status}
-                onChange={(e) => handleInputChange('status', e.target.value)}
-                className="w-full h-10 px-3 py-2 text-sm bg-background border border-input rounded-md focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
-                required
-              >
-                <option value="Agendado">Agendado</option>
-                <option value="Em Andamento">Em Andamento</option>
-                <option value="Concluído">Concluído</option>
-                <option value="Cancelado">Cancelado</option>
-              </select>
-            </div>
+          <div className="space-y-2">
+            <Label htmlFor="endereco">Endereço</Label>
+            <Input
+              id="endereco"
+              type="text"
+              placeholder="Digite o endereço completo da instalação"
+              value={formData.endereco}
+              onChange={(e) => handleInputChange('endereco', e.target.value)}
+              required
+              className="w-full"
+            />
+          </div>
 
-            <div className="flex flex-col sm:flex-row gap-2 pt-4">
-              <Button type="submit" className="flex-1">
-                <Save className="w-4 h-4 mr-2" />
-                Salvar
-              </Button>
-              <Button type="button" variant="outline" onClick={onCancel} className="flex-1 sm:flex-none">
-                Cancelar
-              </Button>
-            </div>
-          </form>
-        </CardContent>
-      </Card>
-    </div>
+          <div className="space-y-2">
+            <Label htmlFor="metragem">Metragem (m²)</Label>
+            <Input
+              id="metragem"
+              type="number"
+              step="0.1"
+              min="0"
+              placeholder="0.0"
+              value={metragem}
+              onChange={(e) => handleInputChange('valor_total', (parseFloat(e.target.value) || 0) * 20)}
+              required
+              className="w-full"
+            />
+            <p className="text-xs text-muted-foreground">
+              Valor: R$ {formData.valor_total.toFixed(2)} (R$ 20,00 por m²)
+            </p>
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="status">Status</Label>
+            <select
+              id="status"
+              value={formData.status}
+              onChange={(e) => handleInputChange('status', e.target.value)}
+              className="w-full h-10 px-3 py-2 text-sm bg-background border border-input rounded-md focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
+              required
+            >
+              <option value="Agendado">Agendado</option>
+              <option value="Em Andamento">Em Andamento</option>
+              <option value="Concluído">Concluído</option>
+              <option value="Cancelado">Cancelado</option>
+            </select>
+          </div>
+
+          <div className="flex flex-col sm:flex-row gap-2 pt-4">
+            <Button type="submit" className="flex-1" disabled={isLoading}>
+              <Save className="w-4 h-4 mr-2" />
+              {isLoading ? 'Salvando...' : 'Salvar'}
+            </Button>
+            <Button type="button" variant="outline" onClick={onCancel} className="flex-1 sm:flex-none">
+              Cancelar
+            </Button>
+          </div>
+        </form>
+      </CardContent>
+    </Card>
   );
 };
