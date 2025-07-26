@@ -1,11 +1,12 @@
 
-import React, { useState } from 'react';
-import { Users, Edit, Trash2, ChevronDown, ChevronUp, Mail, Phone, MapPin, Calendar } from 'lucide-react';
+import React from 'react';
+import { Edit, Trash2, Mail, Phone, MapPin } from 'lucide-react';
+import { Card, CardContent } from '@/components/ui/card';
 
 interface Cliente {
   id: string;
   nome: string;
-  cpfCnpj: string;
+  cpf_cnpj: string;
   email: string;
   telefone: string;
   endereco: string;
@@ -13,7 +14,9 @@ interface Cliente {
   estado: string;
   cep: string;
   observacoes?: string;
-  createdAt: string;
+  created_at: string;
+  updated_at: string;
+  user_id: string;
 }
 
 interface ClienteCardProps {
@@ -23,33 +26,15 @@ interface ClienteCardProps {
 }
 
 export const ClienteCard: React.FC<ClienteCardProps> = ({ cliente, onEdit, onDelete }) => {
-  const [isExpanded, setIsExpanded] = useState(false);
-
   return (
-    <div className="bg-white rounded-lg shadow-sm border border-border overflow-hidden">
-      {/* Card Header - Always Visible */}
-      <div className="p-4">
-        <div className="flex items-start justify-between mb-3">
-          <div className="flex-1 min-w-0">
-            <h3 className="font-semibold text-foreground truncate">{cliente.nome}</h3>
-            <p className="text-sm text-muted-foreground truncate">{cliente.cpfCnpj}</p>
+    <Card className="bg-white border border-border hover:shadow-sm transition-shadow">
+      <CardContent className="p-4">
+        <div className="flex justify-between items-start mb-3">
+          <div className="flex-1">
+            <h3 className="font-semibold text-lg text-foreground mb-1">{cliente.nome}</h3>
+            <p className="text-sm text-muted-foreground">{cliente.cpf_cnpj}</p>
           </div>
-          <Users className="w-5 h-5 text-muted-foreground flex-shrink-0 ml-2" />
-        </div>
-
-        <div className="flex items-center justify-between">
-          <div className="flex-1 min-w-0">
-            <div className="flex items-center gap-1 mb-1">
-              <Mail className="w-3 h-3 text-muted-foreground" />
-              <p className="text-xs text-muted-foreground truncate">{cliente.email}</p>
-            </div>
-            <div className="flex items-center gap-1">
-              <Phone className="w-3 h-3 text-muted-foreground" />
-              <p className="text-xs text-muted-foreground">{cliente.telefone}</p>
-            </div>
-          </div>
-          
-          <div className="flex items-center gap-2 ml-2">
+          <div className="flex gap-1">
             <button
               onClick={() => onEdit(cliente)}
               className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
@@ -62,47 +47,34 @@ export const ClienteCard: React.FC<ClienteCardProps> = ({ cliente, onEdit, onDel
             >
               <Trash2 className="w-4 h-4" />
             </button>
-            <button
-              onClick={() => setIsExpanded(!isExpanded)}
-              className="p-2 text-gray-600 hover:bg-gray-50 rounded-lg transition-colors"
-            >
-              {isExpanded ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
-            </button>
           </div>
         </div>
-      </div>
 
-      {/* Expanded Content */}
-      {isExpanded && (
-        <div className="px-4 pb-4 border-t border-border bg-gray-50">
-          <div className="pt-3 space-y-3">
-            <div>
-              <div className="flex items-center gap-1 mb-2">
-                <MapPin className="w-4 h-4 text-muted-foreground" />
-                <span className="text-muted-foreground text-sm font-medium">Endereço Completo:</span>
-              </div>
-              <p className="text-sm ml-5">{cliente.endereco}</p>
-              <p className="text-sm ml-5">{cliente.cidade} - {cliente.estado}</p>
-              <p className="text-sm ml-5">CEP: {cliente.cep}</p>
-            </div>
-            
-            {cliente.observacoes && (
-              <div>
-                <span className="text-muted-foreground text-sm font-medium">Observações:</span>
-                <p className="text-sm mt-1">{cliente.observacoes}</p>
-              </div>
-            )}
-            
-            <div>
-              <div className="flex items-center gap-1 mb-1">
-                <Calendar className="w-4 h-4 text-muted-foreground" />
-                <span className="text-muted-foreground text-sm font-medium">Cadastrado em:</span>
-              </div>
-              <p className="text-sm ml-5">{new Date(cliente.createdAt).toLocaleDateString('pt-BR')}</p>
-            </div>
+        <div className="space-y-2">
+          <div className="flex items-center text-sm text-muted-foreground">
+            <Mail className="w-4 h-4 mr-2 flex-shrink-0" />
+            <span className="truncate">{cliente.email}</span>
+          </div>
+          <div className="flex items-center text-sm text-muted-foreground">
+            <Phone className="w-4 h-4 mr-2 flex-shrink-0" />
+            <span>{cliente.telefone}</span>
+          </div>
+          <div className="flex items-start text-sm text-muted-foreground">
+            <MapPin className="w-4 h-4 mr-2 flex-shrink-0 mt-0.5" />
+            <span className="line-clamp-2">
+              {cliente.endereco}, {cliente.cidade} - {cliente.estado}, {cliente.cep}
+            </span>
           </div>
         </div>
-      )}
-    </div>
+
+        {cliente.observacoes && (
+          <div className="mt-3 pt-3 border-t border-border">
+            <p className="text-sm text-muted-foreground line-clamp-2">
+              <strong>Obs:</strong> {cliente.observacoes}
+            </p>
+          </div>
+        )}
+      </CardContent>
+    </Card>
   );
 };

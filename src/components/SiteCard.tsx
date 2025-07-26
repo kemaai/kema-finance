@@ -1,22 +1,25 @@
 
-import React, { useState } from 'react';
-import { Globe, Edit, Trash2, ExternalLink, ChevronDown, ChevronUp } from 'lucide-react';
+import React from 'react';
+import { Edit, Trash2, Globe, Calendar, DollarSign } from 'lucide-react';
+import { Card, CardContent } from '@/components/ui/card';
 
 interface Site {
   id: string;
-  clienteId: string;
-  clienteNome: string;
-  dataInicio: string;
-  tipoPlano: 'assinatura-70' | 'assinatura-85' | 'venda-1400';
+  cliente_id: string;
+  cliente_nome: string;
+  data_inicio: string;
+  tipo_plano: 'assinatura-70' | 'assinatura-85' | 'venda-1400';
   status: 'Ativo' | 'Suspenso' | 'Cancelado';
-  dataVencimento: string;
-  valorMensal: number;
-  descricaoProjeto: string;
-  urlSite?: string;
+  data_vencimento: string;
+  valor_mensal: number;
+  descricao_projeto: string;
+  url_site?: string;
   observacoes?: string;
   hospedagem: boolean;
   instalacao: boolean;
-  createdAt: string;
+  created_at: string;
+  updated_at: string;
+  user_id: string;
 }
 
 interface SiteCardProps {
@@ -51,32 +54,26 @@ const getServicosAdicionais = (site: Site) => {
 };
 
 export const SiteCard: React.FC<SiteCardProps> = ({ site, onEdit, onDelete }) => {
-  const [isExpanded, setIsExpanded] = useState(false);
-
   return (
-    <div className="bg-white rounded-lg shadow-sm border border-border overflow-hidden">
-      {/* Card Header - Always Visible */}
-      <div className="p-4">
-        <div className="flex items-start justify-between mb-3">
-          <div className="flex-1 min-w-0">
-            <h3 className="font-semibold text-foreground truncate">{site.clienteNome}</h3>
-            <p className="text-sm text-muted-foreground truncate">{site.descricaoProjeto}</p>
-          </div>
-          <span className={`px-2 py-1 rounded-full text-xs font-medium whitespace-nowrap ml-2 ${getStatusColor(site.status)}`}>
-            {site.status}
-          </span>
-        </div>
-
-        <div className="flex items-center justify-between">
-          <div>
-            <p className="text-lg font-bold text-foreground">R$ {site.valorMensal.toFixed(2)}</p>
-            <p className="text-xs text-muted-foreground">{getTipoPlanoLabel(site.tipoPlano)}</p>
-            {getServicosAdicionais(site) && (
-              <p className="text-xs text-blue-600 mt-1">{getServicosAdicionais(site)}</p>
+    <Card className="bg-white border border-border hover:shadow-sm transition-shadow">
+      <CardContent className="p-4">
+        <div className="flex justify-between items-start mb-3">
+          <div className="flex-1">
+            <h3 className="font-semibold text-lg text-foreground mb-1">{site.cliente_nome}</h3>
+            <p className="text-sm text-muted-foreground">{site.descricao_projeto}</p>
+            {site.url_site && (
+              <a
+                href={site.url_site}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-blue-600 hover:text-blue-800 text-sm flex items-center gap-1 mt-1"
+              >
+                <Globe className="w-3 h-3" />
+                {site.url_site}
+              </a>
             )}
           </div>
-          
-          <div className="flex items-center gap-2">
+          <div className="flex gap-1">
             <button
               onClick={() => onEdit(site)}
               className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
@@ -89,55 +86,53 @@ export const SiteCard: React.FC<SiteCardProps> = ({ site, onEdit, onDelete }) =>
             >
               <Trash2 className="w-4 h-4" />
             </button>
-            <button
-              onClick={() => setIsExpanded(!isExpanded)}
-              className="p-2 text-gray-600 hover:bg-gray-50 rounded-lg transition-colors"
-            >
-              {isExpanded ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
-            </button>
           </div>
         </div>
-      </div>
 
-      {/* Expanded Content */}
-      {isExpanded && (
-        <div className="px-4 pb-4 border-t border-border bg-gray-50">
-          <div className="pt-3 space-y-3">
-            <div className="grid grid-cols-2 gap-3 text-sm">
-              <div>
-                <span className="text-muted-foreground">Data Início:</span>
-                <p className="font-medium">{new Date(site.dataInicio).toLocaleDateString('pt-BR')}</p>
-              </div>
-              <div>
-                <span className="text-muted-foreground">Vencimento:</span>
-                <p className="font-medium">{new Date(site.dataVencimento).toLocaleDateString('pt-BR')}</p>
-              </div>
+        <div className="space-y-2 mb-3">
+          <div className="flex items-center justify-between text-sm">
+            <span className="text-muted-foreground">Plano:</span>
+            <span className="font-medium">{getTipoPlanoLabel(site.tipo_plano)}</span>
+          </div>
+          
+          {getServicosAdicionais(site) && (
+            <div className="flex items-center justify-between text-sm">
+              <span className="text-muted-foreground">Serviços:</span>
+              <span className="font-medium">{getServicosAdicionais(site)}</span>
             </div>
-            
-            {site.urlSite && (
-              <div>
-                <span className="text-muted-foreground text-sm">URL do Site:</span>
-                <a
-                  href={site.urlSite}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex items-center gap-1 text-blue-600 hover:text-blue-800 text-sm mt-1"
-                >
-                  <ExternalLink className="w-3 h-3" />
-                  {site.urlSite}
-                </a>
-              </div>
-            )}
-            
-            {site.observacoes && (
-              <div>
-                <span className="text-muted-foreground text-sm">Observações:</span>
-                <p className="text-sm mt-1">{site.observacoes}</p>
-              </div>
-            )}
+          )}
+
+          <div className="flex items-center justify-between text-sm">
+            <span className="text-muted-foreground">Valor:</span>
+            <div className="flex items-center gap-1">
+              <DollarSign className="w-3 h-3" />
+              <span className="font-medium">R$ {site.valor_mensal.toFixed(2)}</span>
+            </div>
+          </div>
+
+          <div className="flex items-center justify-between text-sm">
+            <span className="text-muted-foreground">Vencimento:</span>
+            <div className="flex items-center gap-1">
+              <Calendar className="w-3 h-3" />
+              <span>{new Date(site.data_vencimento).toLocaleDateString('pt-BR')}</span>
+            </div>
           </div>
         </div>
-      )}
-    </div>
+
+        <div className="flex justify-between items-center">
+          <span className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(site.status)}`}>
+            {site.status}
+          </span>
+        </div>
+
+        {site.observacoes && (
+          <div className="mt-3 pt-3 border-t border-border">
+            <p className="text-sm text-muted-foreground line-clamp-2">
+              <strong>Obs:</strong> {site.observacoes}
+            </p>
+          </div>
+        )}
+      </CardContent>
+    </Card>
   );
 };

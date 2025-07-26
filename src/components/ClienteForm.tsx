@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { X, Save } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -10,18 +10,23 @@ import { Textarea } from '@/components/ui/textarea';
 interface Cliente {
   id: string;
   nome: string;
-  cpfCnpj: string;
+  cpf_cnpj: string;
   email: string;
   telefone: string;
   endereco: string;
+  cidade: string;
+  estado: string;
+  cep: string;
   observacoes?: string;
-  createdAt: string;
+  created_at: string;
+  updated_at: string;
+  user_id: string;
 }
 
 interface ClienteFormProps {
   isOpen: boolean;
   onClose: () => void;
-  onSave: (clienteData: Omit<Cliente, 'id' | 'createdAt'>) => void;
+  onSave: (clienteData: Omit<Cliente, 'id' | 'created_at' | 'updated_at' | 'user_id'>) => void;
   cliente?: Cliente;
 }
 
@@ -32,27 +37,54 @@ export const ClienteForm: React.FC<ClienteFormProps> = ({
   cliente
 }) => {
   const [formData, setFormData] = useState({
-    nome: cliente?.nome || '',
-    cpfCnpj: cliente?.cpfCnpj || '',
-    email: cliente?.email || '',
-    telefone: cliente?.telefone || '',
-    endereco: cliente?.endereco || '',
-    observacoes: cliente?.observacoes || ''
+    nome: '',
+    cpf_cnpj: '',
+    email: '',
+    telefone: '',
+    endereco: '',
+    cidade: '',
+    estado: '',
+    cep: '',
+    observacoes: ''
   });
+
+  useEffect(() => {
+    if (cliente) {
+      setFormData({
+        nome: cliente.nome || '',
+        cpf_cnpj: cliente.cpf_cnpj || '',
+        email: cliente.email || '',
+        telefone: cliente.telefone || '',
+        endereco: cliente.endereco || '',
+        cidade: cliente.cidade || '',
+        estado: cliente.estado || '',
+        cep: cliente.cep || '',
+        observacoes: cliente.observacoes || ''
+      });
+    } else {
+      setFormData({
+        nome: '',
+        cpf_cnpj: '',
+        email: '',
+        telefone: '',
+        endereco: '',
+        cidade: '',
+        estado: '',
+        cep: '',
+        observacoes: ''
+      });
+    }
+  }, [cliente]);
 
   if (!isOpen) return null;
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     onSave(formData);
-    onClose();
   };
 
   const handleInputChange = (field: string, value: string) => {
-    setFormData(prev => ({
-      ...prev,
-      [field]: value
-    }));
+    setFormData(prev => ({ ...prev, [field]: value }));
   };
 
   return (
@@ -75,7 +107,7 @@ export const ClienteForm: React.FC<ClienteFormProps> = ({
                 <Input
                   id="nome"
                   type="text"
-                  placeholder="Digite o nome completo ou razão social"
+                  placeholder="Nome completo ou razão social"
                   value={formData.nome}
                   onChange={(e) => handleInputChange('nome', e.target.value)}
                   required
@@ -84,13 +116,13 @@ export const ClienteForm: React.FC<ClienteFormProps> = ({
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="cpfCnpj">CPF/CNPJ</Label>
+                <Label htmlFor="cpf_cnpj">CPF/CNPJ</Label>
                 <Input
-                  id="cpfCnpj"
+                  id="cpf_cnpj"
                   type="text"
-                  placeholder="000.000.000-00 ou 00.000.000/0000-00"
-                  value={formData.cpfCnpj}
-                  onChange={(e) => handleInputChange('cpfCnpj', e.target.value)}
+                  placeholder="000.000.000-00 ou 00.000.000/0001-00"
+                  value={formData.cpf_cnpj}
+                  onChange={(e) => handleInputChange('cpf_cnpj', e.target.value)}
                   required
                   className="w-full"
                 />
@@ -99,11 +131,11 @@ export const ClienteForm: React.FC<ClienteFormProps> = ({
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="email">Email</Label>
+                <Label htmlFor="email">E-mail</Label>
                 <Input
                   id="email"
                   type="email"
-                  placeholder="email@exemplo.com"
+                  placeholder="cliente@exemplo.com"
                   value={formData.email}
                   onChange={(e) => handleInputChange('email', e.target.value)}
                   required
@@ -116,7 +148,7 @@ export const ClienteForm: React.FC<ClienteFormProps> = ({
                 <Input
                   id="telefone"
                   type="tel"
-                  placeholder="(11) 99999-9999"
+                  placeholder="(00) 00000-0000"
                   value={formData.telefone}
                   onChange={(e) => handleInputChange('telefone', e.target.value)}
                   required
@@ -130,12 +162,80 @@ export const ClienteForm: React.FC<ClienteFormProps> = ({
               <Input
                 id="endereco"
                 type="text"
-                placeholder="Rua, número, complemento, bairro, cidade, estado"
+                placeholder="Rua, número, bairro"
                 value={formData.endereco}
                 onChange={(e) => handleInputChange('endereco', e.target.value)}
                 required
                 className="w-full"
               />
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="cidade">Cidade</Label>
+                <Input
+                  id="cidade"
+                  type="text"
+                  placeholder="Cidade"
+                  value={formData.cidade}
+                  onChange={(e) => handleInputChange('cidade', e.target.value)}
+                  required
+                  className="w-full"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="estado">Estado</Label>
+                <select
+                  id="estado"
+                  value={formData.estado}
+                  onChange={(e) => handleInputChange('estado', e.target.value)}
+                  className="w-full h-10 px-3 py-2 text-sm bg-background border border-input rounded-md focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
+                  required
+                >
+                  <option value="">Selecione</option>
+                  <option value="AC">AC</option>
+                  <option value="AL">AL</option>
+                  <option value="AP">AP</option>
+                  <option value="AM">AM</option>
+                  <option value="BA">BA</option>
+                  <option value="CE">CE</option>
+                  <option value="DF">DF</option>
+                  <option value="ES">ES</option>
+                  <option value="GO">GO</option>
+                  <option value="MA">MA</option>
+                  <option value="MT">MT</option>
+                  <option value="MS">MS</option>
+                  <option value="MG">MG</option>
+                  <option value="PA">PA</option>
+                  <option value="PB">PB</option>
+                  <option value="PR">PR</option>
+                  <option value="PE">PE</option>
+                  <option value="PI">PI</option>
+                  <option value="RJ">RJ</option>
+                  <option value="RN">RN</option>
+                  <option value="RS">RS</option>
+                  <option value="RO">RO</option>
+                  <option value="RR">RR</option>
+                  <option value="SC">SC</option>
+                  <option value="SP">SP</option>
+                  <option value="SE">SE</option>
+                  <option value="TO">TO</option>
+                </select>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="cep">CEP</Label>
+                <Input
+                  id="cep"
+                  type="text"
+                  placeholder="00000-000"
+                  value={formData.cep}
+                  onChange={(e) => handleInputChange('cep', e.target.value)}
+                  required
+                  className="w-full"
+                />
+              </div>
             </div>
 
             <div className="space-y-2">
