@@ -1,0 +1,435 @@
+import React, { useState } from 'react';
+import { FileText, Download, TrendingUp, Scissors, Calendar, DollarSign, Users, Globe } from 'lucide-react';
+import { useLocalStorage } from '../hooks/useLocalStorage';
+import { useIsMobile } from '../hooks/use-mobile';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Button } from '@/components/ui/button';
+
+interface Site {
+  id: string;
+  status: string;
+  valorMensal: number;
+  tipoPlano: string;
+  dataVencimento: string;
+  clienteNome: string;
+  descricaoProjeto: string;
+}
+
+interface Cliente {
+  id: string;
+  nome: string;
+}
+
+interface Instalacao {
+  id: string;
+  numeroPedido: string;
+  dataInstalacao: string;
+  valorTotal: number;
+  status: string;
+  arquitetoNome: string;
+  ambiente: string;
+}
+
+export const Relatorios = () => {
+  const [sites] = useLocalStorage<Site[]>('sites', []);
+  const [clientes] = useLocalStorage<Cliente[]>('clientes', []);
+  const [instalacoes] = useLocalStorage<Instalacao[]>('instalacoes', []);
+  const [mesEscolhido, setMesEscolhido] = useState(new Date().getMonth());
+  const [anoEscolhido, setAnoEscolhido] = useState(new Date().getFullYear());
+  const isMobile = useIsMobile();
+
+  // Função para filtrar instalações por período
+  const filtrarInstalacoesPorPeriodo = (mes: number, ano: number) => {
+    return instalacoes.filter(instalacao => {
+      const dataInstalacao = new Date(instalacao.dataInstalacao);
+      return dataInstalacao.getMonth() === mes && dataInstalacao.getFullYear() === ano;
+    });
+  };
+
+  // Função para dividir o mês em quinzenas
+  const dividirEmQuinzenas = (instalacoesMes: Instalacao[]) => {
+    const primeiraQuinzena = instalacoesMes.filter(inst => {
+      const dia = new Date(inst.dataInstalacao).getDate();
+      return dia <= 15;
+    });
+
+    const segundaQuinzena = instalacoesMes.filter(inst => {
+      const dia = new Date(inst.dataInstalacao).getDate();
+      return dia > 15;
+    });
+
+    return { primeiraQuinzena, segundaQuinzena };
+  };
+
+  // Instalações do mês escolhido
+  const instalacoesMesEscolhido = filtrarInstalacoesPorPeriodo(mesEscolhido, anoEscolhido);
+  const { primeiraQuinzena, segundaQuinzena } = dividirEmQuinzenas(instalacoesMesEscolhido);
+
+  // Cálculos para relatórios
+  const hoje = new Date();
+  const inicioMesAtual = new Date(hoje.getFullYear(), hoje.getMonth(), 1);
+  const fimMesAtual = new Date(hoje.getFullYear(), hoje.getMonth() + 1, 0);
+
+  // Receita mensal de sites
+  const receitaMensalSites = sites
+    .filter(site => site.status === 'Ativo')
+    .reduce((total, site) => total + site.valorMensal, 0);
+
+  // Receita de instalações no mês atual
+  const instalacoesMesAtual = instalacoes.filter(instalacao => {
+    const dataInstalacao = new Date(instalacao.dataInstalacao);
+    return dataInstalacao >= inicioMesAtual && dataInstalacao <= fimMesAtual && instalacao.status === 'Concluído';
+  });
+
+  const receitaInstalacoesMesAtual = instalacoesMesAtual.reduce((total, instalacao) => total + instalacao.valorTotal, 0);
+
+  // Receita de instalações do mês escolhido
+  const receitaInstalacoesMesEscolhido = instalacoesMesEscolhido
+    .filter(inst => inst.status === 'Concluído')
+    .reduce((total, instalacao) => total + instalacao.valorTotal, 0);
+
+  // Sites por status
+  const sitesPorStatus = sites.reduce((acc, site) => {
+    acc[site.status] = (acc[site.status] || 0) + 1;
+    return acc;
+  }, {} as Record<string, number>);
+
+  // Vencimentos próximos (próximos 30 dias)
+  const proximosVencimentos = sites.filter(site => {
+    const vencimento = new Date(site.dataVencimento);
+    const em30Dias = new Date();
+    em30Dias.setDate(hoje.getDate() + 30);
+    return site.status === 'Ativo' && vencimento <= em30Dias && vencimento >= hoje;
+  }).length;
+
+  const exportarRelatorio = (tipo: string) => {
+    let dados = '';
+    let nomeArquivo = '';
+    const nomesMeses = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 
+                        'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'];
+
+    switch (tipo) {
+      case 'receita':
+        dados = `Relatório de Receita - ${hoje.toLocaleDateString('pt-BR')}\n\n`;
+        dados += `Receita Mensal de Sites: R$ ${receitaMensalSites.toFixed(2)}\n`;
+        dados += `Receita de Instalações (Mês Atual): R$ ${receitaInstalacoesMesAtual.toFixed(2)}\n`;
+        dados += `Total: R$ ${(receitaMensalSites + receitaInstalacoesMesAtual).toFixed(2)}\n`;
+        nomeArquivo = `relatorio-receita-${hoje.toISOString().split('T')[0]}.txt`;
+        break;
+      
+      case 'sites':
+        dados = `Relatório de Sites - ${hoje.toLocaleDateString('pt-BR')}\n\n`;
+        Object.entries(sitesPorStatus).forEach(([status, quantidade]) => {
+          dados += `${status}: ${quantidade} sites\n`;
+        });
+        nomeArquivo = `relatorio-sites-${hoje.toISOString().split('T')[0]}.txt`;
+        break;
+      
+      case 'instalacoes':
+        dados = `Relatório de Instalações - ${nomesMeses[mesEscolhido]} ${anoEscolhido}\n\n`;
+        dados += `Total do Mês: ${instalacoesMesEscolhido.length} instalações\n`;
+        dados += `Primeira Quinzena (1-15): ${primeiraQuinzena.length} instalações\n`;
+        dados += `Segunda Quinzena (16-30): ${segundaQuinzena.length} instalações\n\n`;
+        dados += `Receita Total do Mês: R$ ${receitaInstalacoesMesEscolhido.toFixed(2)}\n`;
+        dados += `Receita 1ª Quinzena: R$ ${primeiraQuinzena.filter(i => i.status === 'Concluído').reduce((acc, inst) => acc + inst.valorTotal, 0).toFixed(2)}\n`;
+        dados += `Receita 2ª Quinzena: R$ ${segundaQuinzena.filter(i => i.status === 'Concluído').reduce((acc, inst) => acc + inst.valorTotal, 0).toFixed(2)}\n`;
+        nomeArquivo = `relatorio-instalacoes-${mesEscolhido + 1}-${anoEscolhido}.txt`;
+        break;
+    }
+
+    const blob = new Blob([dados], { type: 'text/plain' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = nomeArquivo;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  };
+
+  const nomesMeses = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 
+                      'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'];
+
+  return (
+    <div className="p-3 md:p-6 pb-20 md:pb-6">
+      <div className="flex flex-col gap-3 md:gap-4 md:flex-row md:items-center justify-between mb-4 md:mb-6">
+        <div>
+          <h1 className="text-xl md:text-2xl font-bold text-foreground">Relatórios</h1>
+          <p className="text-sm md:text-base text-muted-foreground">Análises e relatórios gerenciais</p>
+        </div>
+        <button 
+          onClick={() => exportarRelatorio('receita')}
+          className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center justify-center gap-2 transition-colors w-full md:w-auto"
+        >
+          <Download className="w-4 h-4" />
+          Exportar
+        </button>
+      </div>
+
+      <Tabs defaultValue="visao-geral" className="space-y-4 md:space-y-6">
+        <TabsList className={`grid w-full ${isMobile ? 'grid-cols-1 h-auto' : 'grid-cols-3'}`}>
+          <TabsTrigger value="visao-geral" className={isMobile ? 'mb-1' : ''}>Visão Geral</TabsTrigger>
+          <TabsTrigger value="receita" className={isMobile ? 'mb-1' : ''}>Receita</TabsTrigger>
+          <TabsTrigger value="operacional">Operacional</TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="visao-geral" className="space-y-4 md:space-y-6">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-6">
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-xs md:text-sm font-medium">Total Clientes</CardTitle>
+                <Users className="h-3 w-3 md:h-4 md:w-4 text-muted-foreground" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-lg md:text-2xl font-bold">{clientes.length}</div>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-xs md:text-sm font-medium">Sites Ativos</CardTitle>
+                <Globe className="h-3 w-3 md:h-4 md:w-4 text-muted-foreground" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-lg md:text-2xl font-bold">{sitesPorStatus['Ativo'] || 0}</div>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-xs md:text-sm font-medium">Receita Mensal</CardTitle>
+                <DollarSign className="h-3 w-3 md:h-4 md:w-4 text-muted-foreground" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-sm md:text-2xl font-bold">R$ {(receitaMensalSites + receitaInstalacoesMesAtual).toFixed(2)}</div>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-xs md:text-sm font-medium">Vencimentos Próximos</CardTitle>
+                <Calendar className="h-3 w-3 md:h-4 md:w-4 text-muted-foreground" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-lg md:text-2xl font-bold">{proximosVencimentos}</div>
+              </CardContent>
+            </Card>
+          </div>
+        </TabsContent>
+
+        <TabsContent value="receita" className="space-y-4 md:space-y-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2 text-sm md:text-base">
+                  <TrendingUp className="w-4 h-4 md:w-5 md:h-5 text-green-600" />
+                  Receita Mensal Detalhada
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-3 md:space-y-4">
+                <div className="flex justify-between items-center p-2 md:p-3 bg-blue-50 rounded-lg">
+                  <span className="font-medium text-xs md:text-sm">Sites (Recorrente)</span>
+                  <span className="text-sm md:text-lg font-bold text-blue-600">R$ {receitaMensalSites.toFixed(2)}</span>
+                </div>
+                <div className="flex justify-between items-center p-2 md:p-3 bg-orange-50 rounded-lg">
+                  <span className="font-medium text-xs md:text-sm">Instalações (Mês Atual)</span>
+                  <span className="text-sm md:text-lg font-bold text-orange-600">R$ {receitaInstalacoesMesAtual.toFixed(2)}</span>
+                </div>
+                <div className="flex justify-between items-center p-2 md:p-3 bg-green-50 rounded-lg border-2 border-green-200">
+                  <span className="font-bold text-xs md:text-sm">Total</span>
+                  <span className="text-lg md:text-xl font-bold text-green-600">R$ {(receitaMensalSites + receitaInstalacoesMesAtual).toFixed(2)}</span>
+                </div>
+                <button 
+                  onClick={() => exportarRelatorio('receita')}
+                  className="w-full mt-4 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center justify-center gap-2 transition-colors text-sm"
+                >
+                  <Download className="w-4 h-4" />
+                  Exportar Relatório de Receita
+                </button>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2 text-sm md:text-base">
+                  <Globe className="w-4 h-4 md:w-5 md:h-5 text-blue-600" />
+                  Performance de Sites
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-3">
+                {Object.entries(sitesPorStatus).map(([status, quantidade]) => (
+                  <div key={status} className="flex justify-between items-center p-2 border rounded text-xs md:text-sm">
+                    <span>{status}</span>
+                    <span className="font-semibold">{quantidade}</span>
+                  </div>
+                ))}
+                <button 
+                  onClick={() => exportarRelatorio('sites')}
+                  className="w-full mt-4 bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg flex items-center justify-center gap-2 transition-colors text-sm"
+                >
+                  <Download className="w-4 h-4" />
+                  Exportar Relatório de Sites
+                </button>
+              </CardContent>
+            </Card>
+          </div>
+        </TabsContent>
+
+        <TabsContent value="operacional" className="space-y-4 md:space-y-6">
+          {/* Seletor de mês e ano */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2 text-sm md:text-base">
+                <Calendar className="w-4 h-4 md:w-5 md:h-5 text-blue-600" />
+                Seleção de Período
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="flex flex-col gap-3 md:flex-row md:gap-4">
+                <div className="space-y-2 flex-1">
+                  <label className="text-xs md:text-sm font-medium">Mês:</label>
+                  <select
+                    value={mesEscolhido}
+                    onChange={(e) => setMesEscolhido(parseInt(e.target.value))}
+                    className="w-full px-3 py-2 border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+                  >
+                    {nomesMeses.map((nome, index) => (
+                      <option key={index} value={index}>{nome}</option>
+                    ))}
+                  </select>
+                </div>
+                <div className="space-y-2 flex-1">
+                  <label className="text-xs md:text-sm font-medium">Ano:</label>
+                  <select
+                    value={anoEscolhido}
+                    onChange={(e) => setAnoEscolhido(parseInt(e.target.value))}
+                    className="w-full px-3 py-2 border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+                  >
+                    {Array.from({length: 5}, (_, i) => new Date().getFullYear() - 2 + i).map(ano => (
+                      <option key={ano} value={ano}>{ano}</option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2 text-sm md:text-base">
+                <Scissors className="w-4 h-4 md:w-5 md:h-5 text-orange-600" />
+                Instalações por Quinzena - {nomesMeses[mesEscolhido]} {anoEscolhido}
+              </CardTitle>
+              <CardDescription className="text-xs md:text-sm">
+                Controle de instalações do período selecionado
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="p-3 md:p-4 bg-blue-50 rounded-lg">
+                  <h4 className="font-medium text-blue-900 mb-2 text-sm">Primeira Quinzena (1-15)</h4>
+                  <div className="text-xl md:text-2xl font-bold text-blue-600">{primeiraQuinzena.length}</div>
+                  <p className="text-xs md:text-sm text-blue-700">instalações</p>
+                  <div className="mt-2 text-xs md:text-sm">
+                    Receita: R$ {primeiraQuinzena.filter(i => i.status === 'Concluído').reduce((acc, inst) => acc + inst.valorTotal, 0).toFixed(2)}
+                  </div>
+                </div>
+                
+                <div className="p-3 md:p-4 bg-orange-50 rounded-lg">
+                  <h4 className="font-medium text-orange-900 mb-2 text-sm">Segunda Quinzena (16-30)</h4>
+                  <div className="text-xl md:text-2xl font-bold text-orange-600">{segundaQuinzena.length}</div>
+                  <p className="text-xs md:text-sm text-orange-700">instalações</p>
+                  <div className="mt-2 text-xs md:text-sm">
+                    Receita: R$ {segundaQuinzena.filter(i => i.status === 'Concluído').reduce((acc, inst) => acc + inst.valorTotal, 0).toFixed(2)}
+                  </div>
+                </div>
+              </div>
+
+              <div className="p-3 md:p-4 bg-green-50 rounded-lg">
+                <h4 className="font-medium text-green-900 mb-2 text-sm">Total do Mês</h4>
+                <div className="text-xl md:text-2xl font-bold text-green-600">{instalacoesMesEscolhido.length}</div>
+                <p className="text-xs md:text-sm text-green-700">instalações</p>
+                <div className="mt-2 text-xs md:text-sm">
+                  Receita Total: R$ {receitaInstalacoesMesEscolhido.toFixed(2)}
+                </div>
+              </div>
+              
+              <button 
+                onClick={() => exportarRelatorio('instalacoes')}
+                className="w-full bg-orange-600 hover:bg-orange-700 text-white px-4 py-2 rounded-lg flex items-center justify-center gap-2 transition-colors text-sm"
+              >
+                <Download className="w-4 h-4" />
+                Exportar Relatório de Instalações
+              </button>
+            </CardContent>
+          </Card>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-sm md:text-base">Próximos Vencimentos</CardTitle>
+                <CardDescription className="text-xs md:text-sm">Contratos que vencem nos próximos 30 dias</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-2">
+                  {sites
+                    .filter(site => {
+                      const vencimento = new Date(site.dataVencimento);
+                      const em30Dias = new Date();
+                      em30Dias.setDate(hoje.getDate() + 30);
+                      return site.status === 'Ativo' && vencimento <= em30Dias && vencimento >= hoje;
+                    })
+                    .slice(0, 5)
+                    .map((site) => (
+                      <div key={site.id} className="flex justify-between items-center p-2 border rounded">
+                        <div>
+                          <div className="font-medium text-xs md:text-sm">{site.clienteNome}</div>
+                          <div className="text-xs text-muted-foreground">
+                            {new Date(site.dataVencimento).toLocaleDateString('pt-BR')}
+                          </div>
+                        </div>
+                        <div className="text-xs md:text-sm font-medium">R$ {site.valorMensal.toFixed(2)}</div>
+                      </div>
+                    ))}
+                  {proximosVencimentos === 0 && (
+                    <p className="text-xs md:text-sm text-muted-foreground">Nenhum vencimento próximo</p>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-sm md:text-base">Instalações Agendadas</CardTitle>
+                <CardDescription className="text-xs md:text-sm">Próximas instalações a serem realizadas</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-2">
+                  {instalacoes
+                    .filter(inst => inst.status === 'Agendado')
+                    .slice(0, 5)
+                    .map((instalacao) => (
+                      <div key={instalacao.id} className="flex justify-between items-center p-2 border rounded">
+                        <div>
+                          <div className="font-medium text-xs md:text-sm">{instalacao.arquitetoNome}</div>
+                          <div className="text-xs text-muted-foreground">
+                            {new Date(instalacao.dataInstalacao).toLocaleDateString('pt-BR')}
+                          </div>
+                        </div>
+                        <div className="text-xs md:text-sm font-medium">R$ {instalacao.valorTotal.toFixed(2)}</div>
+                      </div>
+                    ))}
+                  {instalacoes.filter(inst => inst.status === 'Agendado').length === 0 && (
+                    <p className="text-xs md:text-sm text-muted-foreground">Nenhuma instalação agendada</p>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        </TabsContent>
+      </Tabs>
+    </div>
+  );
+};
