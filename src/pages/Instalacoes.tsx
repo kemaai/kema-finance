@@ -1,326 +1,256 @@
+
 import React, { useState } from 'react';
-import { Plus, Search, Calendar, Scissors, Edit, Trash2 } from 'lucide-react';
-import { useLocalStorage } from '../hooks/useLocalStorage';
-import { useIsMobile } from '../hooks/use-mobile';
-import { InstalacaoForm } from '../components/InstalacaoForm';
-import { InstalacaoCard } from '../components/InstalacaoCard';
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@/components/ui/table';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/hooks/useAuth';
+import { InstalacaoCard } from '@/components/InstalacaoCard';
+import { InstalacaoForm } from '@/components/InstalacaoForm';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Plus } from 'lucide-react';
+import { toast } from 'sonner';
 
 interface Instalacao {
   id: string;
-  numeroPedido: string;
-  dataInstalacao: string;
-  arquitetoNome: string;
-  ambiente: string;
+  user_id: string;
+  numero_pedido: string;
   endereco: string;
-  valorTotal: number;
-  status: 'Agendado' | 'Em Andamento' | 'Concluído' | 'Cancelado';
+  ambiente: string;
+  arquiteto_nome: string;
+  data_instalacao: string;
+  valor_total: number;
+  status: string;
+  created_at: string;
+  updated_at: string;
 }
 
-type FiltroTempo = 'quinzena-1' | 'quinzena-2' | 'mes-atual' | 'mes-anterior' | 'todos';
-
 export const Instalacoes = () => {
-  const [instalacoes, setInstalacoes] = useLocalStorage<Instalacao[]>('instalacoes', []);
   const [showForm, setShowForm] = useState(false);
-  const [editingInstalacao, setEditingInstalacao] = useState<Instalacao | undefined>();
-  const [searchTerm, setSearchTerm] = useState('');
-  const [filtroTempo, setFiltroTempo] = useState<FiltroTempo>('todos');
-  const isMobile = useIsMobile();
+  const [editingInstalacao, setEditingInstalacao] = useState<Instalacao | null>(null);
+  const { user } = useAuth();
+  const queryClient = useQueryClient();
 
-  const handleSaveInstalacao = (instalacao: Instalacao) => {
-    if (editingInstalacao) {
-      setInstalacoes(prev => prev.map(inst => 
-        inst.id === instalacao.id ? instalacao : inst
-      ));
-    } else {
-      setInstalacoes(prev => [...prev, instalacao]);
-    }
-    setShowForm(false);
-    setEditingInstalacao(undefined);
+  console.log('User authenticated:', !!user);
+  console.log('User ID:', user?.id);
+
+  const { data: instalacoes = [], isLoading } = useQuery({
+    queryKey: ['instalacoes'],
+    queryFn: async () => {
+      console.log('Fetching instalacoes for user:', user?.id);
+      const { data, error } = await supabase
+        .from('instalacoes')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      if (error) {
+        console.error('Error fetching instalacoes:', error);
+        throw error;
+      }
+      
+      console.log('Instalacoes fetched:', data);
+      return data as Instalacao[];
+    },
+    enabled: !!user,
+  });
+
+  const createInstalacaoMutation = useMutation({
+    mutationFn: async (instalacaoData: Omit<Instalacao, 'id' | 'created_at' | 'updated_at' | 'user_id'>) => {
+      if (!user) {
+        throw new Error('Usuário não autenticado');
+      }
+
+      console.log('Creating instalacao with data:', instalacaoData);
+      console.log('User ID for creation:', user.id);
+
+      const dataToInsert = {
+        ...instalacaoData,
+        user_id: user.id,
+        valor_total: Number(instalacaoData.valor_total), // Garantir que é número
+      };
+
+      console.log('Data being inserted:', dataToInsert);
+
+      const { data, error } = await supabase
+        .from('instalacoes')
+        .insert([dataToInsert])
+        .select()
+        .single();
+
+      if (error) {
+        console.error('Error creating instalacao:', error);
+        throw error;
+      }
+
+      console.log('Instalacao created successfully:', data);
+      return data;
+    },
+    onSuccess: () => {
+      toast.success('Instalação criada com sucesso!');
+      queryClient.invalidateQueries({ queryKey: ['instalacoes'] });
+      setShowForm(false);
+    },
+    onError: (error) => {
+      console.error('Mutation error:', error);
+      toast.error('Erro ao criar instalação: ' + error.message);
+    },
+  });
+
+  const updateInstalacaoMutation = useMutation({
+    mutationFn: async (instalacaoData: Instalacao) => {
+      if (!user) {
+        throw new Error('Usuário não autenticado');
+      }
+
+      console.log('Updating instalacao with data:', instalacaoData);
+
+      const { data, error } = await supabase
+        .from('instalacoes')
+        .update({
+          numero_pedido: instalacaoData.numero_pedido,
+          endereco: instalacaoData.endereco,
+          ambiente: instalacaoData.ambiente,
+          arquiteto_nome: instalacaoData.arquiteto_nome,
+          data_instalacao: instalacaoData.data_instalacao,
+          valor_total: Number(instalacaoData.valor_total),
+          status: instalacaoData.status,
+        })
+        .eq('id', instalacaoData.id)
+        .eq('user_id', user.id) // Garantir que só atualiza próprios dados
+        .select()
+        .single();
+
+      if (error) {
+        console.error('Error updating instalacao:', error);
+        throw error;
+      }
+
+      console.log('Instalacao updated successfully:', data);
+      return data;
+    },
+    onSuccess: () => {
+      toast.success('Instalação atualizada com sucesso!');
+      queryClient.invalidateQueries({ queryKey: ['instalacoes'] });
+      setEditingInstalacao(null);
+    },
+    onError: (error) => {
+      console.error('Update mutation error:', error);
+      toast.error('Erro ao atualizar instalação: ' + error.message);
+    },
+  });
+
+  const deleteInstalacaoMutation = useMutation({
+    mutationFn: async (id: string) => {
+      if (!user) {
+        throw new Error('Usuário não autenticado');
+      }
+
+      console.log('Deleting instalacao with id:', id);
+
+      const { error } = await supabase
+        .from('instalacoes')
+        .delete()
+        .eq('id', id)
+        .eq('user_id', user.id); // Garantir que só deleta próprios dados
+
+      if (error) {
+        console.error('Error deleting instalacao:', error);
+        throw error;
+      }
+
+      console.log('Instalacao deleted successfully');
+    },
+    onSuccess: () => {
+      toast.success('Instalação excluída com sucesso!');
+      queryClient.invalidateQueries({ queryKey: ['instalacoes'] });
+    },
+    onError: (error) => {
+      console.error('Delete mutation error:', error);
+      toast.error('Erro ao excluir instalação: ' + error.message);
+    },
+  });
+
+  const handleCreateInstalacao = (instalacaoData: Omit<Instalacao, 'id' | 'created_at' | 'updated_at' | 'user_id'>) => {
+    console.log('Handle create instalacao called with:', instalacaoData);
+    createInstalacaoMutation.mutate(instalacaoData);
+  };
+
+  const handleUpdateInstalacao = (instalacao: Instalacao) => {
+    console.log('Handle update instalacao called with:', instalacao);
+    updateInstalacaoMutation.mutate(instalacao);
   };
 
   const handleDeleteInstalacao = (id: string) => {
+    console.log('Handle delete instalacao called with id:', id);
     if (confirm('Tem certeza que deseja excluir esta instalação?')) {
-      setInstalacoes(prev => prev.filter(inst => inst.id !== id));
+      deleteInstalacaoMutation.mutate(id);
     }
   };
 
   const handleEditInstalacao = (instalacao: Instalacao) => {
     setEditingInstalacao(instalacao);
-    setShowForm(true);
   };
 
-  const filtrarPorPeriodo = (instalacoes: Instalacao[]) => {
-    const hoje = new Date();
-    const inicioMes = new Date(hoje.getFullYear(), hoje.getMonth(), 1);
-    const fimMes = new Date(hoje.getFullYear(), hoje.getMonth() + 1, 0);
-    const inicioMesAnterior = new Date(hoje.getFullYear(), hoje.getMonth() - 1, 1);
-    const fimMesAnterior = new Date(hoje.getFullYear(), hoje.getMonth(), 0);
-
-    switch (filtroTempo) {
-      case 'quinzena-1':
-        return instalacoes.filter(inst => {
-          const dataInstalacao = new Date(inst.dataInstalacao);
-          const mesmoMes = dataInstalacao.getMonth() === hoje.getMonth() && 
-                          dataInstalacao.getFullYear() === hoje.getFullYear();
-          return mesmoMes && dataInstalacao.getDate() >= 1 && dataInstalacao.getDate() <= 15;
-        });
-      
-      case 'quinzena-2':
-        return instalacoes.filter(inst => {
-          const dataInstalacao = new Date(inst.dataInstalacao);
-          const mesmoMes = dataInstalacao.getMonth() === hoje.getMonth() && 
-                          dataInstalacao.getFullYear() === hoje.getFullYear();
-          return mesmoMes && dataInstalacao.getDate() >= 16 && dataInstalacao.getDate() <= 30;
-        });
-      
-      case 'mes-atual':
-        return instalacoes.filter(inst => {
-          const dataInstalacao = new Date(inst.dataInstalacao);
-          return dataInstalacao >= inicioMes && dataInstalacao <= fimMes;
-        });
-      
-      case 'mes-anterior':
-        return instalacoes.filter(inst => {
-          const dataInstalacao = new Date(inst.dataInstalacao);
-          return dataInstalacao >= inicioMesAnterior && dataInstalacao <= fimMesAnterior;
-        });
-      
-      default:
-        return instalacoes;
-    }
-  };
-
-  const filteredInstalacoes = filtrarPorPeriodo(instalacoes).filter(instalacao =>
-    instalacao.arquitetoNome.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    instalacao.ambiente.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    instalacao.numeroPedido.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    instalacao.endereco.toLowerCase().includes(searchTerm.toLowerCase())
-  );
-
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'Agendado': return 'text-blue-600 bg-blue-50';
-      case 'Em Andamento': return 'text-orange-600 bg-orange-50';
-      case 'Concluído': return 'text-green-600 bg-green-50';
-      case 'Cancelado': return 'text-red-600 bg-red-50';
-      default: return 'text-gray-600 bg-gray-50';
-    }
-  };
-
-  const getFiltroLabel = () => {
-    switch (filtroTempo) {
-      case 'quinzena-1': return 'Quinzena 1 (Dia 1-15)';
-      case 'quinzena-2': return 'Quinzena 2 (Dia 16-30)';
-      case 'mes-atual': return 'Mês Atual';
-      case 'mes-anterior': return 'Mês Anterior';
-      default: return 'Todos os Períodos';
-    }
-  };
-
-  const receitaTotal = filteredInstalacoes
-    .filter(inst => inst.status === 'Concluído')
-    .reduce((acc, inst) => acc + inst.valorTotal, 0);
-
-  const totalM2 = filteredInstalacoes
-    .filter(inst => inst.status === 'Concluído')
-    .reduce((acc, inst) => acc + (inst.valorTotal / 20), 0);
-
-  if (showForm) {
+  if (!user) {
     return (
-      <InstalacaoForm
-        onSave={handleSaveInstalacao}
-        onCancel={() => {
-          setShowForm(false);
-          setEditingInstalacao(undefined);
-        }}
-        instalacao={editingInstalacao}
-      />
+      <div className="flex items-center justify-center h-64">
+        <p className="text-muted-foreground">Você precisa estar logado para acessar esta página.</p>
+      </div>
+    );
+  }
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+      </div>
     );
   }
 
   return (
-    <div className="p-3 md:p-6 pb-20 md:pb-6">
-      <div className="flex flex-col gap-3 md:gap-4 md:flex-row md:items-center justify-between mb-4 md:mb-6">
-        <div>
-          <h1 className="text-xl md:text-2xl font-bold text-foreground">Instalações</h1>
-          <p className="text-sm md:text-base text-muted-foreground">Gerencie pedidos de instalação</p>
-        </div>
-        <button
-          onClick={() => setShowForm(true)}
-          className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center justify-center gap-2 transition-colors w-full md:w-auto"
+    <div className="container mx-auto p-6 space-y-6">
+      <div className="flex justify-between items-center">
+        <h1 className="text-3xl font-bold text-gray-900">Instalações</h1>
+        <Button 
+          onClick={() => setShowForm(true)} 
+          className="bg-blue-600 hover:bg-blue-700"
+          disabled={createInstalacaoMutation.isPending}
         >
-          <Plus className="w-4 h-4" />
-          Novo Pedido
-        </button>
+          <Plus className="w-4 h-4 mr-2" />
+          {createInstalacaoMutation.isPending ? 'Salvando...' : 'Nova Instalação'}
+        </Button>
       </div>
 
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4 mb-4 md:mb-6">
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-xs md:text-sm font-medium">Total</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-lg md:text-2xl font-bold">{filteredInstalacoes.length}</div>
-          </CardContent>
-        </Card>
-        
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-xs md:text-sm font-medium">Concluídas</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-lg md:text-2xl font-bold text-green-600">
-              {filteredInstalacoes.filter(inst => inst.status === 'Concluído').length}
-            </div>
-          </CardContent>
-        </Card>
-        
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-xs md:text-sm font-medium">Total m²</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-lg md:text-2xl font-bold text-orange-600">
-              {totalM2.toFixed(1)}
-            </div>
-          </CardContent>
-        </Card>
-        
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-xs md:text-sm font-medium">Receita</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-sm md:text-xl font-bold text-blue-600">
-              R$ {receitaTotal.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-
-      <div className="bg-white rounded-xl shadow-sm border border-border">
-        <div className="p-3 md:p-4 border-b border-border">
-          <div className="flex flex-col gap-3 md:flex-row md:items-center md:gap-4">
-            <div className="flex-1 relative">
-              <Search className="w-4 h-4 absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground" />
-              <input
-                type="text"
-                placeholder="Buscar instalações..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full pl-10 pr-4 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
-              />
-            </div>
-            
-            <select
-              value={filtroTempo}
-              onChange={(e) => setFiltroTempo(e.target.value as FiltroTempo)}
-              className="px-3 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm bg-white"
-            >
-              <option value="todos">Todos os Períodos</option>
-              <option value="quinzena-1">Quinzena 1 (Dia 1-15)</option>
-              <option value="quinzena-2">Quinzena 2 (Dia 16-30)</option>
-              <option value="mes-atual">Mês Atual</option>
-              <option value="mes-anterior">Mês Anterior</option>
-            </select>
-          </div>
+      {(showForm || editingInstalacao) && (
+        <div className="bg-white p-6 rounded-lg border shadow-sm">
+          <h2 className="text-xl font-semibold mb-4">
+            {editingInstalacao ? 'Editar Instalação' : 'Nova Instalação'}
+          </h2>
+          <InstalacaoForm
+            instalacao={editingInstalacao}
+            onSubmit={editingInstalacao ? handleUpdateInstalacao : handleCreateInstalacao}
+            onCancel={() => {
+              setShowForm(false);
+              setEditingInstalacao(null);
+            }}
+            isLoading={createInstalacaoMutation.isPending || updateInstalacaoMutation.isPending}
+          />
         </div>
+      )}
 
-        {filteredInstalacoes.length === 0 ? (
-          <div className="p-6 md:p-8 text-center">
-            <div className="text-muted-foreground">
-              <Scissors className="w-12 h-12 mx-auto mb-4 opacity-50" />
-              <h3 className="text-lg font-medium mb-2">
-                {searchTerm || filtroTempo !== 'todos' 
-                  ? 'Nenhuma instalação encontrada' 
-                  : 'Nenhum pedido cadastrado'}
-              </h3>
-              <p className="text-sm">
-                {searchTerm || filtroTempo !== 'todos'
-                  ? 'Tente ajustar os filtros de busca' 
-                  : 'Comece adicionando seu primeiro pedido de instalação'}
-              </p>
-            </div>
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {instalacoes.length === 0 ? (
+          <div className="col-span-full text-center py-12">
+            <p className="text-gray-500 text-lg">Nenhuma instalação cadastrada ainda.</p>
+            <p className="text-gray-400">Clique em "Nova Instalação" para começar.</p>
           </div>
         ) : (
-          <div className="p-3 md:p-4">
-            {isMobile ? (
-              <div className="space-y-3">
-                {filteredInstalacoes.map((instalacao) => (
-                  <InstalacaoCard
-                    key={instalacao.id}
-                    instalacao={instalacao}
-                    onEdit={handleEditInstalacao}
-                    onDelete={handleDeleteInstalacao}
-                  />
-                ))}
-              </div>
-            ) : (
-              <div className="overflow-x-auto">
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Nº Pedido</TableHead>
-                      <TableHead>Data</TableHead>
-                      <TableHead>Arquiteto</TableHead>
-                      <TableHead>Ambiente</TableHead>
-                      <TableHead>Endereço</TableHead>
-                      <TableHead>Valor</TableHead>
-                      <TableHead>Status</TableHead>
-                      <TableHead>Ações</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {filteredInstalacoes.map((instalacao) => (
-                      <TableRow key={instalacao.id}>
-                        <TableCell className="font-medium">{instalacao.numeroPedido}</TableCell>
-                        <TableCell>
-                          {new Date(instalacao.dataInstalacao).toLocaleDateString('pt-BR')}
-                        </TableCell>
-                        <TableCell>{instalacao.arquitetoNome}</TableCell>
-                        <TableCell>{instalacao.ambiente}</TableCell>
-                        <TableCell>{instalacao.endereco}</TableCell>
-                        <TableCell>R$ {instalacao.valorTotal.toFixed(2)}</TableCell>
-                        <TableCell>
-                          <span className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(instalacao.status)}`}>
-                            {instalacao.status}
-                          </span>
-                        </TableCell>
-                        <TableCell>
-                          <div className="flex gap-1">
-                            <button
-                              onClick={() => handleEditInstalacao(instalacao)}
-                              className="p-1 text-blue-600 hover:bg-blue-50 rounded"
-                              title="Editar"
-                            >
-                              <Edit className="w-4 h-4" />
-                            </button>
-                            <button
-                              onClick={() => handleDeleteInstalacao(instalacao.id)}
-                              className="p-1 text-red-600 hover:bg-red-50 rounded"
-                              title="Excluir"
-                            >
-                              <Trash2 className="w-4 h-4" />
-                            </button>
-                          </div>
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              </div>
-            )}
-          </div>
+          instalacoes.map((instalacao) => (
+            <InstalacaoCard
+              key={instalacao.id}
+              instalacao={instalacao}
+              onEdit={handleEditInstalacao}
+              onDelete={handleDeleteInstalacao}
+            />
+          ))
         )}
       </div>
     </div>
