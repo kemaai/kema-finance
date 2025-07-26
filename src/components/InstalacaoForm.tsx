@@ -40,7 +40,7 @@ export const InstalacaoForm: React.FC<InstalacaoFormProps> = ({
     ambiente: '',
     endereco: '',
     valor_total: 0,
-    status: 'Agendado' as const
+    status: 'Agendado'
   });
 
   useEffect(() => {
