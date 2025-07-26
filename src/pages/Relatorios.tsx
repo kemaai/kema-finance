@@ -1,61 +1,40 @@
+
 import React, { useState } from 'react';
 import { FileText, Download, TrendingUp, Scissors, Calendar, DollarSign, Users, Globe } from 'lucide-react';
-import { useLocalStorage } from '../hooks/useLocalStorage';
 import { useIsMobile } from '../hooks/use-mobile';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
-
-interface Site {
-  id: string;
-  status: string;
-  valorMensal: number;
-  tipoPlano: string;
-  dataVencimento: string;
-  clienteNome: string;
-  descricaoProjeto: string;
-}
-
-interface Cliente {
-  id: string;
-  nome: string;
-}
-
-interface Instalacao {
-  id: string;
-  numeroPedido: string;
-  dataInstalacao: string;
-  valorTotal: number;
-  status: string;
-  arquitetoNome: string;
-  ambiente: string;
-}
+import { useSites, useClientes, useInstalacoes } from '../hooks/useSupabaseData';
 
 export const Relatorios = () => {
-  const [sites] = useLocalStorage<Site[]>('sites', []);
-  const [clientes] = useLocalStorage<Cliente[]>('clientes', []);
-  const [instalacoes] = useLocalStorage<Instalacao[]>('instalacoes', []);
+  const { data: sites = [], isLoading: sitesLoading } = useSites();
+  const { data: clientes = [], isLoading: clientesLoading } = useClientes();
+  const { data: instalacoes = [], isLoading: instalacoesLoading } = useInstalacoes();
+  
   const [mesEscolhido, setMesEscolhido] = useState(new Date().getMonth());
   const [anoEscolhido, setAnoEscolhido] = useState(new Date().getFullYear());
   const isMobile = useIsMobile();
 
+  const isLoading = sitesLoading || clientesLoading || instalacoesLoading;
+
   // Função para filtrar instalações por período
   const filtrarInstalacoesPorPeriodo = (mes: number, ano: number) => {
     return instalacoes.filter(instalacao => {
-      const dataInstalacao = new Date(instalacao.dataInstalacao);
+      const dataInstalacao = new Date(instalacao.data_instalacao);
       return dataInstalacao.getMonth() === mes && dataInstalacao.getFullYear() === ano;
     });
   };
 
   // Função para dividir o mês em quinzenas
-  const dividirEmQuinzenas = (instalacoesMes: Instalacao[]) => {
+  const dividirEmQuinzenas = (instalacoesMes: any[]) => {
     const primeiraQuinzena = instalacoesMes.filter(inst => {
-      const dia = new Date(inst.dataInstalacao).getDate();
+      const dia = new Date(inst.data_instalacao).getDate();
       return dia <= 15;
     });
 
     const segundaQuinzena = instalacoesMes.filter(inst => {
-      const dia = new Date(inst.dataInstalacao).getDate();
+      const dia = new Date(inst.data_instalacao).getDate();
       return dia > 15;
     });
 
@@ -74,20 +53,20 @@ export const Relatorios = () => {
   // Receita mensal de sites
   const receitaMensalSites = sites
     .filter(site => site.status === 'Ativo')
-    .reduce((total, site) => total + site.valorMensal, 0);
+    .reduce((total, site) => total + site.valor_mensal, 0);
 
   // Receita de instalações no mês atual
   const instalacoesMesAtual = instalacoes.filter(instalacao => {
-    const dataInstalacao = new Date(instalacao.dataInstalacao);
+    const dataInstalacao = new Date(instalacao.data_instalacao);
     return dataInstalacao >= inicioMesAtual && dataInstalacao <= fimMesAtual && instalacao.status === 'Concluído';
   });
 
-  const receitaInstalacoesMesAtual = instalacoesMesAtual.reduce((total, instalacao) => total + instalacao.valorTotal, 0);
+  const receitaInstalacoesMesAtual = instalacoesMesAtual.reduce((total, instalacao) => total + instalacao.valor_total, 0);
 
   // Receita de instalações do mês escolhido
   const receitaInstalacoesMesEscolhido = instalacoesMesEscolhido
     .filter(inst => inst.status === 'Concluído')
-    .reduce((total, instalacao) => total + instalacao.valorTotal, 0);
+    .reduce((total, instalacao) => total + instalacao.valor_total, 0);
 
   // Sites por status
   const sitesPorStatus = sites.reduce((acc, site) => {
@@ -97,7 +76,7 @@ export const Relatorios = () => {
 
   // Vencimentos próximos (próximos 30 dias)
   const proximosVencimentos = sites.filter(site => {
-    const vencimento = new Date(site.dataVencimento);
+    const vencimento = new Date(site.data_vencimento);
     const em30Dias = new Date();
     em30Dias.setDate(hoje.getDate() + 30);
     return site.status === 'Ativo' && vencimento <= em30Dias && vencimento >= hoje;
@@ -132,8 +111,8 @@ export const Relatorios = () => {
         dados += `Primeira Quinzena (1-15): ${primeiraQuinzena.length} instalações\n`;
         dados += `Segunda Quinzena (16-30): ${segundaQuinzena.length} instalações\n\n`;
         dados += `Receita Total do Mês: R$ ${receitaInstalacoesMesEscolhido.toFixed(2)}\n`;
-        dados += `Receita 1ª Quinzena: R$ ${primeiraQuinzena.filter(i => i.status === 'Concluído').reduce((acc, inst) => acc + inst.valorTotal, 0).toFixed(2)}\n`;
-        dados += `Receita 2ª Quinzena: R$ ${segundaQuinzena.filter(i => i.status === 'Concluído').reduce((acc, inst) => acc + inst.valorTotal, 0).toFixed(2)}\n`;
+        dados += `Receita 1ª Quinzena: R$ ${primeiraQuinzena.filter(i => i.status === 'Concluído').reduce((acc, inst) => acc + inst.valor_total, 0).toFixed(2)}\n`;
+        dados += `Receita 2ª Quinzena: R$ ${segundaQuinzena.filter(i => i.status === 'Concluído').reduce((acc, inst) => acc + inst.valor_total, 0).toFixed(2)}\n`;
         nomeArquivo = `relatorio-instalacoes-${mesEscolhido + 1}-${anoEscolhido}.txt`;
         break;
     }
@@ -151,6 +130,16 @@ export const Relatorios = () => {
 
   const nomesMeses = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 
                       'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'];
+
+  if (isLoading) {
+    return (
+      <div className="p-3 md:p-6 pb-20 md:pb-6">
+        <div className="flex items-center justify-center h-64">
+          <div className="text-lg">Carregando relatórios...</div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="p-3 md:p-6 pb-20 md:pb-6">
@@ -333,7 +322,7 @@ export const Relatorios = () => {
                   <div className="text-xl md:text-2xl font-bold text-blue-600">{primeiraQuinzena.length}</div>
                   <p className="text-xs md:text-sm text-blue-700">instalações</p>
                   <div className="mt-2 text-xs md:text-sm">
-                    Receita: R$ {primeiraQuinzena.filter(i => i.status === 'Concluído').reduce((acc, inst) => acc + inst.valorTotal, 0).toFixed(2)}
+                    Receita: R$ {primeiraQuinzena.filter(i => i.status === 'Concluído').reduce((acc, inst) => acc + inst.valor_total, 0).toFixed(2)}
                   </div>
                 </div>
                 
@@ -342,7 +331,7 @@ export const Relatorios = () => {
                   <div className="text-xl md:text-2xl font-bold text-orange-600">{segundaQuinzena.length}</div>
                   <p className="text-xs md:text-sm text-orange-700">instalações</p>
                   <div className="mt-2 text-xs md:text-sm">
-                    Receita: R$ {segundaQuinzena.filter(i => i.status === 'Concluído').reduce((acc, inst) => acc + inst.valorTotal, 0).toFixed(2)}
+                    Receita: R$ {segundaQuinzena.filter(i => i.status === 'Concluído').reduce((acc, inst) => acc + inst.valor_total, 0).toFixed(2)}
                   </div>
                 </div>
               </div>
@@ -376,7 +365,7 @@ export const Relatorios = () => {
                 <div className="space-y-2">
                   {sites
                     .filter(site => {
-                      const vencimento = new Date(site.dataVencimento);
+                      const vencimento = new Date(site.data_vencimento);
                       const em30Dias = new Date();
                       em30Dias.setDate(hoje.getDate() + 30);
                       return site.status === 'Ativo' && vencimento <= em30Dias && vencimento >= hoje;
@@ -385,12 +374,12 @@ export const Relatorios = () => {
                     .map((site) => (
                       <div key={site.id} className="flex justify-between items-center p-2 border rounded">
                         <div>
-                          <div className="font-medium text-xs md:text-sm">{site.clienteNome}</div>
+                          <div className="font-medium text-xs md:text-sm">{site.cliente_nome}</div>
                           <div className="text-xs text-muted-foreground">
-                            {new Date(site.dataVencimento).toLocaleDateString('pt-BR')}
+                            {new Date(site.data_vencimento).toLocaleDateString('pt-BR')}
                           </div>
                         </div>
-                        <div className="text-xs md:text-sm font-medium">R$ {site.valorMensal.toFixed(2)}</div>
+                        <div className="text-xs md:text-sm font-medium">R$ {site.valor_mensal.toFixed(2)}</div>
                       </div>
                     ))}
                   {proximosVencimentos === 0 && (
@@ -413,12 +402,12 @@ export const Relatorios = () => {
                     .map((instalacao) => (
                       <div key={instalacao.id} className="flex justify-between items-center p-2 border rounded">
                         <div>
-                          <div className="font-medium text-xs md:text-sm">{instalacao.arquitetoNome}</div>
+                          <div className="font-medium text-xs md:text-sm">{instalacao.arquiteto_nome}</div>
                           <div className="text-xs text-muted-foreground">
-                            {new Date(instalacao.dataInstalacao).toLocaleDateString('pt-BR')}
+                            {new Date(instalacao.data_instalacao).toLocaleDateString('pt-BR')}
                           </div>
                         </div>
-                        <div className="text-xs md:text-sm font-medium">R$ {instalacao.valorTotal.toFixed(2)}</div>
+                        <div className="text-xs md:text-sm font-medium">R$ {instalacao.valor_total.toFixed(2)}</div>
                       </div>
                     ))}
                   {instalacoes.filter(inst => inst.status === 'Agendado').length === 0 && (
