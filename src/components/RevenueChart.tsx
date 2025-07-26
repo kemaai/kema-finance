@@ -11,16 +11,75 @@ import {
   Legend
 } from 'recharts';
 
-const data = [
-  { month: 'Jan', sites: 1200, instalacoes: 800 },
-  { month: 'Fev', sites: 1350, instalacoes: 920 },
-  { month: 'Mar', sites: 1400, instalacoes: 1100 },
-  { month: 'Abr', sites: 1500, instalacoes: 950 },
-  { month: 'Mai', sites: 1600, instalacoes: 1200 },
-  { month: 'Jun', sites: 1750, instalacoes: 1050 },
-];
+interface Site {
+  id: string;
+  status: string;
+  valor_mensal: number;
+  tipo_plano: string;
+  data_vencimento: string;
+  cliente_nome: string;
+  descricao_projeto: string;
+  data_inicio: string;
+}
 
-export const RevenueChart = () => {
+interface Instalacao {
+  id: string;
+  numero_pedido: string;
+  data_instalacao: string;
+  valor_total: number;
+  status: string;
+  arquiteto_nome: string;
+  ambiente: string;
+}
+
+interface RevenueChartProps {
+  sites?: Site[];
+  instalacoes?: Instalacao[];
+}
+
+export const RevenueChart: React.FC<RevenueChartProps> = ({ sites = [], instalacoes = [] }) => {
+  // Gerar dados dos últimos 6 meses baseados nos dados reais
+  const generateChartData = () => {
+    const months = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun'];
+    const currentDate = new Date();
+    const chartData = [];
+
+    for (let i = 5; i >= 0; i--) {
+      const monthDate = new Date(currentDate.getFullYear(), currentDate.getMonth() - i, 1);
+      const monthName = months[monthDate.getMonth()];
+      
+      // Calcular receita de sites ativos nesse mês
+      const sitesRevenue = sites
+        .filter(site => {
+          const startDate = new Date(site.data_inicio);
+          return site.status === 'Ativo' && 
+                 startDate <= monthDate &&
+                 (site.tipo_plano.includes('assinatura') || site.tipo_plano.includes('hospedagem'));
+        })
+        .reduce((total, site) => total + site.valor_mensal, 0);
+
+      // Calcular receita de instalações concluídas nesse mês
+      const instalacoesRevenue = instalacoes
+        .filter(instalacao => {
+          const installDate = new Date(instalacao.data_instalacao);
+          return instalacao.status === 'Concluído' &&
+                 installDate.getMonth() === monthDate.getMonth() &&
+                 installDate.getFullYear() === monthDate.getFullYear();
+        })
+        .reduce((total, instalacao) => total + instalacao.valor_total, 0);
+
+      chartData.push({
+        month: monthName,
+        sites: sitesRevenue,
+        instalacoes: instalacoesRevenue
+      });
+    }
+
+    return chartData;
+  };
+
+  const data = generateChartData();
+
   return (
     <div className="h-80">
       <ResponsiveContainer width="100%" height="100%">
