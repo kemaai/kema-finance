@@ -9,6 +9,7 @@ interface Site {
   valor_mensal: number;
   tipo_plano: string;
   data_vencimento: string;
+  data_inicio: string;
   cliente_nome: string;
   descricao_projeto: string;
 }
