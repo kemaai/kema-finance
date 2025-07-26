@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import { Plus, Search, Filter, Globe } from 'lucide-react';
+import { Plus, Search, Filter, Globe, Edit, Trash2 } from 'lucide-react';
 import { SiteForm } from '../components/SiteForm';
 import { SiteCard } from '../components/SiteCard';
 import { useIsMobile } from '../hooks/use-mobile';
@@ -29,6 +29,8 @@ interface Site {
   hospedagem: boolean;
   instalacao: boolean;
   created_at: string;
+  updated_at: string;
+  user_id: string;
 }
 
 const getTipoPlanoLabel = (tipo: string) => {
@@ -67,7 +69,7 @@ export const Sites = () => {
         .order('created_at', { ascending: false });
       
       if (error) throw error;
-      return data || [];
+      return data as Site[] || [];
     },
     enabled: !!user,
   });
@@ -82,14 +84,14 @@ export const Sites = () => {
         .order('nome');
       
       if (error) throw error;
-      return data || [];
+      return data as Cliente[] || [];
     },
     enabled: !!user,
   });
 
   // Mutação para criar/atualizar site
   const saveSiteMutation = useMutation({
-    mutationFn: async (siteData: Omit<Site, 'id' | 'created_at'>) => {
+    mutationFn: async (siteData: Omit<Site, 'id' | 'created_at' | 'updated_at' | 'user_id'>) => {
       if (editingSite) {
         const { data, error } = await supabase
           .from('sites')
@@ -115,6 +117,7 @@ export const Sites = () => {
       queryClient.invalidateQueries({ queryKey: ['sites'] });
       toast.success(editingSite ? 'Site atualizado!' : 'Site criado!');
       setEditingSite(undefined);
+      setIsFormOpen(false);
     },
     onError: (error: any) => {
       toast.error('Erro ao salvar site: ' + error.message);
@@ -140,7 +143,7 @@ export const Sites = () => {
     },
   });
 
-  const handleSaveSite = (siteData: Omit<Site, 'id' | 'created_at'>) => {
+  const handleSaveSite = (siteData: Omit<Site, 'id' | 'created_at' | 'updated_at' | 'user_id'>) => {
     saveSiteMutation.mutate(siteData);
   };
 
@@ -310,13 +313,13 @@ export const Sites = () => {
                               onClick={() => handleEditSite(site)}
                               className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
                             >
-                              <Globe className="w-4 h-4" />
+                              <Edit className="w-4 h-4" />
                             </button>
                             <button
                               onClick={() => handleDeleteSite(site.id)}
                               className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
                             >
-                              <Globe className="w-4 h-4" />
+                              <Trash2 className="w-4 h-4" />
                             </button>
                           </div>
                         </td>

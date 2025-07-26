@@ -28,12 +28,14 @@ interface Site {
   hospedagem: boolean;
   instalacao: boolean;
   created_at: string;
+  updated_at: string;
+  user_id: string;
 }
 
 interface SiteFormProps {
   isOpen: boolean;
   onClose: () => void;
-  onSave: (siteData: Omit<Site, 'id' | 'created_at'>) => void;
+  onSave: (siteData: Omit<Site, 'id' | 'created_at' | 'updated_at' | 'user_id'>) => void;
   site?: Site;
   clientes: Cliente[];
 }
@@ -64,6 +66,7 @@ export const SiteForm: React.FC<SiteFormProps> = ({
     tipo_plano: 'assinatura-70' as Site['tipo_plano'],
     data_vencimento: '',
     status: 'Ativo' as Site['status'],
+    valor_mensal: 0,
     descricao_projeto: '',
     url_site: '',
     observacoes: '',
@@ -81,6 +84,7 @@ export const SiteForm: React.FC<SiteFormProps> = ({
         tipo_plano: site.tipo_plano || 'assinatura-70',
         data_vencimento: site.data_vencimento || '',
         status: site.status || 'Ativo',
+        valor_mensal: site.valor_mensal || 0,
         descricao_projeto: site.descricao_projeto || '',
         url_site: site.url_site || '',
         observacoes: site.observacoes || '',
@@ -96,6 +100,7 @@ export const SiteForm: React.FC<SiteFormProps> = ({
         tipo_plano: 'assinatura-70',
         data_vencimento: '',
         status: 'Ativo',
+        valor_mensal: 0,
         descricao_projeto: '',
         url_site: '',
         observacoes: '',
@@ -138,7 +143,6 @@ export const SiteForm: React.FC<SiteFormProps> = ({
     };
 
     onSave(siteData);
-    onClose();
   };
 
   const handleInputChange = (field: string, value: string | boolean) => {

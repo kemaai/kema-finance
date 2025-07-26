@@ -21,6 +21,8 @@ interface Cliente {
   cep: string;
   observacoes?: string;
   created_at: string;
+  updated_at: string;
+  user_id: string;
 }
 
 export const Clientes = () => {
@@ -41,14 +43,14 @@ export const Clientes = () => {
         .order('created_at', { ascending: false });
       
       if (error) throw error;
-      return data || [];
+      return data as Cliente[] || [];
     },
     enabled: !!user,
   });
 
   // Mutação para criar/atualizar cliente
   const saveClienteMutation = useMutation({
-    mutationFn: async (clienteData: Omit<Cliente, 'id' | 'created_at'>) => {
+    mutationFn: async (clienteData: Omit<Cliente, 'id' | 'created_at' | 'updated_at' | 'user_id'>) => {
       if (editingCliente) {
         const { data, error } = await supabase
           .from('clientes')
@@ -74,6 +76,7 @@ export const Clientes = () => {
       queryClient.invalidateQueries({ queryKey: ['clientes'] });
       toast.success(editingCliente ? 'Cliente atualizado!' : 'Cliente criado!');
       setEditingCliente(undefined);
+      setIsFormOpen(false);
     },
     onError: (error: any) => {
       toast.error('Erro ao salvar cliente: ' + error.message);
@@ -99,7 +102,7 @@ export const Clientes = () => {
     },
   });
 
-  const handleSaveCliente = (clienteData: Omit<Cliente, 'id' | 'created_at'>) => {
+  const handleSaveCliente = (clienteData: Omit<Cliente, 'id' | 'created_at' | 'updated_at' | 'user_id'>) => {
     saveClienteMutation.mutate(clienteData);
   };
 
