@@ -14,7 +14,161 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      clientes: {
+        Row: {
+          cep: string
+          cidade: string
+          cpf_cnpj: string
+          created_at: string
+          email: string
+          endereco: string
+          estado: string
+          id: string
+          nome: string
+          observacoes: string | null
+          telefone: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          cep: string
+          cidade: string
+          cpf_cnpj: string
+          created_at?: string
+          email: string
+          endereco: string
+          estado: string
+          id?: string
+          nome: string
+          observacoes?: string | null
+          telefone: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          cep?: string
+          cidade?: string
+          cpf_cnpj?: string
+          created_at?: string
+          email?: string
+          endereco?: string
+          estado?: string
+          id?: string
+          nome?: string
+          observacoes?: string | null
+          telefone?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      instalacoes: {
+        Row: {
+          ambiente: string
+          arquiteto_nome: string
+          created_at: string
+          data_instalacao: string
+          endereco: string
+          id: string
+          numero_pedido: string
+          status: string
+          updated_at: string
+          user_id: string
+          valor_total: number
+        }
+        Insert: {
+          ambiente: string
+          arquiteto_nome: string
+          created_at?: string
+          data_instalacao: string
+          endereco: string
+          id?: string
+          numero_pedido: string
+          status: string
+          updated_at?: string
+          user_id: string
+          valor_total: number
+        }
+        Update: {
+          ambiente?: string
+          arquiteto_nome?: string
+          created_at?: string
+          data_instalacao?: string
+          endereco?: string
+          id?: string
+          numero_pedido?: string
+          status?: string
+          updated_at?: string
+          user_id?: string
+          valor_total?: number
+        }
+        Relationships: []
+      }
+      sites: {
+        Row: {
+          cliente_id: string
+          cliente_nome: string
+          created_at: string
+          data_inicio: string
+          data_vencimento: string
+          descricao_projeto: string
+          hospedagem: boolean
+          id: string
+          instalacao: boolean
+          observacoes: string | null
+          status: string
+          tipo_plano: string
+          updated_at: string
+          url_site: string | null
+          user_id: string
+          valor_mensal: number
+        }
+        Insert: {
+          cliente_id: string
+          cliente_nome: string
+          created_at?: string
+          data_inicio: string
+          data_vencimento: string
+          descricao_projeto: string
+          hospedagem?: boolean
+          id?: string
+          instalacao?: boolean
+          observacoes?: string | null
+          status: string
+          tipo_plano: string
+          updated_at?: string
+          url_site?: string | null
+          user_id: string
+          valor_mensal: number
+        }
+        Update: {
+          cliente_id?: string
+          cliente_nome?: string
+          created_at?: string
+          data_inicio?: string
+          data_vencimento?: string
+          descricao_projeto?: string
+          hospedagem?: boolean
+          id?: string
+          instalacao?: boolean
+          observacoes?: string | null
+          status?: string
+          tipo_plano?: string
+          updated_at?: string
+          url_site?: string | null
+          user_id?: string
+          valor_mensal?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "sites_cliente_id_fkey"
+            columns: ["cliente_id"]
+            isOneToOne: false
+            referencedRelation: "clientes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never

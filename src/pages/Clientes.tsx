@@ -3,13 +3,16 @@ import React, { useState } from 'react';
 import { Plus, Search, Filter, Users, Edit, Trash2 } from 'lucide-react';
 import { ClienteForm } from '../components/ClienteForm';
 import { ClienteCard } from '../components/ClienteCard';
-import { useLocalStorage } from '../hooks/useLocalStorage';
 import { useIsMobile } from '../hooks/use-mobile';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/hooks/useAuth';
+import { toast } from 'sonner';
 
 interface Cliente {
   id: string;
   nome: string;
-  cpfCnpj: string;
+  cpf_cnpj: string;
   email: string;
   telefone: string;
   endereco: string;
@@ -17,32 +20,87 @@ interface Cliente {
   estado: string;
   cep: string;
   observacoes?: string;
-  createdAt: string;
+  created_at: string;
 }
 
 export const Clientes = () => {
-  const [clientes, setClientes] = useLocalStorage<Cliente[]>('clientes', []);
+  const { user } = useAuth();
+  const queryClient = useQueryClient();
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editingCliente, setEditingCliente] = useState<Cliente | undefined>();
   const [searchTerm, setSearchTerm] = useState('');
   const isMobile = useIsMobile();
 
-  const handleSaveCliente = (clienteData: Omit<Cliente, 'id' | 'createdAt'>) => {
-    if (editingCliente) {
-      setClientes(clientes.map(c => 
-        c.id === editingCliente.id 
-          ? { ...clienteData, id: editingCliente.id, createdAt: editingCliente.createdAt }
-          : c
-      ));
-    } else {
-      const newCliente: Cliente = {
-        ...clienteData,
-        id: Date.now().toString(),
-        createdAt: new Date().toISOString()
-      };
-      setClientes([...clientes, newCliente]);
-    }
-    setEditingCliente(undefined);
+  // Buscar clientes do Supabase
+  const { data: clientes = [], isLoading } = useQuery({
+    queryKey: ['clientes'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('clientes')
+        .select('*')
+        .order('created_at', { ascending: false });
+      
+      if (error) throw error;
+      return data || [];
+    },
+    enabled: !!user,
+  });
+
+  // Mutação para criar/atualizar cliente
+  const saveClienteMutation = useMutation({
+    mutationFn: async (clienteData: Omit<Cliente, 'id' | 'created_at'>) => {
+      if (editingCliente) {
+        const { data, error } = await supabase
+          .from('clientes')
+          .update(clienteData)
+          .eq('id', editingCliente.id)
+          .select()
+          .single();
+        
+        if (error) throw error;
+        return data;
+      } else {
+        const { data, error } = await supabase
+          .from('clientes')
+          .insert([{ ...clienteData, user_id: user!.id }])
+          .select()
+          .single();
+        
+        if (error) throw error;
+        return data;
+      }
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['clientes'] });
+      toast.success(editingCliente ? 'Cliente atualizado!' : 'Cliente criado!');
+      setEditingCliente(undefined);
+    },
+    onError: (error: any) => {
+      toast.error('Erro ao salvar cliente: ' + error.message);
+    },
+  });
+
+  // Mutação para deletar cliente
+  const deleteClienteMutation = useMutation({
+    mutationFn: async (id: string) => {
+      const { error } = await supabase
+        .from('clientes')
+        .delete()
+        .eq('id', id);
+      
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['clientes'] });
+      toast.success('Cliente excluído!');
+    },
+    onError: (error: any) => {
+      toast.error('Erro ao excluir cliente: ' + error.message);
+    },
+  });
+
+  const handleSaveCliente = (clienteData: Omit<Cliente, 'id' | 'created_at'>) => {
+    saveClienteMutation.mutate(clienteData);
   };
 
   const handleEditCliente = (cliente: Cliente) => {
@@ -52,15 +110,25 @@ export const Clientes = () => {
 
   const handleDeleteCliente = (id: string) => {
     if (confirm('Tem certeza que deseja excluir este cliente?')) {
-      setClientes(clientes.filter(c => c.id !== id));
+      deleteClienteMutation.mutate(id);
     }
   };
 
   const filteredClientes = clientes.filter(cliente =>
     cliente.nome.toLowerCase().includes(searchTerm.toLowerCase()) ||
     cliente.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    cliente.cpfCnpj.includes(searchTerm)
+    cliente.cpf_cnpj.includes(searchTerm)
   );
+
+  if (isLoading) {
+    return (
+      <div className="p-3 md:p-6 pb-20 md:pb-6">
+        <div className="flex items-center justify-center h-64">
+          <div className="text-muted-foreground">Carregando clientes...</div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="p-3 md:p-6 pb-20 md:pb-6">
@@ -141,7 +209,7 @@ export const Clientes = () => {
                     {filteredClientes.map((cliente) => (
                       <tr key={cliente.id} className="border-b border-border hover:bg-gray-50">
                         <td className="p-4 font-medium">{cliente.nome}</td>
-                        <td className="p-4 text-muted-foreground">{cliente.cpfCnpj}</td>
+                        <td className="p-4 text-muted-foreground">{cliente.cpf_cnpj}</td>
                         <td className="p-4 text-muted-foreground">{cliente.email}</td>
                         <td className="p-4 text-muted-foreground">{cliente.telefone}</td>
                         <td className="p-4">

@@ -15,25 +15,25 @@ interface Cliente {
 
 interface Site {
   id: string;
-  clienteId: string;
-  clienteNome: string;
-  dataInicio: string;
-  tipoPlano: 'assinatura-70' | 'assinatura-85' | 'venda-1400';
+  cliente_id: string;
+  cliente_nome: string;
+  data_inicio: string;
+  tipo_plano: 'assinatura-70' | 'assinatura-85' | 'venda-1400';
   status: 'Ativo' | 'Suspenso' | 'Cancelado';
-  dataVencimento: string;
-  valorMensal: number;
-  descricaoProjeto: string;
-  urlSite?: string;
+  data_vencimento: string;
+  valor_mensal: number;
+  descricao_projeto: string;
+  url_site?: string;
   observacoes?: string;
   hospedagem: boolean;
   instalacao: boolean;
-  createdAt: string;
+  created_at: string;
 }
 
 interface SiteFormProps {
   isOpen: boolean;
   onClose: () => void;
-  onSave: (siteData: Omit<Site, 'id' | 'createdAt'>) => void;
+  onSave: (siteData: Omit<Site, 'id' | 'created_at'>) => void;
   site?: Site;
   clientes: Cliente[];
 }
@@ -58,14 +58,14 @@ export const SiteForm: React.FC<SiteFormProps> = ({
   clientes
 }) => {
   const [formData, setFormData] = useState({
-    clienteId: '',
-    clienteNome: '',
-    dataInicio: '',
-    tipoPlano: 'assinatura-70' as Site['tipoPlano'],
-    dataVencimento: '',
+    cliente_id: '',
+    cliente_nome: '',
+    data_inicio: '',
+    tipo_plano: 'assinatura-70' as Site['tipo_plano'],
+    data_vencimento: '',
     status: 'Ativo' as Site['status'],
-    descricaoProjeto: '',
-    urlSite: '',
+    descricao_projeto: '',
+    url_site: '',
     observacoes: '',
     hospedagem: false,
     instalacao: false
@@ -75,14 +75,14 @@ export const SiteForm: React.FC<SiteFormProps> = ({
   useEffect(() => {
     if (site) {
       setFormData({
-        clienteId: site.clienteId || '',
-        clienteNome: site.clienteNome || '',
-        dataInicio: site.dataInicio || '',
-        tipoPlano: site.tipoPlano || 'assinatura-70',
-        dataVencimento: site.dataVencimento || '',
+        cliente_id: site.cliente_id || '',
+        cliente_nome: site.cliente_nome || '',
+        data_inicio: site.data_inicio || '',
+        tipo_plano: site.tipo_plano || 'assinatura-70',
+        data_vencimento: site.data_vencimento || '',
         status: site.status || 'Ativo',
-        descricaoProjeto: site.descricaoProjeto || '',
-        urlSite: site.urlSite || '',
+        descricao_projeto: site.descricao_projeto || '',
+        url_site: site.url_site || '',
         observacoes: site.observacoes || '',
         hospedagem: site.hospedagem || false,
         instalacao: site.instalacao || false
@@ -90,14 +90,14 @@ export const SiteForm: React.FC<SiteFormProps> = ({
     } else {
       // Reset form quando não há site (novo site)
       setFormData({
-        clienteId: '',
-        clienteNome: '',
-        dataInicio: '',
-        tipoPlano: 'assinatura-70',
-        dataVencimento: '',
+        cliente_id: '',
+        cliente_nome: '',
+        data_inicio: '',
+        tipo_plano: 'assinatura-70',
+        data_vencimento: '',
         status: 'Ativo',
-        descricaoProjeto: '',
-        urlSite: '',
+        descricao_projeto: '',
+        url_site: '',
         observacoes: '',
         hospedagem: false,
         instalacao: false
@@ -110,9 +110,9 @@ export const SiteForm: React.FC<SiteFormProps> = ({
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
-    const selectedCliente = clientes.find(c => c.id === formData.clienteId);
+    const selectedCliente = clientes.find(c => c.id === formData.cliente_id);
     
-    let valorMensal = planoValues[formData.tipoPlano];
+    let valorMensal = planoValues[formData.tipo_plano];
     
     // Adicionar valores de hospedagem e instalação
     if (formData.hospedagem) {
@@ -123,15 +123,15 @@ export const SiteForm: React.FC<SiteFormProps> = ({
     }
     
     const siteData = {
-      clienteId: formData.clienteId,
-      clienteNome: selectedCliente?.nome || formData.clienteNome,
-      dataInicio: formData.dataInicio,
-      tipoPlano: formData.tipoPlano,
+      cliente_id: formData.cliente_id,
+      cliente_nome: selectedCliente?.nome || formData.cliente_nome,
+      data_inicio: formData.data_inicio,
+      tipo_plano: formData.tipo_plano,
       status: formData.status,
-      dataVencimento: formData.dataVencimento,
-      valorMensal: valorMensal,
-      descricaoProjeto: formData.descricaoProjeto,
-      urlSite: formData.urlSite,
+      data_vencimento: formData.data_vencimento,
+      valor_mensal: valorMensal,
+      descricao_projeto: formData.descricao_projeto,
+      url_site: formData.url_site,
       observacoes: formData.observacoes,
       hospedagem: formData.hospedagem,
       instalacao: formData.instalacao
@@ -145,10 +145,10 @@ export const SiteForm: React.FC<SiteFormProps> = ({
     setFormData(prev => {
       const updated = { ...prev, [field]: value };
       
-      // Atualizar nome do cliente quando clienteId muda
-      if (field === 'clienteId') {
+      // Atualizar nome do cliente quando cliente_id muda
+      if (field === 'cliente_id') {
         const selectedCliente = clientes.find(c => c.id === value);
-        updated.clienteNome = selectedCliente?.nome || '';
+        updated.cliente_nome = selectedCliente?.nome || '';
       }
       
       return updated;
@@ -156,7 +156,7 @@ export const SiteForm: React.FC<SiteFormProps> = ({
   };
 
   const getValorTotal = () => {
-    let total = planoValues[formData.tipoPlano];
+    let total = planoValues[formData.tipo_plano];
     if (formData.hospedagem) total += 40;
     if (formData.instalacao) total += 120;
     return total;
@@ -178,11 +178,11 @@ export const SiteForm: React.FC<SiteFormProps> = ({
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="clienteId">Cliente</Label>
+                <Label htmlFor="cliente_id">Cliente</Label>
                 <select
-                  id="clienteId"
-                  value={formData.clienteId}
-                  onChange={(e) => handleInputChange('clienteId', e.target.value)}
+                  id="cliente_id"
+                  value={formData.cliente_id}
+                  onChange={(e) => handleInputChange('cliente_id', e.target.value)}
                   className="w-full h-10 px-3 py-2 text-sm bg-background border border-input rounded-md focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
                   required
                 >
@@ -196,12 +196,12 @@ export const SiteForm: React.FC<SiteFormProps> = ({
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="dataInicio">Data de Início</Label>
+                <Label htmlFor="data_inicio">Data de Início</Label>
                 <Input
-                  id="dataInicio"
+                  id="data_inicio"
                   type="date"
-                  value={formData.dataInicio}
-                  onChange={(e) => handleInputChange('dataInicio', e.target.value)}
+                  value={formData.data_inicio}
+                  onChange={(e) => handleInputChange('data_inicio', e.target.value)}
                   required
                   className="w-full"
                 />
@@ -209,13 +209,13 @@ export const SiteForm: React.FC<SiteFormProps> = ({
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="descricaoProjeto">Descrição do Projeto</Label>
+              <Label htmlFor="descricao_projeto">Descrição do Projeto</Label>
               <Input
-                id="descricaoProjeto"
+                id="descricao_projeto"
                 type="text"
                 placeholder="Descreva o projeto do site"
-                value={formData.descricaoProjeto}
-                onChange={(e) => handleInputChange('descricaoProjeto', e.target.value)}
+                value={formData.descricao_projeto}
+                onChange={(e) => handleInputChange('descricao_projeto', e.target.value)}
                 required
                 className="w-full"
               />
@@ -223,11 +223,11 @@ export const SiteForm: React.FC<SiteFormProps> = ({
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="tipoPlano">Tipo de Plano</Label>
+                <Label htmlFor="tipo_plano">Tipo de Plano</Label>
                 <select
-                  id="tipoPlano"
-                  value={formData.tipoPlano}
-                  onChange={(e) => handleInputChange('tipoPlano', e.target.value)}
+                  id="tipo_plano"
+                  value={formData.tipo_plano}
+                  onChange={(e) => handleInputChange('tipo_plano', e.target.value)}
                   className="w-full h-10 px-3 py-2 text-sm bg-background border border-input rounded-md focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
                   required
                 >
@@ -240,12 +240,12 @@ export const SiteForm: React.FC<SiteFormProps> = ({
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="dataVencimento">Data de Vencimento</Label>
+                <Label htmlFor="data_vencimento">Data de Vencimento</Label>
                 <Input
-                  id="dataVencimento"
+                  id="data_vencimento"
                   type="date"
-                  value={formData.dataVencimento}
-                  onChange={(e) => handleInputChange('dataVencimento', e.target.value)}
+                  value={formData.data_vencimento}
+                  onChange={(e) => handleInputChange('data_vencimento', e.target.value)}
                   required
                   className="w-full"
                 />
@@ -295,13 +295,13 @@ export const SiteForm: React.FC<SiteFormProps> = ({
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="urlSite">URL do Site</Label>
+                <Label htmlFor="url_site">URL do Site</Label>
                 <Input
-                  id="urlSite"
+                  id="url_site"
                   type="url"
                   placeholder="https://exemplo.com"
-                  value={formData.urlSite}
-                  onChange={(e) => handleInputChange('urlSite', e.target.value)}
+                  value={formData.url_site}
+                  onChange={(e) => handleInputChange('url_site', e.target.value)}
                   className="w-full"
                 />
               </div>
@@ -321,10 +321,10 @@ export const SiteForm: React.FC<SiteFormProps> = ({
             <div className="p-3 bg-muted rounded-lg">
               <p className="text-sm text-muted-foreground">
                 Valor Total: <span className="font-semibold text-foreground">R$ {getValorTotal()}</span>
-                {(formData.tipoPlano.includes('assinatura') || formData.hospedagem) ? '/mês' : ''}
+                {(formData.tipo_plano.includes('assinatura') || formData.hospedagem) ? '/mês' : ''}
               </p>
               <div className="text-xs text-muted-foreground mt-1 space-y-1">
-                <div>Plano: R$ {planoValues[formData.tipoPlano]}</div>
+                <div>Plano: R$ {planoValues[formData.tipo_plano]}</div>
                 {formData.hospedagem && <div>+ Hospedagem: R$ 40/mês</div>}
                 {formData.instalacao && <div>+ Instalação: R$ 120</div>}
               </div>

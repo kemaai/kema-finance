@@ -3,8 +3,11 @@ import React, { useState } from 'react';
 import { Plus, Search, Filter, Globe } from 'lucide-react';
 import { SiteForm } from '../components/SiteForm';
 import { SiteCard } from '../components/SiteCard';
-import { useLocalStorage } from '../hooks/useLocalStorage';
 import { useIsMobile } from '../hooks/use-mobile';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/hooks/useAuth';
+import { toast } from 'sonner';
 
 interface Cliente {
   id: string;
@@ -13,19 +16,19 @@ interface Cliente {
 
 interface Site {
   id: string;
-  clienteId: string;
-  clienteNome: string;
-  dataInicio: string;
-  tipoPlano: 'assinatura-70' | 'assinatura-85' | 'venda-1400';
+  cliente_id: string;
+  cliente_nome: string;
+  data_inicio: string;
+  tipo_plano: 'assinatura-70' | 'assinatura-85' | 'venda-1400';
   status: 'Ativo' | 'Suspenso' | 'Cancelado';
-  dataVencimento: string;
-  valorMensal: number;
-  descricaoProjeto: string;
-  urlSite?: string;
+  data_vencimento: string;
+  valor_mensal: number;
+  descricao_projeto: string;
+  url_site?: string;
   observacoes?: string;
   hospedagem: boolean;
   instalacao: boolean;
-  createdAt: string;
+  created_at: string;
 }
 
 const getTipoPlanoLabel = (tipo: string) => {
@@ -47,29 +50,98 @@ const getStatusColor = (status: string) => {
 };
 
 export const Sites = () => {
-  const [sites, setSites] = useLocalStorage<Site[]>('sites', []);
-  const [clientes] = useLocalStorage<Cliente[]>('clientes', []);
+  const { user } = useAuth();
+  const queryClient = useQueryClient();
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editingSite, setEditingSite] = useState<Site | undefined>();
   const [searchTerm, setSearchTerm] = useState('');
   const isMobile = useIsMobile();
 
-  const handleSaveSite = (siteData: Omit<Site, 'id' | 'createdAt'>) => {
-    if (editingSite) {
-      setSites(sites.map(s => 
-        s.id === editingSite.id 
-          ? { ...siteData, id: editingSite.id, createdAt: editingSite.createdAt }
-          : s
-      ));
-    } else {
-      const newSite: Site = {
-        ...siteData,
-        id: Date.now().toString(),
-        createdAt: new Date().toISOString()
-      };
-      setSites([...sites, newSite]);
-    }
-    setEditingSite(undefined);
+  // Buscar sites do Supabase
+  const { data: sites = [], isLoading: sitesLoading } = useQuery({
+    queryKey: ['sites'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('sites')
+        .select('*')
+        .order('created_at', { ascending: false });
+      
+      if (error) throw error;
+      return data || [];
+    },
+    enabled: !!user,
+  });
+
+  // Buscar clientes para o formulário
+  const { data: clientes = [] } = useQuery({
+    queryKey: ['clientes'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('clientes')
+        .select('id, nome')
+        .order('nome');
+      
+      if (error) throw error;
+      return data || [];
+    },
+    enabled: !!user,
+  });
+
+  // Mutação para criar/atualizar site
+  const saveSiteMutation = useMutation({
+    mutationFn: async (siteData: Omit<Site, 'id' | 'created_at'>) => {
+      if (editingSite) {
+        const { data, error } = await supabase
+          .from('sites')
+          .update(siteData)
+          .eq('id', editingSite.id)
+          .select()
+          .single();
+        
+        if (error) throw error;
+        return data;
+      } else {
+        const { data, error } = await supabase
+          .from('sites')
+          .insert([{ ...siteData, user_id: user!.id }])
+          .select()
+          .single();
+        
+        if (error) throw error;
+        return data;
+      }
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['sites'] });
+      toast.success(editingSite ? 'Site atualizado!' : 'Site criado!');
+      setEditingSite(undefined);
+    },
+    onError: (error: any) => {
+      toast.error('Erro ao salvar site: ' + error.message);
+    },
+  });
+
+  // Mutação para deletar site
+  const deleteSiteMutation = useMutation({
+    mutationFn: async (id: string) => {
+      const { error } = await supabase
+        .from('sites')
+        .delete()
+        .eq('id', id);
+      
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['sites'] });
+      toast.success('Site excluído!');
+    },
+    onError: (error: any) => {
+      toast.error('Erro ao excluir site: ' + error.message);
+    },
+  });
+
+  const handleSaveSite = (siteData: Omit<Site, 'id' | 'created_at'>) => {
+    saveSiteMutation.mutate(siteData);
   };
 
   const handleEditSite = (site: Site) => {
@@ -79,22 +151,22 @@ export const Sites = () => {
 
   const handleDeleteSite = (id: string) => {
     if (confirm('Tem certeza que deseja excluir este site?')) {
-      setSites(sites.filter(s => s.id !== id));
+      deleteSiteMutation.mutate(id);
     }
   };
 
   const filteredSites = sites.filter(site =>
-    site.clienteNome.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    site.descricaoProjeto.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    (site.urlSite && site.urlSite.toLowerCase().includes(searchTerm.toLowerCase()))
+    site.cliente_nome.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    site.descricao_projeto.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    (site.url_site && site.url_site.toLowerCase().includes(searchTerm.toLowerCase()))
   );
 
   // Calcular total de receita mensal recorrente
   const receitaMensalRecorrente = sites
-    .filter(site => site.status === 'Ativo' && (site.tipoPlano.includes('assinatura') || site.hospedagem))
+    .filter(site => site.status === 'Ativo' && (site.tipo_plano.includes('assinatura') || site.hospedagem))
     .reduce((total, site) => {
-      if (site.tipoPlano.includes('assinatura')) {
-        return total + site.valorMensal;
+      if (site.tipo_plano.includes('assinatura')) {
+        return total + site.valor_mensal;
       } else if (site.hospedagem) {
         return total + 40; // Apenas hospedagem se não for assinatura
       }
@@ -107,6 +179,16 @@ export const Sites = () => {
     if (site.instalacao) servicos.push('Instalação');
     return servicos.join(', ');
   };
+
+  if (sitesLoading) {
+    return (
+      <div className="p-3 md:p-6 pb-20 md:pb-6">
+        <div className="flex items-center justify-center h-64">
+          <div className="text-muted-foreground">Carregando sites...</div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="p-3 md:p-6 pb-20 md:pb-6">
@@ -191,31 +273,31 @@ export const Sites = () => {
                   <tbody>
                     {filteredSites.map((site) => (
                       <tr key={site.id} className="border-b border-border hover:bg-gray-50">
-                        <td className="p-4 font-medium">{site.clienteNome}</td>
+                        <td className="p-4 font-medium">{site.cliente_nome}</td>
                         <td className="p-4">
                           <div>
-                            <div className="font-medium">{site.descricaoProjeto}</div>
-                            {site.urlSite && (
+                            <div className="font-medium">{site.descricao_projeto}</div>
+                            {site.url_site && (
                               <a
-                                href={site.urlSite}
+                                href={site.url_site}
                                 target="_blank"
                                 rel="noopener noreferrer"
                                 className="text-blue-600 hover:text-blue-800 text-sm flex items-center gap-1 mt-1"
                               >
                                 <Globe className="w-3 h-3" />
-                                {site.urlSite}
+                                {site.url_site}
                               </a>
                             )}
                           </div>
                         </td>
                         <td className="p-4 text-muted-foreground">
-                          {getTipoPlanoLabel(site.tipoPlano)}
+                          {getTipoPlanoLabel(site.tipo_plano)}
                         </td>
                         <td className="p-4 text-sm text-muted-foreground">
                           {getServicosAdicionais(site) || '-'}
                         </td>
                         <td className="p-4 font-medium">
-                          R$ {site.valorMensal.toFixed(2)}
+                          R$ {site.valor_mensal.toFixed(2)}
                         </td>
                         <td className="p-4">
                           <span className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(site.status)}`}>
