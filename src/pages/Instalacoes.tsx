@@ -1,10 +1,11 @@
-
 import React, { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
+import { useQuinzenaFilter } from '@/hooks/useQuinzenaFilter';
 import { InstalacaoCard } from '@/components/InstalacaoCard';
 import { InstalacaoForm } from '@/components/InstalacaoForm';
+import { QuinzenaFilter } from '@/components/QuinzenaFilter';
 import { Button } from '@/components/ui/button';
 import { Plus } from 'lucide-react';
 import { toast } from 'sonner';
@@ -51,6 +52,15 @@ export const Instalacoes = () => {
     },
     enabled: !!user,
   });
+
+  const {
+    selectedMonth,
+    selectedQuinzena,
+    filteredInstalacoes,
+    totalValorQuinzena,
+    setSelectedMonth,
+    setSelectedQuinzena,
+  } = useQuinzenaFilter(instalacoes);
 
   const createInstalacaoMutation = useMutation({
     mutationFn: async (instalacaoData: Omit<Instalacao, 'id' | 'created_at' | 'updated_at' | 'user_id'>) => {
@@ -219,6 +229,23 @@ export const Instalacoes = () => {
         </Button>
       </div>
 
+      <QuinzenaFilter
+        selectedMonth={selectedMonth}
+        selectedQuinzena={selectedQuinzena}
+        onMonthChange={setSelectedMonth}
+        onQuinzenaChange={setSelectedQuinzena}
+      />
+
+      {totalValorQuinzena > 0 && (
+        <div className="bg-blue-50 border-l-4 border-blue-400 p-4">
+          <p className="text-blue-800 font-medium">
+            Total da {selectedQuinzena === 'primeira' ? '1ª quinzena' : 
+                     selectedQuinzena === 'segunda' ? '2ª quinzena' : 
+                     'quinzena'}: R$ {totalValorQuinzena.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+          </p>
+        </div>
+      )}
+
       {(showForm || editingInstalacao) && (
         <div className="bg-white p-6 rounded-lg border shadow-sm">
           <h2 className="text-xl font-semibold mb-4">
@@ -237,13 +264,19 @@ export const Instalacoes = () => {
       )}
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {instalacoes.length === 0 ? (
+        {filteredInstalacoes.length === 0 ? (
           <div className="col-span-full text-center py-12">
-            <p className="text-gray-500 text-lg">Nenhuma instalação cadastrada ainda.</p>
-            <p className="text-gray-400">Clique em "Nova Instalação" para começar.</p>
+            <p className="text-gray-500 text-lg">
+              Nenhuma instalação encontrada para este período.
+            </p>
+            <p className="text-gray-400">
+              {selectedQuinzena === 'primeira' ? 'Primeira quinzena (01-15)' :
+               selectedQuinzena === 'segunda' ? 'Segunda quinzena (16-30)' :
+               'Todas as quinzenas'} de {selectedMonth.toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' })}
+            </p>
           </div>
         ) : (
-          instalacoes.map((instalacao) => (
+          filteredInstalacoes.map((instalacao) => (
             <InstalacaoCard
               key={instalacao.id}
               instalacao={instalacao}
