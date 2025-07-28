@@ -40,7 +40,7 @@ interface RevenueChartProps {
 export const RevenueChart: React.FC<RevenueChartProps> = ({ sites = [], instalacoes = [] }) => {
   // Gerar dados dos últimos 6 meses baseados nos dados reais
   const generateChartData = () => {
-    const months = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun'];
+    const months = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'];
     const currentDate = new Date();
     const chartData = [];
 

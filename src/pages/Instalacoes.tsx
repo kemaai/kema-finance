@@ -216,12 +216,12 @@ export const Instalacoes = () => {
   }
 
   return (
-    <div className="container mx-auto p-6 space-y-6">
-      <div className="flex justify-between items-center">
-        <h1 className="text-3xl font-bold text-gray-900">Instalações</h1>
+    <div className="container mx-auto p-4 lg:p-6 space-y-4 lg:space-y-6">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+        <h1 className="text-2xl lg:text-3xl font-bold text-gray-900">Instalações</h1>
         <Button 
           onClick={() => setShowForm(true)} 
-          className="bg-blue-600 hover:bg-blue-700"
+          className="bg-blue-600 hover:bg-blue-700 w-full sm:w-auto"
           disabled={createInstalacaoMutation.isPending}
         >
           <Plus className="w-4 h-4 mr-2" />
@@ -237,8 +237,8 @@ export const Instalacoes = () => {
       />
 
       {totalValorQuinzena > 0 && (
-        <div className="bg-blue-50 border-l-4 border-blue-400 p-4">
-          <p className="text-blue-800 font-medium">
+        <div className="bg-blue-50 border-l-4 border-blue-400 p-3 lg:p-4 rounded-r-lg">
+          <p className="text-blue-800 font-medium text-sm lg:text-base">
             Total da {selectedQuinzena === 'primeira' ? '1ª quinzena' : 
                      selectedQuinzena === 'segunda' ? '2ª quinzena' : 
                      'quinzena'}: R$ {totalValorQuinzena.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
@@ -247,8 +247,8 @@ export const Instalacoes = () => {
       )}
 
       {(showForm || editingInstalacao) && (
-        <div className="bg-white p-6 rounded-lg border shadow-sm">
-          <h2 className="text-xl font-semibold mb-4">
+        <div className="bg-white p-4 lg:p-6 rounded-lg border shadow-sm">
+          <h2 className="text-lg lg:text-xl font-semibold mb-4">
             {editingInstalacao ? 'Editar Instalação' : 'Nova Instalação'}
           </h2>
           <InstalacaoForm
@@ -263,13 +263,13 @@ export const Instalacoes = () => {
         </div>
       )}
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 lg:gap-6">
         {filteredInstalacoes.length === 0 ? (
-          <div className="col-span-full text-center py-12">
-            <p className="text-gray-500 text-lg">
+          <div className="col-span-full text-center py-8 lg:py-12">
+            <p className="text-gray-500 text-base lg:text-lg">
               Nenhuma instalação encontrada para este período.
             </p>
-            <p className="text-gray-400">
+            <p className="text-gray-400 text-sm lg:text-base mt-2">
               {selectedQuinzena === 'primeira' ? 'Primeira quinzena (01-15)' :
                selectedQuinzena === 'segunda' ? 'Segunda quinzena (16-30)' :
                'Todas as quinzenas'} de {selectedMonth.toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' })}

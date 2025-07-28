@@ -41,18 +41,18 @@ export const Dashboard = () => {
   const clientesAtivos = clientes.length;
   const mediaSites = clientesAtivos > 0 ? (sitesAtivos / clientesAtivos).toFixed(1) : 'N/A';
 
-  // Próximos vencimentos
-  const proximoMes = new Date();
-  proximoMes.setDate(proximoMes.getDate() + 30);
+  // Próximos vencimentos (próximos 60 dias para melhor visualização)
+  const proximosDois = new Date();
+  proximosDois.setDate(proximosDois.getDate() + 60);
   const proximosVencimentos = sites.filter(site => {
     const vencimento = new Date(site.data_vencimento);
-    return site.status === 'Ativo' && vencimento <= proximoMes && vencimento >= hoje;
+    return site.status === 'Ativo' && vencimento <= proximosDois && vencimento >= hoje;
   }).sort((a, b) => new Date(a.data_vencimento).getTime() - new Date(b.data_vencimento).getTime()).slice(0, 5);
 
-  // Próximas instalações
+  // Próximas instalações (próximos 60 dias)
   const proximasInstalacoes = instalacoes.filter(instalacao => {
     const dataInstalacao = new Date(instalacao.data_instalacao);
-    return instalacao.status === 'Agendado' && dataInstalacao >= hoje && dataInstalacao <= proximoMes;
+    return instalacao.status === 'Agendado' && dataInstalacao >= hoje && dataInstalacao <= proximosDois;
   }).sort((a, b) => new Date(a.data_instalacao).getTime() - new Date(b.data_instalacao).getTime()).slice(0, 3);
 
   // Instalações concluídas no mês
@@ -180,7 +180,7 @@ export const Dashboard = () => {
                 </div>
                 <div>
                   <h3 className="text-lg font-semibold text-foreground">Próximos Vencimentos</h3>
-                  <p className="text-sm text-muted-foreground">Contratos a vencer em 30 dias</p>
+                  <p className="text-sm text-muted-foreground">Contratos a vencer em 60 dias</p>
                 </div>
               </div>
               {proximosVencimentos.length > 0 && (
