@@ -31,7 +31,7 @@ function App() {
                 element={
                   <ProtectedRoute>
                     <Layout>
-                      <Index />
+                      <Dashboard />
                     </Layout>
                   </ProtectedRoute>
                 }
