@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import { Plus, Search, Filter, Globe, Edit, Trash2 } from 'lucide-react';
 import { SiteForm } from '../components/SiteForm';
 import { SiteCard } from '../components/SiteCard';
-import { useIsMobile } from '../hooks/use-mobile';
+
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
@@ -57,7 +57,6 @@ export const Sites = () => {
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editingSite, setEditingSite] = useState<Site | undefined>();
   const [searchTerm, setSearchTerm] = useState('');
-  const isMobile = useIsMobile();
 
   // Buscar sites do Supabase
   const { data: sites = [], isLoading: sitesLoading } = useQuery({
@@ -246,89 +245,16 @@ export const Sites = () => {
           </div>
         ) : (
           <div className="p-3 md:p-4">
-            {isMobile ? (
-              // Mobile Card View
-              <div className="space-y-3">
-                {filteredSites.map((site) => (
-                  <SiteCard
-                    key={site.id}
-                    site={site}
-                    onEdit={handleEditSite}
-                    onDelete={handleDeleteSite}
-                  />
-                ))}
-              </div>
-            ) : (
-              // Desktop Table View
-              <div className="overflow-x-auto">
-                <table className="w-full">
-                  <thead className="bg-gray-50 border-b border-border">
-                    <tr>
-                      <th className="text-left p-4 font-medium text-muted-foreground">Cliente</th>
-                      <th className="text-left p-4 font-medium text-muted-foreground">Projeto</th>
-                      <th className="text-left p-4 font-medium text-muted-foreground">Plano</th>
-                      <th className="text-left p-4 font-medium text-muted-foreground">Serviços</th>
-                      <th className="text-left p-4 font-medium text-muted-foreground">Valor</th>
-                      <th className="text-left p-4 font-medium text-muted-foreground">Status</th>
-                      <th className="text-left p-4 font-medium text-muted-foreground">Ações</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {filteredSites.map((site) => (
-                      <tr key={site.id} className="border-b border-border hover:bg-gray-50">
-                        <td className="p-4 font-medium">{site.cliente_nome}</td>
-                        <td className="p-4">
-                          <div>
-                            <div className="font-medium">{site.descricao_projeto}</div>
-                            {site.url_site && (
-                              <a
-                                href={site.url_site}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="text-blue-600 hover:text-blue-800 text-sm flex items-center gap-1 mt-1"
-                              >
-                                <Globe className="w-3 h-3" />
-                                {site.url_site}
-                              </a>
-                            )}
-                          </div>
-                        </td>
-                        <td className="p-4 text-muted-foreground">
-                          {getTipoPlanoLabel(site.tipo_plano)}
-                        </td>
-                        <td className="p-4 text-sm text-muted-foreground">
-                          {getServicosAdicionais(site) || '-'}
-                        </td>
-                        <td className="p-4 font-medium">
-                          R$ {site.valor_mensal.toFixed(2)}
-                        </td>
-                        <td className="p-4">
-                          <span className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(site.status)}`}>
-                            {site.status}
-                          </span>
-                        </td>
-                        <td className="p-4">
-                          <div className="flex gap-2">
-                            <button
-                              onClick={() => handleEditSite(site)}
-                              className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
-                            >
-                              <Edit className="w-4 h-4" />
-                            </button>
-                            <button
-                              onClick={() => handleDeleteSite(site.id)}
-                              className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
-                            >
-                              <Trash2 className="w-4 h-4" />
-                            </button>
-                          </div>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            )}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {filteredSites.map((site) => (
+                <SiteCard
+                  key={site.id}
+                  site={site}
+                  onEdit={handleEditSite}
+                  onDelete={handleDeleteSite}
+                />
+              ))}
+            </div>
           </div>
         )}
       </div>
