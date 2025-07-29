@@ -1,9 +1,7 @@
-
 import React, { useState } from 'react';
-import { Plus, Search, Filter, Globe, Edit, Trash2 } from 'lucide-react';
+import { Plus, Search, Filter, Globe } from 'lucide-react';
 import { SiteForm } from '../components/SiteForm';
 import { SiteCard } from '../components/SiteCard';
-
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
@@ -32,24 +30,6 @@ interface Site {
   updated_at: string;
   user_id: string;
 }
-
-const getTipoPlanoLabel = (tipo: string) => {
-  const tipos: Record<string, string> = {
-    'assinatura-70': 'Assinatura R$70/mês',
-    'assinatura-85': 'Assinatura R$85/mês',
-    'venda-1400': 'Venda R$1.400'
-  };
-  return tipos[tipo] || tipo;
-};
-
-const getStatusColor = (status: string) => {
-  const colors: Record<string, string> = {
-    'Ativo': 'bg-green-100 text-green-800',
-    'Suspenso': 'bg-yellow-100 text-yellow-800',
-    'Cancelado': 'bg-red-100 text-red-800'
-  };
-  return colors[status] || 'bg-gray-100 text-gray-800';
-};
 
 export const Sites = () => {
   const { user } = useAuth();
@@ -174,13 +154,6 @@ export const Sites = () => {
       }
       return total;
     }, 0);
-
-  const getServicosAdicionais = (site: Site) => {
-    const servicos = [];
-    if (site.hospedagem) servicos.push('Hospedagem');
-    if (site.instalacao) servicos.push('Instalação');
-    return servicos.join(', ');
-  };
 
   if (sitesLoading) {
     return (
