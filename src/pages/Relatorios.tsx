@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { FileText, Download, TrendingUp, Scissors, Calendar, DollarSign, Users, Globe } from 'lucide-react';
 import { useIsMobile } from '../hooks/use-mobile';
@@ -6,6 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
 import { useSites, useClientes, useInstalacoes } from '../hooks/useSupabaseData';
+import { RelatorioFilter } from '../components/RelatorioFilter';
 
 export const Relatorios = () => {
   const { data: sites = [], isLoading: sitesLoading } = useSites();
@@ -14,16 +14,46 @@ export const Relatorios = () => {
   
   const [mesEscolhido, setMesEscolhido] = useState(new Date().getMonth());
   const [anoEscolhido, setAnoEscolhido] = useState(new Date().getFullYear());
+  const [tipoRelatorio, setTipoRelatorio] = useState('todos');
   const isMobile = useIsMobile();
 
   const isLoading = sitesLoading || clientesLoading || instalacoesLoading;
 
-  // Função para filtrar instalações por período
-  const filtrarInstalacoesPorPeriodo = (mes: number, ano: number) => {
-    return instalacoes.filter(instalacao => {
+  // Função para resetar filtros
+  const resetarFiltros = () => {
+    setMesEscolhido(new Date().getMonth());
+    setAnoEscolhido(new Date().getFullYear());
+    setTipoRelatorio('todos');
+  };
+
+  // Função para filtrar dados por período e tipo
+  const filtrarDadosPorPeriodo = (mes: number, ano: number, tipo: string) => {
+    let dadosFiltrados = {
+      sites: sites,
+      clientes: clientes,
+      instalacoes: instalacoes
+    };
+
+    // Filtrar instalações por período
+    dadosFiltrados.instalacoes = instalacoes.filter(instalacao => {
       const dataInstalacao = new Date(instalacao.data_instalacao);
       return dataInstalacao.getMonth() === mes && dataInstalacao.getFullYear() === ano;
     });
+
+    // Filtrar sites por período de vencimento (removendo created_at que não existe)
+    if (tipo === 'sites' || tipo === 'todos') {
+      dadosFiltrados.sites = sites.filter(site => {
+        const dataVencimento = new Date(site.data_vencimento);
+        return dataVencimento.getMonth() === mes && dataVencimento.getFullYear() === ano;
+      });
+    }
+
+    // Para clientes, vamos manter todos os dados (não há created_at disponível)
+    if (tipo === 'clientes' || tipo === 'todos') {
+      dadosFiltrados.clientes = clientes; // Mantém todos os clientes
+    }
+
+    return dadosFiltrados;
   };
 
   // Função para dividir o mês em quinzenas
@@ -41,8 +71,11 @@ export const Relatorios = () => {
     return { primeiraQuinzena, segundaQuinzena };
   };
 
+  // Dados filtrados
+  const dadosFiltrados = filtrarDadosPorPeriodo(mesEscolhido, anoEscolhido, tipoRelatorio);
+  
   // Instalações do mês escolhido
-  const instalacoesMesEscolhido = filtrarInstalacoesPorPeriodo(mesEscolhido, anoEscolhido);
+  const instalacoesMesEscolhido = dadosFiltrados.instalacoes;
   const { primeiraQuinzena, segundaQuinzena } = dividirEmQuinzenas(instalacoesMesEscolhido);
 
   // Cálculos para relatórios
@@ -50,8 +83,9 @@ export const Relatorios = () => {
   const inicioMesAtual = new Date(hoje.getFullYear(), hoje.getMonth(), 1);
   const fimMesAtual = new Date(hoje.getFullYear(), hoje.getMonth() + 1, 0);
 
-  // Receita mensal de sites
-  const receitaMensalSites = sites
+  // Receita mensal de sites (filtrada ou não baseada no tipo)
+  const sitesParaReceita = tipoRelatorio === 'sites' || tipoRelatorio === 'todos' ? dadosFiltrados.sites : sites;
+  const receitaMensalSites = sitesParaReceita
     .filter(site => site.status === 'Ativo')
     .reduce((total, site) => total + site.valor_mensal, 0);
 
@@ -68,8 +102,9 @@ export const Relatorios = () => {
     .filter(inst => inst.status === 'Concluído')
     .reduce((total, instalacao) => total + instalacao.valor_total, 0);
 
-  // Sites por status
-  const sitesPorStatus = sites.reduce((acc, site) => {
+  // Sites por status (filtrados ou não)
+  const sitesParaStatus = tipoRelatorio === 'sites' || tipoRelatorio === 'todos' ? dadosFiltrados.sites : sites;
+  const sitesPorStatus = sitesParaStatus.reduce((acc, site) => {
     acc[site.status] = (acc[site.status] || 0) + 1;
     return acc;
   }, {} as Record<string, number>);
@@ -157,6 +192,17 @@ export const Relatorios = () => {
         </button>
       </div>
 
+      {/* Componente de Filtros */}
+      <RelatorioFilter
+        mesEscolhido={mesEscolhido}
+        anoEscolhido={anoEscolhido}
+        tipoRelatorio={tipoRelatorio}
+        onMesChange={setMesEscolhido}
+        onAnoChange={setAnoEscolhido}
+        onTipoChange={setTipoRelatorio}
+        onResetFilter={resetarFiltros}
+      />
+
       <Tabs defaultValue="visao-geral" className="space-y-4 md:space-y-6">
         <TabsList className={`grid w-full ${isMobile ? 'grid-cols-1 h-auto' : 'grid-cols-3'}`}>
           <TabsTrigger value="visao-geral" className={isMobile ? 'mb-1' : ''}>Visão Geral</TabsTrigger>
@@ -172,7 +218,9 @@ export const Relatorios = () => {
                 <Users className="h-3 w-3 md:h-4 md:w-4 text-muted-foreground" />
               </CardHeader>
               <CardContent>
-                <div className="text-lg md:text-2xl font-bold">{clientes.length}</div>
+                <div className="text-lg md:text-2xl font-bold">
+                  {tipoRelatorio === 'clientes' || tipoRelatorio === 'todos' ? dadosFiltrados.clientes.length : clientes.length}
+                </div>
               </CardContent>
             </Card>
 
@@ -182,7 +230,9 @@ export const Relatorios = () => {
                 <Globe className="h-3 w-3 md:h-4 md:w-4 text-muted-foreground" />
               </CardHeader>
               <CardContent>
-                <div className="text-lg md:text-2xl font-bold">{sitesPorStatus['Ativo'] || 0}</div>
+                <div className="text-lg md:text-2xl font-bold">
+                  {tipoRelatorio === 'sites' || tipoRelatorio === 'todos' ? (dadosFiltrados.sites.filter(s => s.status === 'Ativo').length) : (sitesPorStatus['Ativo'] || 0)}
+                </div>
               </CardContent>
             </Card>
 
@@ -267,49 +317,16 @@ export const Relatorios = () => {
         </TabsContent>
 
         <TabsContent value="operacional" className="space-y-4 md:space-y-6">
-          {/* Seletor de mês e ano */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2 text-sm md:text-base">
-                <Calendar className="w-4 h-4 md:w-5 md:h-5 text-blue-600" />
-                Seleção de Período
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="flex flex-col gap-3 md:flex-row md:gap-4">
-                <div className="space-y-2 flex-1">
-                  <label className="text-xs md:text-sm font-medium">Mês:</label>
-                  <select
-                    value={mesEscolhido}
-                    onChange={(e) => setMesEscolhido(parseInt(e.target.value))}
-                    className="w-full px-3 py-2 border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
-                  >
-                    {nomesMeses.map((nome, index) => (
-                      <option key={index} value={index}>{nome}</option>
-                    ))}
-                  </select>
-                </div>
-                <div className="space-y-2 flex-1">
-                  <label className="text-xs md:text-sm font-medium">Ano:</label>
-                  <select
-                    value={anoEscolhido}
-                    onChange={(e) => setAnoEscolhido(parseInt(e.target.value))}
-                    className="w-full px-3 py-2 border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
-                  >
-                    {Array.from({length: 5}, (_, i) => new Date().getFullYear() - 2 + i).map(ano => (
-                      <option key={ano} value={ano}>{ano}</option>
-                    ))}
-                  </select>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2 text-sm md:text-base">
                 <Scissors className="w-4 h-4 md:w-5 md:h-5 text-orange-600" />
                 Instalações por Quinzena - {nomesMeses[mesEscolhido]} {anoEscolhido}
+                {tipoRelatorio !== 'todos' && (
+                  <span className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded-full ml-2">
+                    Filtrado: {tipoRelatorio}
+                  </span>
+                )}
               </CardTitle>
               <CardDescription className="text-xs md:text-sm">
                 Controle de instalações do período selecionado
