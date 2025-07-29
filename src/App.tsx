@@ -11,6 +11,7 @@ import { Dashboard } from "./pages/Dashboard";
 import { Clientes } from "./pages/Clientes";
 import { Sites } from "./pages/Sites";
 import { Instalacoes } from "./pages/Instalacoes";
+import Despesas from "./pages/Despesas";
 import { Relatorios } from "./pages/Relatorios";
 import { Login } from "./pages/Login";
 import NotFound from "./pages/NotFound";
@@ -72,6 +73,16 @@ function App() {
                   <ProtectedRoute>
                     <Layout>
                       <Instalacoes />
+                    </Layout>
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/despesas"
+                element={
+                  <ProtectedRoute>
+                    <Layout>
+                      <Despesas />
                     </Layout>
                   </ProtectedRoute>
                 }

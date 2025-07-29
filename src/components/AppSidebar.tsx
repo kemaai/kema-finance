@@ -18,6 +18,7 @@ import {
   Globe, 
   Wrench, 
   BarChart3, 
+  Receipt,
   LogOut,
   User
 } from "lucide-react"
@@ -45,6 +46,11 @@ const navigation = [
     title: "Instalações", 
     url: "/instalacoes",
     icon: Wrench,
+  },
+  {
+    title: "Despesas",
+    url: "/despesas",
+    icon: Receipt,
   },
   {
     title: "Relatórios",

@@ -6,6 +6,7 @@ import {
   Users, 
   Globe, 
   Scissors, 
+  Receipt,
   FileText
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -15,6 +16,7 @@ const menuItems = [
   { name: 'Clientes', icon: Users, path: '/clientes' },
   { name: 'Sites', icon: Globe, path: '/sites' },
   { name: 'Instalações', icon: Scissors, path: '/instalacoes' },
+  { name: 'Despesas', icon: Receipt, path: '/despesas' },
   { name: 'Relatórios', icon: FileText, path: '/relatorios' },
 ];
 
@@ -23,7 +25,7 @@ export const MobileNavigation = () => {
 
   return (
     <div className="fixed bottom-0 left-0 right-0 z-50 bg-white border-t border-border md:hidden">
-      <div className="grid grid-cols-5 h-16">
+      <div className="grid grid-cols-6 h-16">
         {menuItems.map((item) => {
           const isActive = location.pathname === item.path;
           return (

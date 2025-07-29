@@ -29,6 +29,18 @@ interface Instalacao {
   ambiente: string;
 }
 
+interface Despesa {
+  id: string;
+  nome: string;
+  valor: number;
+  data_vencimento: string;
+  anotacao?: string;
+  paga: boolean;
+  user_id: string;
+  created_at: string;
+  updated_at: string;
+}
+
 export const useSites = () => {
   const { user } = useAuth();
   
@@ -114,6 +126,27 @@ export const useInstalacoes = () => {
 
       console.log('Instalacoes fetched:', data);
       return data || [];
+    },
+    enabled: !!user,
+  });
+};
+
+export const useDespesas = () => {
+  const { user } = useAuth();
+
+  return useQuery({
+    queryKey: ['despesas', user?.id],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('despesas')
+        .select('*')
+        .order('data_vencimento', { ascending: true });
+
+      if (error) {
+        throw error;
+      }
+
+      return data as Despesa[];
     },
     enabled: !!user,
   });

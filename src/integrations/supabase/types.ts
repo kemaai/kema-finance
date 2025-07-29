@@ -62,6 +62,42 @@ export type Database = {
         }
         Relationships: []
       }
+      despesas: {
+        Row: {
+          anotacao: string | null
+          created_at: string
+          data_vencimento: string
+          id: string
+          nome: string
+          paga: boolean
+          updated_at: string
+          user_id: string
+          valor: number
+        }
+        Insert: {
+          anotacao?: string | null
+          created_at?: string
+          data_vencimento: string
+          id?: string
+          nome: string
+          paga?: boolean
+          updated_at?: string
+          user_id: string
+          valor?: number
+        }
+        Update: {
+          anotacao?: string | null
+          created_at?: string
+          data_vencimento?: string
+          id?: string
+          nome?: string
+          paga?: boolean
+          updated_at?: string
+          user_id?: string
+          valor?: number
+        }
+        Relationships: []
+      }
       instalacoes: {
         Row: {
           ambiente: string
