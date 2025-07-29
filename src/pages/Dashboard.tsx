@@ -4,13 +4,14 @@ import { DashboardCard } from '../components/DashboardCard';
 import { RevenueChart } from '../components/RevenueChart';
 import { ProfileCard } from '../components/ProfileCard';
 import { QuickActions } from '../components/QuickActions';
-import { useSites, useClientes, useInstalacoes } from '../hooks/useSupabaseData';
-import { DollarSign, Globe, Scissors, Users, TrendingUp, Calendar, Bell, CheckCircle, Sparkles } from 'lucide-react';
+import { useSites, useClientes, useInstalacoes, useDespesas } from '../hooks/useSupabaseData';
+import { DollarSign, Globe, Scissors, Users, TrendingUp, Calendar, Bell, CheckCircle, Sparkles, CreditCard, AlertTriangle } from 'lucide-react';
 
 export const Dashboard = () => {
   const { data: sites = [], isLoading: sitesLoading } = useSites();
   const { data: clientes = [], isLoading: clientesLoading } = useClientes();
   const { data: instalacoes = [], isLoading: instalacoesLoading } = useInstalacoes();
+  const { data: despesas = [], isLoading: despesasLoading } = useDespesas();
 
   // Calcular receita mensal dos sites
   const receitaMensalSites = sites
@@ -65,8 +66,29 @@ export const Dashboard = () => {
 
   const todasInstalacoes = [...proximasInstalacoes, ...instalacoesConcluidasMes];
 
+  // Calcular métricas das despesas
+  const despesasDoMes = despesas.filter(despesa => {
+    const dataVencimento = new Date(despesa.data_vencimento);
+    return dataVencimento.getMonth() === hoje.getMonth() && 
+           dataVencimento.getFullYear() === hoje.getFullYear();
+  });
+
+  const totalDespesasMes = despesasDoMes.reduce((total, despesa) => total + Number(despesa.valor), 0);
+  const despesasPagas = despesasDoMes.filter(despesa => despesa.paga);
+  const despesasPendentes = despesasDoMes.filter(despesa => !despesa.paga);
+  const totalDespesasPagas = despesasPagas.reduce((total, despesa) => total + Number(despesa.valor), 0);
+  const totalDespesasPendentes = despesasPendentes.reduce((total, despesa) => total + Number(despesa.valor), 0);
+
+  // Próximas despesas a vencer (próximos 15 dias)
+  const proximasDespesas = new Date();
+  proximasDespesas.setDate(proximasDespesas.getDate() + 15);
+  const despesasProximasVencimento = despesas.filter(despesa => {
+    const vencimento = new Date(despesa.data_vencimento);
+    return !despesa.paga && vencimento <= proximasDespesas && vencimento >= hoje;
+  }).sort((a, b) => new Date(a.data_vencimento).getTime() - new Date(b.data_vencimento).getTime()).slice(0, 5);
+
   // Se ainda estiver carregando, mostrar loading
-  if (sitesLoading || clientesLoading || instalacoesLoading) {
+  if (sitesLoading || clientesLoading || instalacoesLoading || despesasLoading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted/20">
         <div className="max-w-7xl mx-auto p-4 md:p-8">
@@ -118,7 +140,7 @@ export const Dashboard = () => {
       </div>
 
       <div className="max-w-7xl mx-auto p-4 md:p-8 space-y-8 -mt-4 md:-mt-8 relative z-10">
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 md:gap-6">
           <DashboardCard 
             title="Receita Total" 
             value={`R$ ${receitaTotal.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`} 
@@ -155,6 +177,15 @@ export const Dashboard = () => {
             iconColor="bg-gradient-to-br from-purple-500 to-purple-600" 
             className="hover:shadow-lg transition-all duration-300 hover:-translate-y-1" 
           />
+
+          <DashboardCard 
+            title="Despesas" 
+            value={`R$ ${totalDespesasMes.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`} 
+            subValue={`Pagas: R$ ${totalDespesasPagas.toFixed(2)} • Pendentes: R$ ${totalDespesasPendentes.toFixed(2)}`} 
+            icon={CreditCard} 
+            iconColor="bg-gradient-to-br from-red-500 to-red-600" 
+            className="hover:shadow-lg transition-all duration-300 hover:-translate-y-1" 
+          />
         </div>
 
         <div className="bg-white rounded-2xl p-6 shadow-sm border hover:shadow-md transition-shadow duration-300">
@@ -171,7 +202,7 @@ export const Dashboard = () => {
           <RevenueChart sites={sites} instalacoes={instalacoes} />
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           <div className="bg-white rounded-2xl p-6 shadow-sm border hover:shadow-md transition-shadow duration-300">
             <div className="flex items-center justify-between mb-6">
               <div className="flex items-center gap-3">
@@ -207,6 +238,51 @@ export const Dashboard = () => {
                       <div className="font-bold text-amber-700">R$ {site.valor_mensal.toFixed(2)}</div>
                       <div className="text-xs text-amber-600">
                         {new Date(site.data_vencimento).toLocaleDateString('pt-BR')}
+                      </div>
+                    </div>
+                  </div>
+                ))
+              )}
+            </div>
+          </div>
+
+          <div className="bg-white rounded-2xl p-6 shadow-sm border hover:shadow-md transition-shadow duration-300">
+            <div className="flex items-center justify-between mb-6">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 bg-red-100 rounded-xl flex items-center justify-center">
+                  <AlertTriangle className="w-5 h-5 text-red-600" />
+                </div>
+                <div>
+                  <h3 className="text-lg font-semibold text-foreground">Despesas Próximas</h3>
+                  <p className="text-sm text-muted-foreground">Contas a vencer em 15 dias</p>
+                </div>
+              </div>
+              {despesasProximasVencimento.length > 0 && (
+                <div className="w-6 h-6 bg-red-500 rounded-full flex items-center justify-center">
+                  <span className="text-xs font-bold text-white">{despesasProximasVencimento.length}</span>
+                </div>
+              )}
+            </div>
+            
+            <div className="space-y-3 max-h-80 overflow-y-auto">
+              {despesasProximasVencimento.length === 0 ? (
+                <div className="text-center py-8">
+                  <CreditCard className="w-12 h-12 mx-auto mb-3 text-muted-foreground/50" />
+                  <p className="text-muted-foreground">Nenhuma despesa próxima ao vencimento</p>
+                </div>
+              ) : (
+                despesasProximasVencimento.map(despesa => (
+                  <div key={despesa.id} className="flex items-center justify-between p-4 bg-red-50 rounded-xl border border-red-100 hover:bg-red-100 transition-colors">
+                    <div className="flex-1 min-w-0">
+                      <div className="font-medium text-foreground truncate">{despesa.nome}</div>
+                      {despesa.anotacao && (
+                        <div className="text-sm text-muted-foreground truncate">{despesa.anotacao}</div>
+                      )}
+                    </div>
+                    <div className="text-right ml-4">
+                      <div className="font-bold text-red-700">R$ {Number(despesa.valor).toFixed(2)}</div>
+                      <div className="text-xs text-red-600">
+                        {new Date(despesa.data_vencimento).toLocaleDateString('pt-BR')}
                       </div>
                     </div>
                   </div>
