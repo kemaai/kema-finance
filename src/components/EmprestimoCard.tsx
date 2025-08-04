@@ -112,30 +112,30 @@ export const EmprestimoCard: React.FC<EmprestimoCardProps> = ({
   const isFullyPaid = remainingAmount <= 0;
 
   return (
-    <Card className="hover:shadow-md transition-shadow">
+    <Card className="hover:shadow-md transition-shadow w-full max-w-sm mx-auto">
       <CardHeader className="pb-3">
-        <div className="flex justify-between items-start">
-          <div>
-            <CardTitle className="text-lg">{emprestimo.nome}</CardTitle>
-            <CardDescription>
+        <div className="flex justify-between items-start gap-2">
+          <div className="flex-1 min-w-0">
+            <CardTitle className="text-lg truncate">{emprestimo.nome}</CardTitle>
+            <CardDescription className="text-sm">
               Criado em {new Date(emprestimo.created_at).toLocaleDateString('pt-BR')}
             </CardDescription>
           </div>
-          <Badge variant={isFullyPaid ? "default" : "secondary"}>
+          <Badge variant={isFullyPaid ? "default" : "secondary"} className="shrink-0">
             {isFullyPaid ? 'Quitado' : 'Em andamento'}
           </Badge>
         </div>
       </CardHeader>
       
       <CardContent className="space-y-4">
-        <div className="grid grid-cols-2 gap-4 text-sm">
+        <div className="grid grid-cols-2 gap-3 text-sm">
           <div>
-            <p className="text-muted-foreground">Valor Original</p>
-            <p className="font-medium text-lg">R$ {Number(emprestimo.valor_original).toFixed(2)}</p>
+            <p className="text-muted-foreground text-xs">Valor Original</p>
+            <p className="font-medium text-base">R$ {Number(emprestimo.valor_original).toFixed(2)}</p>
           </div>
           <div>
-            <p className="text-muted-foreground">Valor Restante</p>
-            <p className={`font-medium text-lg ${isFullyPaid ? 'text-green-600' : 'text-orange-600'}`}>
+            <p className="text-muted-foreground text-xs">Valor Restante</p>
+            <p className={`font-medium text-base ${isFullyPaid ? 'text-green-600' : 'text-orange-600'}`}>
               R$ {remainingAmount.toFixed(2)}
             </p>
           </div>
@@ -155,86 +155,89 @@ export const EmprestimoCard: React.FC<EmprestimoCardProps> = ({
         </div>
 
         <div className="text-sm">
-          <p className="text-muted-foreground">Total Pago</p>
+          <p className="text-muted-foreground text-xs">Total Pago</p>
           <p className="font-medium text-green-600">R$ {totalPago.toFixed(2)}</p>
         </div>
 
-        <div className="flex gap-2 pt-2">
-          {!isFullyPaid && (
-            <Dialog open={isPaymentDialogOpen} onOpenChange={setIsPaymentDialogOpen}>
+        <div className="flex flex-col gap-2 pt-2">
+          <div className="flex gap-2">
+            {!isFullyPaid && (
+              <Dialog open={isPaymentDialogOpen} onOpenChange={setIsPaymentDialogOpen}>
+                <DialogTrigger asChild>
+                  <Button size="sm" className="flex-1 text-xs px-2 py-1 h-8">
+                    <Plus className="w-3 h-3 mr-1" />
+                    Adicionar Pagamento
+                  </Button>
+                </DialogTrigger>
+                <DialogContent>
+                  <DialogHeader>
+                    <DialogTitle>Adicionar Pagamento - {emprestimo.nome}</DialogTitle>
+                  </DialogHeader>
+                  <div className="space-y-4">
+                    <div>
+                      <Label htmlFor="valor">Valor do Pagamento</Label>
+                      <Input
+                        id="valor"
+                        type="number"
+                        step="0.01"
+                        value={paymentAmount}
+                        onChange={(e) => setPaymentAmount(e.target.value)}
+                        placeholder="0,00"
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="data">Data do Pagamento</Label>
+                      <Input
+                        id="data"
+                        type="date"
+                        value={paymentDate}
+                        onChange={(e) => setPaymentDate(e.target.value)}
+                      />
+                    </div>
+                    <Button onClick={handleAddPayment} className="w-full">
+                      Adicionar Pagamento
+                    </Button>
+                  </div>
+                </DialogContent>
+              </Dialog>
+            )}
+            
+            <Dialog open={isHistoryDialogOpen} onOpenChange={setIsHistoryDialogOpen}>
               <DialogTrigger asChild>
-                <Button size="sm" className="flex-1">
-                  <Plus className="w-4 h-4 mr-1" />
-                  Adicionar Pagamento
+                <Button variant="outline" size="sm" className={`text-xs px-2 py-1 h-8 ${!isFullyPaid ? 'flex-1' : 'flex-1'}`}>
+                  <Receipt className="w-3 h-3 mr-1" />
+                  Histórico
                 </Button>
               </DialogTrigger>
               <DialogContent>
                 <DialogHeader>
-                  <DialogTitle>Adicionar Pagamento - {emprestimo.nome}</DialogTitle>
+                  <DialogTitle>Histórico de Pagamentos - {emprestimo.nome}</DialogTitle>
                 </DialogHeader>
-                <div className="space-y-4">
-                  <div>
-                    <Label htmlFor="valor">Valor do Pagamento</Label>
-                    <Input
-                      id="valor"
-                      type="number"
-                      step="0.01"
-                      value={paymentAmount}
-                      onChange={(e) => setPaymentAmount(e.target.value)}
-                      placeholder="0,00"
-                    />
-                  </div>
-                  <div>
-                    <Label htmlFor="data">Data do Pagamento</Label>
-                    <Input
-                      id="data"
-                      type="date"
-                      value={paymentDate}
-                      onChange={(e) => setPaymentDate(e.target.value)}
-                    />
-                  </div>
-                  <Button onClick={handleAddPayment} className="w-full">
-                    Adicionar Pagamento
-                  </Button>
+                <div className="space-y-2 max-h-60 overflow-y-auto">
+                  {emprestimoPayments.length === 0 ? (
+                    <p className="text-muted-foreground text-center py-4">
+                      Nenhum pagamento registrado
+                    </p>
+                  ) : (
+                    emprestimoPayments.map((pagamento) => (
+                      <div key={pagamento.id} className="flex justify-between items-center p-3 border rounded">
+                        <div>
+                          <p className="font-medium">R$ {Number(pagamento.valor_pago).toFixed(2)}</p>
+                          <p className="text-sm text-muted-foreground">
+                            {new Date(pagamento.data_pagamento).toLocaleDateString('pt-BR')}
+                          </p>
+                        </div>
+                      </div>
+                    ))
+                  )}
                 </div>
               </DialogContent>
             </Dialog>
-          )}
+          </div>
           
-          <Dialog open={isHistoryDialogOpen} onOpenChange={setIsHistoryDialogOpen}>
-            <DialogTrigger asChild>
-              <Button variant="outline" size="sm">
-                <Receipt className="w-4 h-4 mr-1" />
-                Histórico
-              </Button>
-            </DialogTrigger>
-            <DialogContent>
-              <DialogHeader>
-                <DialogTitle>Histórico de Pagamentos - {emprestimo.nome}</DialogTitle>
-              </DialogHeader>
-              <div className="space-y-2 max-h-60 overflow-y-auto">
-                {emprestimoPayments.length === 0 ? (
-                  <p className="text-muted-foreground text-center py-4">
-                    Nenhum pagamento registrado
-                  </p>
-                ) : (
-                  emprestimoPayments.map((pagamento) => (
-                    <div key={pagamento.id} className="flex justify-between items-center p-3 border rounded">
-                      <div>
-                        <p className="font-medium">R$ {Number(pagamento.valor_pago).toFixed(2)}</p>
-                        <p className="text-sm text-muted-foreground">
-                          {new Date(pagamento.data_pagamento).toLocaleDateString('pt-BR')}
-                        </p>
-                      </div>
-                    </div>
-                  ))
-                )}
-              </div>
-            </DialogContent>
-          </Dialog>
-          
-          <Button variant="destructive" size="sm" onClick={handleDelete}>
-            <Trash2 className="w-4 h-4" />
+          <Button variant="destructive" size="sm" onClick={handleDelete} className="w-full text-xs h-8">
+            <Trash2 className="w-3 h-3 mr-1" />
+            Excluir Empréstimo
           </Button>
         </div>
       </CardContent>
