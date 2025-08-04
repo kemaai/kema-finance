@@ -10,7 +10,11 @@ import {
   FileText,
   CreditCard
 } from 'lucide-react';
-import { cn } from '@/lib/utils';
+import {
+  Carousel,
+  CarouselContent,
+  CarouselItem,
+} from "@/components/ui/carousel"
 
 const menuItems = [
   { name: 'Dashboard', icon: BarChart3, path: '/' },
@@ -27,24 +31,36 @@ export const MobileNavigation = () => {
 
   return (
     <div className="fixed bottom-0 left-0 right-0 z-50 bg-white border-t border-border md:hidden">
-      <div className="grid grid-cols-7 h-16">
-        {menuItems.map((item) => {
-          const isActive = location.pathname === item.path;
-          return (
-            <NavLink
-              key={item.name}
-              to={item.path}
-              className={`flex flex-col items-center justify-center gap-1 px-1 py-2 transition-colors ${
-                isActive 
-                  ? 'text-blue-600 bg-blue-50' 
-                  : 'text-muted-foreground hover:text-foreground'
-              }`}
-            >
-              <item.icon className="w-4 h-4" />
-              <span className="text-xs font-medium truncate">{item.name}</span>
-            </NavLink>
-          );
-        })}
+      <div className="h-16 px-4">
+        <Carousel
+          opts={{
+            align: "start",
+            dragFree: true,
+            containScroll: "trimSnaps",
+          }}
+          className="w-full h-full"
+        >
+          <CarouselContent className="h-full">
+            {menuItems.map((item) => {
+              const isActive = location.pathname === item.path;
+              return (
+                <CarouselItem key={item.name} className="basis-auto pl-2">
+                  <NavLink
+                    to={item.path}
+                    className={`flex flex-col items-center justify-center gap-1 px-4 py-2 h-full min-w-[80px] transition-colors rounded-lg ${
+                      isActive 
+                        ? 'text-blue-600 bg-blue-50' 
+                        : 'text-muted-foreground hover:text-foreground hover:bg-accent'
+                    }`}
+                  >
+                    <item.icon className="w-5 h-5" />
+                    <span className="text-xs font-medium whitespace-nowrap">{item.name}</span>
+                  </NavLink>
+                </CarouselItem>
+              );
+            })}
+          </CarouselContent>
+        </Carousel>
       </div>
     </div>
   );
