@@ -98,6 +98,72 @@ export type Database = {
         }
         Relationships: []
       }
+      dividas_negativadas: {
+        Row: {
+          created_at: string
+          data_pagamento: string | null
+          id: string
+          nome: string
+          pago: boolean
+          updated_at: string
+          user_id: string
+          valor_atual: number
+          valor_original: number
+        }
+        Insert: {
+          created_at?: string
+          data_pagamento?: string | null
+          id?: string
+          nome: string
+          pago?: boolean
+          updated_at?: string
+          user_id: string
+          valor_atual?: number
+          valor_original?: number
+        }
+        Update: {
+          created_at?: string
+          data_pagamento?: string | null
+          id?: string
+          nome?: string
+          pago?: boolean
+          updated_at?: string
+          user_id?: string
+          valor_atual?: number
+          valor_original?: number
+        }
+        Relationships: []
+      }
+      emprestimos: {
+        Row: {
+          created_at: string
+          id: string
+          nome: string
+          updated_at: string
+          user_id: string
+          valor_atual: number
+          valor_original: number
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          nome: string
+          updated_at?: string
+          user_id: string
+          valor_atual?: number
+          valor_original?: number
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          nome?: string
+          updated_at?: string
+          user_id?: string
+          valor_atual?: number
+          valor_original?: number
+        }
+        Relationships: []
+      }
       instalacoes: {
         Row: {
           ambiente: string
@@ -139,6 +205,38 @@ export type Database = {
           valor_total?: number
         }
         Relationships: []
+      }
+      pagamentos_emprestimo: {
+        Row: {
+          created_at: string
+          data_pagamento: string
+          emprestimo_id: string
+          id: string
+          valor_pago: number
+        }
+        Insert: {
+          created_at?: string
+          data_pagamento: string
+          emprestimo_id: string
+          id?: string
+          valor_pago?: number
+        }
+        Update: {
+          created_at?: string
+          data_pagamento?: string
+          emprestimo_id?: string
+          id?: string
+          valor_pago?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pagamentos_emprestimo_emprestimo_id_fkey"
+            columns: ["emprestimo_id"]
+            isOneToOne: false
+            referencedRelation: "emprestimos"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       sites: {
         Row: {

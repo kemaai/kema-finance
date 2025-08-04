@@ -19,6 +19,7 @@ import {
   Wrench, 
   BarChart3, 
   Receipt,
+  CreditCard,
   LogOut,
   User
 } from "lucide-react"
@@ -51,6 +52,11 @@ const navigation = [
     title: "Despesas",
     url: "/despesas",
     icon: Receipt,
+  },
+  {
+    title: "Dívidas",
+    url: "/dividas",
+    icon: CreditCard,
   },
   {
     title: "Relatórios",

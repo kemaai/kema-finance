@@ -1,4 +1,3 @@
-
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from './useAuth';
@@ -36,6 +35,36 @@ interface Despesa {
   data_vencimento: string;
   anotacao?: string;
   paga: boolean;
+  user_id: string;
+  created_at: string;
+  updated_at: string;
+}
+
+interface Emprestimo {
+  id: string;
+  nome: string;
+  valor_original: number;
+  valor_atual: number;
+  user_id: string;
+  created_at: string;
+  updated_at: string;
+}
+
+interface PagamentoEmprestimo {
+  id: string;
+  emprestimo_id: string;
+  valor_pago: number;
+  data_pagamento: string;
+  created_at: string;
+}
+
+interface DividaNegativada {
+  id: string;
+  nome: string;
+  valor_original: number;
+  valor_atual: number;
+  data_pagamento?: string;
+  pago: boolean;
   user_id: string;
   created_at: string;
   updated_at: string;
@@ -147,6 +176,96 @@ export const useDespesas = () => {
       }
 
       return data as Despesa[];
+    },
+    enabled: !!user,
+  });
+};
+
+export const useEmprestimos = () => {
+  const { user } = useAuth();
+  
+  return useQuery({
+    queryKey: ['emprestimos'],
+    queryFn: async (): Promise<Emprestimo[]> => {
+      if (!user) {
+        console.log('No user found, returning empty array');
+        return [];
+      }
+
+      console.log('Fetching emprestimos for user:', user.id);
+      
+      const { data, error } = await supabase
+        .from('emprestimos')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      if (error) {
+        console.error('Error fetching emprestimos:', error);
+        throw error;
+      }
+
+      console.log('Emprestimos fetched:', data);
+      return data || [];
+    },
+    enabled: !!user,
+  });
+};
+
+export const usePagamentosEmprestimo = () => {
+  const { user } = useAuth();
+  
+  return useQuery({
+    queryKey: ['pagamentos_emprestimo'],
+    queryFn: async (): Promise<PagamentoEmprestimo[]> => {
+      if (!user) {
+        console.log('No user found, returning empty array');
+        return [];
+      }
+
+      console.log('Fetching pagamentos_emprestimo for user:', user.id);
+      
+      const { data, error } = await supabase
+        .from('pagamentos_emprestimo')
+        .select('*')
+        .order('data_pagamento', { ascending: false });
+
+      if (error) {
+        console.error('Error fetching pagamentos_emprestimo:', error);
+        throw error;
+      }
+
+      console.log('Pagamentos emprestimo fetched:', data);
+      return data || [];
+    },
+    enabled: !!user,
+  });
+};
+
+export const useDividasNegativadas = () => {
+  const { user } = useAuth();
+  
+  return useQuery({
+    queryKey: ['dividas_negativadas'],
+    queryFn: async (): Promise<DividaNegativada[]> => {
+      if (!user) {
+        console.log('No user found, returning empty array');
+        return [];
+      }
+
+      console.log('Fetching dividas_negativadas for user:', user.id);
+      
+      const { data, error } = await supabase
+        .from('dividas_negativadas')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      if (error) {
+        console.error('Error fetching dividas_negativadas:', error);
+        throw error;
+      }
+
+      console.log('Dividas negativadas fetched:', data);
+      return data || [];
     },
     enabled: !!user,
   });
