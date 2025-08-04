@@ -1,27 +1,41 @@
+
 import React from 'react';
 import { SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar';
 import { AppSidebar } from './AppSidebar';
 import { MobileNavigation } from './MobileNavigation';
+import { QuickActions } from './QuickActions';
+import { ProfileCard } from './ProfileCard';
+
 interface LayoutProps {
   children: React.ReactNode;
 }
+
 export const Layout: React.FC<LayoutProps> = ({
   children
 }) => {
-  return <SidebarProvider>
+  return (
+    <SidebarProvider>
       <div className="min-h-screen flex w-full bg-gray-50">
         {/* Desktop Sidebar */}
         <AppSidebar />
         
         {/* Main Content Area */}
         <div className="flex-1 flex flex-col">
-          {/* Mobile Header with Trigger */}
-          <header className="md:hidden bg-white border-b border-border p-4 flex items-center justify-between">
-            <div>
+          {/* Header for both mobile and desktop */}
+          <header className="bg-white border-b border-border p-4 flex items-center justify-between">
+            <div className="flex items-center gap-4">
+              {/* Mobile Sidebar Trigger */}
+              <div className="md:hidden">
+                <SidebarTrigger />
+              </div>
               <h1 className="text-xl font-bold text-foreground">Dashboard</h1>
-              
             </div>
-            <SidebarTrigger />
+            
+            {/* Header Actions */}
+            <div className="flex items-center gap-3">
+              <QuickActions />
+              <ProfileCard />
+            </div>
           </header>
 
           {/* Main Content */}
@@ -33,5 +47,6 @@ export const Layout: React.FC<LayoutProps> = ({
         {/* Mobile Bottom Navigation */}
         <MobileNavigation />
       </div>
-    </SidebarProvider>;
+    </SidebarProvider>
+  );
 };
