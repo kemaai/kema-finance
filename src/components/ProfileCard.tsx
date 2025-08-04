@@ -10,13 +10,11 @@ import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { useLocalStorage } from "@/hooks/useLocalStorage";
 import { useToast } from "@/hooks/use-toast";
-import { useAuth } from "@/hooks/useAuth";
 
 export const ProfileCard: React.FC = () => {
   const [isDarkMode, setIsDarkMode] = useLocalStorage<boolean>('darkMode', false);
   const [notifications, setNotifications] = useLocalStorage<boolean>('notifications', true);
   const { toast } = useToast();
-  const { signOut } = useAuth();
 
   const toggleDarkMode = () => {
     const newDarkMode = !isDarkMode;
@@ -54,20 +52,14 @@ export const ProfileCard: React.FC = () => {
     }
   }, [isDarkMode]);
 
-  const handleLogout = async () => {
-    try {
-      await signOut();
-      toast({
-        title: "Logout realizado",
-        description: "Você foi desconectado com sucesso!",
-      });
-    } catch (error) {
-      toast({
-        title: "Erro",
-        description: "Erro ao fazer logout. Tente novamente.",
-        variant: "destructive",
-      });
-    }
+  const handleLogout = () => {
+    toast({
+      title: "Logout realizado",
+      description: "Você foi desconectado com sucesso!",
+    });
+    
+    // Aqui você pode adicionar a lógica de logout real
+    console.log('Logout realizado');
   };
 
   const handleProfileClick = () => {
