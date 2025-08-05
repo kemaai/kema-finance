@@ -1,13 +1,10 @@
-
 import React from 'react';
 import { SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar';
 import { AppSidebar } from './AppSidebar';
 import { MobileNavigation } from './MobileNavigation';
-
 interface LayoutProps {
   children: React.ReactNode;
 }
-
 export const Layout: React.FC<LayoutProps> = ({
   children
 }) => {
@@ -22,6 +19,7 @@ export const Layout: React.FC<LayoutProps> = ({
           <header className="md:hidden bg-white border-b border-border p-4 flex items-center justify-between">
             <div>
               <h1 className="text-xl font-bold text-foreground">Dashboard</h1>
+              
             </div>
             <SidebarTrigger />
           </header>
