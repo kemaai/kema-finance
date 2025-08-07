@@ -1,13 +1,35 @@
+
 import React from 'react';
+import { useLocation } from 'react-router-dom';
 import { SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar';
 import { AppSidebar } from './AppSidebar';
 import { MobileNavigation } from './MobileNavigation';
+
 interface LayoutProps {
   children: React.ReactNode;
 }
+
 export const Layout: React.FC<LayoutProps> = ({
   children
 }) => {
+  const location = useLocation();
+  
+  // Mapear as rotas para os nomes das páginas
+  const getPageTitle = (pathname: string) => {
+    const routes: { [key: string]: string } = {
+      '/': 'Dashboard',
+      '/dashboard': 'Dashboard',
+      '/clientes': 'Clientes',
+      '/sites': 'Sites',
+      '/instalacoes': 'Instalações',
+      '/despesas': 'Despesas',
+      '/dividas': 'Dívidas',
+      '/relatorios': 'Relatórios'
+    };
+    
+    return routes[pathname] || 'Dashboard';
+  };
+
   return <SidebarProvider>
       <div className="min-h-screen flex w-full bg-gray-50">
         {/* Desktop Sidebar */}
@@ -18,8 +40,7 @@ export const Layout: React.FC<LayoutProps> = ({
           {/* Mobile Header with Trigger */}
           <header className="md:hidden bg-white border-b border-border p-4 flex items-center justify-between">
             <div>
-              <h1 className="text-xl font-bold text-foreground">Dashboard</h1>
-              
+              <h1 className="text-xl font-bold text-foreground">{getPageTitle(location.pathname)}</h1>
             </div>
             <SidebarTrigger />
           </header>
