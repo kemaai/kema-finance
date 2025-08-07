@@ -57,89 +57,99 @@ const getServicosAdicionais = (site: Site) => {
 export const SiteCard: React.FC<SiteCardProps> = ({ site, onEdit, onDelete, onDuplicate }) => {
   return (
     <Card className="bg-white border border-border hover:shadow-sm transition-shadow">
-      <CardContent className="p-4">
-        <div className="flex justify-between items-start mb-3">
-          <div className="flex-1">
-            <h3 className="font-semibold text-lg text-foreground mb-1">{site.cliente_nome}</h3>
-            <p className="text-sm text-muted-foreground">{site.descricao_projeto}</p>
-            {site.url_site && (
-              <a
-                href={site.url_site}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-blue-600 hover:text-blue-800 text-sm flex items-center gap-1 mt-1"
+      <CardContent className="p-3 sm:p-4">
+        <div className="flex flex-col gap-3">
+          {/* Header com título e ações */}
+          <div className="flex justify-between items-start gap-2">
+            <div className="flex-1 min-w-0">
+              <h3 className="font-semibold text-base sm:text-lg text-foreground mb-1 truncate">{site.cliente_nome}</h3>
+              <p className="text-sm text-muted-foreground line-clamp-2">{site.descricao_projeto}</p>
+              {site.url_site && (
+                <a
+                  href={site.url_site}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-blue-600 hover:text-blue-800 text-sm flex items-center gap-1 mt-1 truncate"
+                >
+                  <Globe className="w-3 h-3 flex-shrink-0" />
+                  <span className="truncate">{site.url_site}</span>
+                </a>
+              )}
+            </div>
+            
+            {/* Botões de ação - responsivos */}
+            <div className="flex gap-1 flex-shrink-0">
+              <button
+                onClick={() => onDuplicate(site)}
+                className="p-1.5 sm:p-2 text-green-600 hover:bg-green-50 rounded-lg transition-colors"
+                title="Duplicar para próximo mês"
               >
-                <Globe className="w-3 h-3" />
-                {site.url_site}
-              </a>
-            )}
+                <Copy className="w-3 h-3 sm:w-4 sm:h-4" />
+              </button>
+              <button
+                onClick={() => onEdit(site)}
+                className="p-1.5 sm:p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+                title="Editar"
+              >
+                <Edit className="w-3 h-3 sm:w-4 sm:h-4" />
+              </button>
+              <button
+                onClick={() => onDelete(site.id)}
+                className="p-1.5 sm:p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                title="Excluir"
+              >
+                <Trash2 className="w-3 h-3 sm:w-4 sm:h-4" />
+              </button>
+            </div>
           </div>
-          <div className="flex gap-1">
-            <button
-              onClick={() => onDuplicate(site)}
-              className="p-2 text-green-600 hover:bg-green-50 rounded-lg transition-colors"
-              title="Duplicar para próximo mês"
-            >
-              <Copy className="w-4 h-4" />
-            </button>
-            <button
-              onClick={() => onEdit(site)}
-              className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
-            >
-              <Edit className="w-4 h-4" />
-            </button>
-            <button
-              onClick={() => onDelete(site.id)}
-              className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
-            >
-              <Trash2 className="w-4 h-4" />
-            </button>
-          </div>
-        </div>
 
-        <div className="space-y-2 mb-3">
-          <div className="flex items-center justify-between text-sm">
-            <span className="text-muted-foreground">Plano:</span>
-            <span className="font-medium">{getTipoPlanoLabel(site.tipo_plano)}</span>
-          </div>
-          
-          {getServicosAdicionais(site) && (
+          {/* Informações do site */}
+          <div className="space-y-2">
             <div className="flex items-center justify-between text-sm">
-              <span className="text-muted-foreground">Serviços:</span>
-              <span className="font-medium">{getServicosAdicionais(site)}</span>
+              <span className="text-muted-foreground">Plano:</span>
+              <span className="font-medium text-right truncate ml-2">{getTipoPlanoLabel(site.tipo_plano)}</span>
+            </div>
+            
+            {getServicosAdicionais(site) && (
+              <div className="flex items-center justify-between text-sm">
+                <span className="text-muted-foreground">Serviços:</span>
+                <span className="font-medium text-right truncate ml-2">{getServicosAdicionais(site)}</span>
+              </div>
+            )}
+
+            <div className="flex items-center justify-between text-sm">
+              <span className="text-muted-foreground">Valor:</span>
+              <div className="flex items-center gap-1 flex-shrink-0">
+                <DollarSign className="w-3 h-3" />
+                <span className="font-medium">R$ {site.valor_mensal.toFixed(2)}</span>
+              </div>
+            </div>
+
+            <div className="flex items-center justify-between text-sm">
+              <span className="text-muted-foreground">Vencimento:</span>
+              <div className="flex items-center gap-1 flex-shrink-0">
+                <Calendar className="w-3 h-3" />
+                <span>{new Date(site.data_vencimento).toLocaleDateString('pt-BR')}</span>
+              </div>
+            </div>
+          </div>
+
+          {/* Status */}
+          <div className="flex justify-between items-center">
+            <span className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(site.status)}`}>
+              {site.status}
+            </span>
+          </div>
+
+          {/* Observações */}
+          {site.observacoes && (
+            <div className="pt-3 border-t border-border">
+              <p className="text-sm text-muted-foreground line-clamp-2">
+                <strong>Obs:</strong> {site.observacoes}
+              </p>
             </div>
           )}
-
-          <div className="flex items-center justify-between text-sm">
-            <span className="text-muted-foreground">Valor:</span>
-            <div className="flex items-center gap-1">
-              <DollarSign className="w-3 h-3" />
-              <span className="font-medium">R$ {site.valor_mensal.toFixed(2)}</span>
-            </div>
-          </div>
-
-          <div className="flex items-center justify-between text-sm">
-            <span className="text-muted-foreground">Vencimento:</span>
-            <div className="flex items-center gap-1">
-              <Calendar className="w-3 h-3" />
-              <span>{new Date(site.data_vencimento).toLocaleDateString('pt-BR')}</span>
-            </div>
-          </div>
         </div>
-
-        <div className="flex justify-between items-center">
-          <span className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(site.status)}`}>
-            {site.status}
-          </span>
-        </div>
-
-        {site.observacoes && (
-          <div className="mt-3 pt-3 border-t border-border">
-            <p className="text-sm text-muted-foreground line-clamp-2">
-              <strong>Obs:</strong> {site.observacoes}
-            </p>
-          </div>
-        )}
       </CardContent>
     </Card>
   );
