@@ -2,10 +2,13 @@ import React, { useState } from 'react';
 import { Plus, Search, Filter, Globe } from 'lucide-react';
 import { SiteForm } from '../components/SiteForm';
 import { SiteCard } from '../components/SiteCard';
+import { SiteMonthFilter } from '../components/SiteMonthFilter';
+import { useSiteMonthFilter } from '../hooks/useSiteMonthFilter';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { toast } from 'sonner';
+import { addMonths } from 'date-fns';
 
 interface Cliente {
   id: string;
@@ -52,6 +55,15 @@ export const Sites = () => {
     },
     enabled: !!user,
   });
+
+  // Usar o hook de filtro de mês
+  const {
+    selectedMonth,
+    filteredSites,
+    goToPreviousMonth,
+    goToNextMonth,
+    goToCurrentMonth,
+  } = useSiteMonthFilter(sites);
 
   // Buscar clientes para o formulário
   const { data: clientes = [] } = useQuery({
@@ -122,6 +134,20 @@ export const Sites = () => {
     },
   });
 
+  // Função para duplicar site para o próximo mês
+  const handleDuplicateSite = (site: Site) => {
+    const nextMonthDate = addMonths(new Date(site.data_vencimento), 1);
+    const duplicatedSite = {
+      ...site,
+      data_vencimento: nextMonthDate.toISOString().split('T')[0],
+    };
+    
+    // Remove campos que não devem ser duplicados
+    const { id, created_at, updated_at, user_id, ...siteData } = duplicatedSite;
+    
+    saveSiteMutation.mutate(siteData);
+  };
+
   const handleSaveSite = (siteData: Omit<Site, 'id' | 'created_at' | 'updated_at' | 'user_id'>) => {
     saveSiteMutation.mutate(siteData);
   };
@@ -137,14 +163,15 @@ export const Sites = () => {
     }
   };
 
-  const filteredSites = sites.filter(site =>
+  // Filtrar sites por termo de busca
+  const searchFilteredSites = filteredSites.filter(site =>
     site.cliente_nome.toLowerCase().includes(searchTerm.toLowerCase()) ||
     site.descricao_projeto.toLowerCase().includes(searchTerm.toLowerCase()) ||
     (site.url_site && site.url_site.toLowerCase().includes(searchTerm.toLowerCase()))
   );
 
-  // Calcular total de receita mensal recorrente
-  const receitaMensalRecorrente = sites
+  // Calcular total de receita mensal recorrente do mês selecionado
+  const receitaMensalRecorrente = filteredSites
     .filter(site => site.status === 'Ativo' && (site.tipo_plano.includes('assinatura') || site.hospedagem))
     .reduce((total, site) => {
       if (site.tipo_plano.includes('assinatura')) {
@@ -186,6 +213,13 @@ export const Sites = () => {
 
       <div className="bg-white rounded-xl shadow-sm border border-border">
         <div className="p-3 md:p-4 border-b border-border">
+          <SiteMonthFilter
+            selectedMonth={selectedMonth}
+            onPreviousMonth={goToPreviousMonth}
+            onNextMonth={goToNextMonth}
+            onCurrentMonth={goToCurrentMonth}
+          />
+          
           <div className="flex flex-col gap-3 md:flex-row md:items-center md:gap-4">
             <div className="flex-1 relative">
               <Search className="w-4 h-4 absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground" />
@@ -204,7 +238,7 @@ export const Sites = () => {
           </div>
         </div>
 
-        {filteredSites.length === 0 ? (
+        {searchFilteredSites.length === 0 ? (
           <div className="p-6 md:p-8 text-center">
             <div className="text-muted-foreground">
               <Globe className="w-12 h-12 mx-auto mb-4 opacity-50" />
@@ -219,12 +253,13 @@ export const Sites = () => {
         ) : (
           <div className="p-3 md:p-4">
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {filteredSites.map((site) => (
+              {searchFilteredSites.map((site) => (
                 <SiteCard
                   key={site.id}
                   site={site}
                   onEdit={handleEditSite}
                   onDelete={handleDeleteSite}
+                  onDuplicate={handleDuplicateSite}
                 />
               ))}
             </div>

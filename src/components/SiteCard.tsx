@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Edit, Trash2, Globe, Calendar, DollarSign } from 'lucide-react';
+import { Edit, Trash2, Globe, Calendar, DollarSign, Copy } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 
 interface Site {
@@ -26,6 +26,7 @@ interface SiteCardProps {
   site: Site;
   onEdit: (site: Site) => void;
   onDelete: (id: string) => void;
+  onDuplicate: (site: Site) => void;
 }
 
 const getTipoPlanoLabel = (tipo: string) => {
@@ -53,7 +54,7 @@ const getServicosAdicionais = (site: Site) => {
   return servicos.join(', ');
 };
 
-export const SiteCard: React.FC<SiteCardProps> = ({ site, onEdit, onDelete }) => {
+export const SiteCard: React.FC<SiteCardProps> = ({ site, onEdit, onDelete, onDuplicate }) => {
   return (
     <Card className="bg-white border border-border hover:shadow-sm transition-shadow">
       <CardContent className="p-4">
@@ -74,6 +75,13 @@ export const SiteCard: React.FC<SiteCardProps> = ({ site, onEdit, onDelete }) =>
             )}
           </div>
           <div className="flex gap-1">
+            <button
+              onClick={() => onDuplicate(site)}
+              className="p-2 text-green-600 hover:bg-green-50 rounded-lg transition-colors"
+              title="Duplicar para próximo mês"
+            >
+              <Copy className="w-4 h-4" />
+            </button>
             <button
               onClick={() => onEdit(site)}
               className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
