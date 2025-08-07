@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Calendar, Filter } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -30,10 +31,13 @@ export const RelatorioFilter: React.FC<RelatorioFilterProps> = ({
 
   const tiposRelatorio = [
     { value: 'todos', label: 'Todos os Dados' },
-    { value: 'receita', label: 'Apenas Receita' },
-    { value: 'instalacoes', label: 'Apenas Instalações' },
-    { value: 'sites', label: 'Apenas Sites' },
-    { value: 'clientes', label: 'Apenas Clientes' }
+    { value: 'receita', label: 'Análise de Receita' },
+    { value: 'sites', label: 'Sites e Contratos' },
+    { value: 'instalacoes', label: 'Instalações' },
+    { value: 'clientes', label: 'Base de Clientes' },
+    { value: 'despesas', label: 'Despesas' },
+    { value: 'dividas', label: 'Dívidas Negativadas' },
+    { value: 'emprestimos', label: 'Empréstimos' }
   ];
 
   const anosDisponiveis = Array.from(
@@ -53,10 +57,10 @@ export const RelatorioFilter: React.FC<RelatorioFilterProps> = ({
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
           {/* Seletor de Tipo */}
           <div className="space-y-2">
-            <label className="text-sm font-medium text-gray-700">Tipo de Relatório:</label>
+            <label className="text-sm font-medium text-gray-700">Categoria:</label>
             <Select value={tipoRelatorio} onValueChange={onTipoChange}>
               <SelectTrigger className="w-full">
-                <SelectValue placeholder="Selecione o tipo" />
+                <SelectValue placeholder="Selecione a categoria" />
               </SelectTrigger>
               <SelectContent>
                 {tiposRelatorio.map((tipo) => (
@@ -110,7 +114,7 @@ export const RelatorioFilter: React.FC<RelatorioFilterProps> = ({
               className="w-full"
             >
               <Calendar className="w-4 h-4 mr-2" />
-              Resetar
+              Limpar
             </Button>
           </div>
         </div>
@@ -118,10 +122,10 @@ export const RelatorioFilter: React.FC<RelatorioFilterProps> = ({
         {/* Indicador do período selecionado */}
         <div className="mt-4 p-3 bg-blue-50 rounded-lg">
           <p className="text-sm text-blue-800">
-            <strong>Período selecionado:</strong> {nomesMeses[mesEscolhido]} de {anoEscolhido}
+            <strong>Período:</strong> {nomesMeses[mesEscolhido]} de {anoEscolhido}
             {tipoRelatorio !== 'todos' && (
               <span className="ml-2">
-                | <strong>Tipo:</strong> {tiposRelatorio.find(t => t.value === tipoRelatorio)?.label}
+                | <strong>Categoria:</strong> {tiposRelatorio.find(t => t.value === tipoRelatorio)?.label}
               </span>
             )}
           </p>

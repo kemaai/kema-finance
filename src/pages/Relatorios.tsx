@@ -1,23 +1,26 @@
 import React, { useState } from 'react';
-import { FileText, Download, TrendingUp, Scissors, Calendar, DollarSign, Users, Globe } from 'lucide-react';
+import { FileText, Download, TrendingUp, Scissors, Calendar, DollarSign, Users, Globe, CreditCard, AlertTriangle, Banknote } from 'lucide-react';
 import { useIsMobile } from '../hooks/use-mobile';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
-import { useSites, useClientes, useInstalacoes } from '../hooks/useSupabaseData';
+import { useSites, useClientes, useInstalacoes, useDespesas, useEmprestimos, useDividasNegativadas } from '../hooks/useSupabaseData';
 import { RelatorioFilter } from '../components/RelatorioFilter';
 
 export const Relatorios = () => {
   const { data: sites = [], isLoading: sitesLoading } = useSites();
   const { data: clientes = [], isLoading: clientesLoading } = useClientes();
   const { data: instalacoes = [], isLoading: instalacoesLoading } = useInstalacoes();
+  const { data: despesas = [], isLoading: despesasLoading } = useDespesas();
+  const { data: emprestimos = [], isLoading: emprestimosLoading } = useEmprestimos();
+  const { data: dividasNegativadas = [], isLoading: dividasLoading } = useDividasNegativadas();
   
   const [mesEscolhido, setMesEscolhido] = useState(new Date().getMonth());
   const [anoEscolhido, setAnoEscolhido] = useState(new Date().getFullYear());
   const [tipoRelatorio, setTipoRelatorio] = useState('todos');
   const isMobile = useIsMobile();
 
-  const isLoading = sitesLoading || clientesLoading || instalacoesLoading;
+  const isLoading = sitesLoading || clientesLoading || instalacoesLoading || despesasLoading || emprestimosLoading || dividasLoading;
 
   // Função para resetar filtros
   const resetarFiltros = () => {
@@ -31,16 +34,21 @@ export const Relatorios = () => {
     let dadosFiltrados = {
       sites: sites,
       clientes: clientes,
-      instalacoes: instalacoes
+      instalacoes: instalacoes,
+      despesas: despesas,
+      emprestimos: emprestimos,
+      dividasNegativadas: dividasNegativadas
     };
 
     // Filtrar instalações por período
-    dadosFiltrados.instalacoes = instalacoes.filter(instalacao => {
-      const dataInstalacao = new Date(instalacao.data_instalacao);
-      return dataInstalacao.getMonth() === mes && dataInstalacao.getFullYear() === ano;
-    });
+    if (tipo === 'instalacoes' || tipo === 'todos') {
+      dadosFiltrados.instalacoes = instalacoes.filter(instalacao => {
+        const dataInstalacao = new Date(instalacao.data_instalacao);
+        return dataInstalacao.getMonth() === mes && dataInstalacao.getFullYear() === ano;
+      });
+    }
 
-    // Filtrar sites por período de vencimento (removendo created_at que não existe)
+    // Filtrar sites por período de vencimento
     if (tipo === 'sites' || tipo === 'todos') {
       dadosFiltrados.sites = sites.filter(site => {
         const dataVencimento = new Date(site.data_vencimento);
@@ -48,107 +56,118 @@ export const Relatorios = () => {
       });
     }
 
-    // Para clientes, vamos manter todos os dados (não há created_at disponível)
+    // Filtrar despesas por período
+    if (tipo === 'despesas' || tipo === 'todos') {
+      dadosFiltrados.despesas = despesas.filter(despesa => {
+        const dataDespesa = new Date(despesa.data_vencimento);
+        return dataDespesa.getMonth() === mes && dataDespesa.getFullYear() === ano;
+      });
+    }
+
+    // Para clientes, empréstimos e dívidas, mantém todos se não for filtro específico
     if (tipo === 'clientes' || tipo === 'todos') {
-      dadosFiltrados.clientes = clientes; // Mantém todos os clientes
+      dadosFiltrados.clientes = clientes;
+    }
+    if (tipo === 'emprestimos' || tipo === 'todos') {
+      dadosFiltrados.emprestimos = emprestimos;
+    }
+    if (tipo === 'dividas' || tipo === 'todos') {
+      dadosFiltrados.dividasNegativadas = dividasNegativadas;
     }
 
     return dadosFiltrados;
   };
 
-  // Função para dividir o mês em quinzenas
-  const dividirEmQuinzenas = (instalacoesMes: any[]) => {
-    const primeiraQuinzena = instalacoesMes.filter(inst => {
-      const dia = new Date(inst.data_instalacao).getDate();
-      return dia <= 15;
-    });
-
-    const segundaQuinzena = instalacoesMes.filter(inst => {
-      const dia = new Date(inst.data_instalacao).getDate();
-      return dia > 15;
-    });
-
-    return { primeiraQuinzena, segundaQuinzena };
-  };
-
   // Dados filtrados
   const dadosFiltrados = filtrarDadosPorPeriodo(mesEscolhido, anoEscolhido, tipoRelatorio);
   
-  // Instalações do mês escolhido
-  const instalacoesMesEscolhido = dadosFiltrados.instalacoes;
-  const { primeiraQuinzena, segundaQuinzena } = dividirEmQuinzenas(instalacoesMesEscolhido);
-
-  // Cálculos para relatórios
+  // Cálculos gerais
   const hoje = new Date();
   const inicioMesAtual = new Date(hoje.getFullYear(), hoje.getMonth(), 1);
   const fimMesAtual = new Date(hoje.getFullYear(), hoje.getMonth() + 1, 0);
 
-  // Receita mensal de sites (filtrada ou não baseada no tipo)
-  const sitesParaReceita = tipoRelatorio === 'sites' || tipoRelatorio === 'todos' ? dadosFiltrados.sites : sites;
-  const receitaMensalSites = sitesParaReceita
+  // Receitas
+  const receitaMensalSites = dadosFiltrados.sites
     .filter(site => site.status === 'Ativo')
     .reduce((total, site) => total + site.valor_mensal, 0);
 
-  // Receita de instalações no mês atual
-  const instalacoesMesAtual = instalacoes.filter(instalacao => {
-    const dataInstalacao = new Date(instalacao.data_instalacao);
-    return dataInstalacao >= inicioMesAtual && dataInstalacao <= fimMesAtual && instalacao.status === 'Concluído';
-  });
-
-  const receitaInstalacoesMesAtual = instalacoesMesAtual.reduce((total, instalacao) => total + instalacao.valor_total, 0);
-
-  // Receita de instalações do mês escolhido
-  const receitaInstalacoesMesEscolhido = instalacoesMesEscolhido
+  const receitaInstalacoes = dadosFiltrados.instalacoes
     .filter(inst => inst.status === 'Concluído')
     .reduce((total, instalacao) => total + instalacao.valor_total, 0);
 
-  // Sites por status (filtrados ou não)
-  const sitesParaStatus = tipoRelatorio === 'sites' || tipoRelatorio === 'todos' ? dadosFiltrados.sites : sites;
-  const sitesPorStatus = sitesParaStatus.reduce((acc, site) => {
+  // Despesas
+  const totalDespesas = dadosFiltrados.despesas
+    .reduce((total, despesa) => total + despesa.valor, 0);
+
+  const despesasPagas = dadosFiltrados.despesas
+    .filter(despesa => despesa.paga)
+    .reduce((total, despesa) => total + despesa.valor, 0);
+
+  const despesasPendentes = totalDespesas - despesasPagas;
+
+  // Empréstimos
+  const totalEmprestimos = dadosFiltrados.emprestimos
+    .reduce((total, emprestimo) => total + emprestimo.valor_atual, 0);
+
+  // Dívidas
+  const totalDividas = dadosFiltrados.dividasNegativadas
+    .filter(divida => !divida.pago)
+    .reduce((total, divida) => total + divida.valor_atual, 0);
+
+  // Sites por status
+  const sitesPorStatus = dadosFiltrados.sites.reduce((acc, site) => {
     acc[site.status] = (acc[site.status] || 0) + 1;
     return acc;
   }, {} as Record<string, number>);
 
-  // Vencimentos próximos (próximos 30 dias)
-  const proximosVencimentos = sites.filter(site => {
-    const vencimento = new Date(site.data_vencimento);
-    const em30Dias = new Date();
-    em30Dias.setDate(hoje.getDate() + 30);
-    return site.status === 'Ativo' && vencimento <= em30Dias && vencimento >= hoje;
-  }).length;
-
-  const exportarRelatorio = (tipo: string) => {
+  const exportarRelatorio = (categoria: string) => {
     let dados = '';
     let nomeArquivo = '';
     const nomesMeses = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 
                         'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'];
 
-    switch (tipo) {
+    const dataAtual = hoje.toLocaleDateString('pt-BR');
+    const periodoSelecionado = `${nomesMeses[mesEscolhido]} ${anoEscolhido}`;
+
+    switch (categoria) {
+      case 'geral':
+        dados = `Relatório Geral - ${dataAtual}\n`;
+        dados += `Período: ${periodoSelecionado}\n\n`;
+        dados += `=== RECEITAS ===\n`;
+        dados += `Sites Ativos: R$ ${receitaMensalSites.toFixed(2)}\n`;
+        dados += `Instalações: R$ ${receitaInstalacoes.toFixed(2)}\n`;
+        dados += `Total Receitas: R$ ${(receitaMensalSites + receitaInstalacoes).toFixed(2)}\n\n`;
+        dados += `=== DESPESAS ===\n`;
+        dados += `Total Despesas: R$ ${totalDespesas.toFixed(2)}\n`;
+        dados += `Pagas: R$ ${despesasPagas.toFixed(2)}\n`;
+        dados += `Pendentes: R$ ${despesasPendentes.toFixed(2)}\n\n`;
+        dados += `=== RESUMO ===\n`;
+        dados += `Clientes: ${dadosFiltrados.clientes.length}\n`;
+        dados += `Sites Ativos: ${sitesPorStatus['Ativo'] || 0}\n`;
+        dados += `Instalações: ${dadosFiltrados.instalacoes.length}\n`;
+        dados += `Empréstimos Ativos: R$ ${totalEmprestimos.toFixed(2)}\n`;
+        dados += `Dívidas Pendentes: R$ ${totalDividas.toFixed(2)}\n`;
+        nomeArquivo = `relatorio-geral-${periodoSelecionado.replace(' ', '-')}.txt`;
+        break;
+        
       case 'receita':
-        dados = `Relatório de Receita - ${hoje.toLocaleDateString('pt-BR')}\n\n`;
-        dados += `Receita Mensal de Sites: R$ ${receitaMensalSites.toFixed(2)}\n`;
-        dados += `Receita de Instalações (Mês Atual): R$ ${receitaInstalacoesMesAtual.toFixed(2)}\n`;
-        dados += `Total: R$ ${(receitaMensalSites + receitaInstalacoesMesAtual).toFixed(2)}\n`;
-        nomeArquivo = `relatorio-receita-${hoje.toISOString().split('T')[0]}.txt`;
+        dados = `Relatório de Receitas - ${periodoSelecionado}\n\n`;
+        dados += `Sites Ativos: R$ ${receitaMensalSites.toFixed(2)}\n`;
+        dados += `Instalações Concluídas: R$ ${receitaInstalacoes.toFixed(2)}\n`;
+        dados += `Total: R$ ${(receitaMensalSites + receitaInstalacoes).toFixed(2)}\n`;
+        nomeArquivo = `relatorio-receitas-${periodoSelecionado.replace(' ', '-')}.txt`;
         break;
-      
-      case 'sites':
-        dados = `Relatório de Sites - ${hoje.toLocaleDateString('pt-BR')}\n\n`;
-        Object.entries(sitesPorStatus).forEach(([status, quantidade]) => {
-          dados += `${status}: ${quantidade} sites\n`;
+        
+      case 'despesas':
+        dados = `Relatório de Despesas - ${periodoSelecionado}\n\n`;
+        dados += `Total: R$ ${totalDespesas.toFixed(2)}\n`;
+        dados += `Pagas: R$ ${despesasPagas.toFixed(2)}\n`;
+        dados += `Pendentes: R$ ${despesasPendentes.toFixed(2)}\n\n`;
+        dados += `Detalhamento:\n`;
+        dadosFiltrados.despesas.forEach(despesa => {
+          dados += `- ${despesa.nome}: R$ ${despesa.valor.toFixed(2)} ${despesa.paga ? '(PAGA)' : '(PENDENTE)'}\n`;
         });
-        nomeArquivo = `relatorio-sites-${hoje.toISOString().split('T')[0]}.txt`;
-        break;
-      
-      case 'instalacoes':
-        dados = `Relatório de Instalações - ${nomesMeses[mesEscolhido]} ${anoEscolhido}\n\n`;
-        dados += `Total do Mês: ${instalacoesMesEscolhido.length} instalações\n`;
-        dados += `Primeira Quinzena (1-15): ${primeiraQuinzena.length} instalações\n`;
-        dados += `Segunda Quinzena (16-30): ${segundaQuinzena.length} instalações\n\n`;
-        dados += `Receita Total do Mês: R$ ${receitaInstalacoesMesEscolhido.toFixed(2)}\n`;
-        dados += `Receita 1ª Quinzena: R$ ${primeiraQuinzena.filter(i => i.status === 'Concluído').reduce((acc, inst) => acc + inst.valor_total, 0).toFixed(2)}\n`;
-        dados += `Receita 2ª Quinzena: R$ ${segundaQuinzena.filter(i => i.status === 'Concluído').reduce((acc, inst) => acc + inst.valor_total, 0).toFixed(2)}\n`;
-        nomeArquivo = `relatorio-instalacoes-${mesEscolhido + 1}-${anoEscolhido}.txt`;
+        nomeArquivo = `relatorio-despesas-${periodoSelecionado.replace(' ', '-')}.txt`;
         break;
     }
 
@@ -181,14 +200,14 @@ export const Relatorios = () => {
       <div className="flex flex-col gap-3 md:gap-4 md:flex-row md:items-center justify-between mb-4 md:mb-6">
         <div>
           <h1 className="text-xl md:text-2xl font-bold text-foreground">Relatórios</h1>
-          <p className="text-sm md:text-base text-muted-foreground">Análises e relatórios gerenciais</p>
+          <p className="text-sm md:text-base text-muted-foreground">Análises completas de todos os dados do sistema</p>
         </div>
         <button 
-          onClick={() => exportarRelatorio('receita')}
+          onClick={() => exportarRelatorio('geral')}
           className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center justify-center gap-2 transition-colors w-full md:w-auto"
         >
           <Download className="w-4 h-4" />
-          Exportar
+          Exportar Geral
         </button>
       </div>
 
@@ -204,10 +223,11 @@ export const Relatorios = () => {
       />
 
       <Tabs defaultValue="visao-geral" className="space-y-4 md:space-y-6">
-        <TabsList className={`grid w-full ${isMobile ? 'grid-cols-1 h-auto' : 'grid-cols-3'}`}>
+        <TabsList className={`grid w-full ${isMobile ? 'grid-cols-1 h-auto' : 'grid-cols-4'}`}>
           <TabsTrigger value="visao-geral" className={isMobile ? 'mb-1' : ''}>Visão Geral</TabsTrigger>
-          <TabsTrigger value="receita" className={isMobile ? 'mb-1' : ''}>Receita</TabsTrigger>
-          <TabsTrigger value="operacional">Operacional</TabsTrigger>
+          <TabsTrigger value="financeiro" className={isMobile ? 'mb-1' : ''}>Financeiro</TabsTrigger>
+          <TabsTrigger value="operacional" className={isMobile ? 'mb-1' : ''}>Operacional</TabsTrigger>
+          <TabsTrigger value="detalhado">Detalhado</TabsTrigger>
         </TabsList>
 
         <TabsContent value="visao-geral" className="space-y-4 md:space-y-6">
@@ -218,9 +238,7 @@ export const Relatorios = () => {
                 <Users className="h-3 w-3 md:h-4 md:w-4 text-muted-foreground" />
               </CardHeader>
               <CardContent>
-                <div className="text-lg md:text-2xl font-bold">
-                  {tipoRelatorio === 'clientes' || tipoRelatorio === 'todos' ? dadosFiltrados.clientes.length : clientes.length}
-                </div>
+                <div className="text-lg md:text-2xl font-bold">{dadosFiltrados.clientes.length}</div>
               </CardContent>
             </Card>
 
@@ -230,62 +248,107 @@ export const Relatorios = () => {
                 <Globe className="h-3 w-3 md:h-4 md:w-4 text-muted-foreground" />
               </CardHeader>
               <CardContent>
-                <div className="text-lg md:text-2xl font-bold">
-                  {tipoRelatorio === 'sites' || tipoRelatorio === 'todos' ? (dadosFiltrados.sites.filter(s => s.status === 'Ativo').length) : (sitesPorStatus['Ativo'] || 0)}
-                </div>
+                <div className="text-lg md:text-2xl font-bold">{sitesPorStatus['Ativo'] || 0}</div>
               </CardContent>
             </Card>
 
             <Card>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-xs md:text-sm font-medium">Receita Mensal</CardTitle>
+                <CardTitle className="text-xs md:text-sm font-medium">Receita Total</CardTitle>
                 <DollarSign className="h-3 w-3 md:h-4 md:w-4 text-muted-foreground" />
               </CardHeader>
               <CardContent>
-                <div className="text-sm md:text-2xl font-bold">R$ {(receitaMensalSites + receitaInstalacoesMesAtual).toFixed(2)}</div>
+                <div className="text-sm md:text-2xl font-bold">R$ {(receitaMensalSites + receitaInstalacoes).toFixed(2)}</div>
               </CardContent>
             </Card>
 
             <Card>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-xs md:text-sm font-medium">Vencimentos Próximos</CardTitle>
-                <Calendar className="h-3 w-3 md:h-4 md:w-4 text-muted-foreground" />
+                <CardTitle className="text-xs md:text-sm font-medium">Instalações</CardTitle>
+                <Scissors className="h-3 w-3 md:h-4 md:w-4 text-muted-foreground" />
               </CardHeader>
               <CardContent>
-                <div className="text-lg md:text-2xl font-bold">{proximosVencimentos}</div>
+                <div className="text-lg md:text-2xl font-bold">{dadosFiltrados.instalacoes.length}</div>
+              </CardContent>
+            </Card>
+          </div>
+
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-6">
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-xs md:text-sm font-medium">Despesas</CardTitle>
+                <CreditCard className="h-3 w-3 md:h-4 md:w-4 text-muted-foreground" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-sm md:text-2xl font-bold">R$ {totalDespesas.toFixed(2)}</div>
+                <p className="text-xs text-muted-foreground">
+                  {despesasPendentes > 0 ? `R$ ${despesasPendentes.toFixed(2)} pendente` : 'Tudo pago'}
+                </p>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-xs md:text-sm font-medium">Empréstimos</CardTitle>
+                <Banknote className="h-3 w-3 md:h-4 md:w-4 text-muted-foreground" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-sm md:text-2xl font-bold">R$ {totalEmprestimos.toFixed(2)}</div>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-xs md:text-sm font-medium">Dívidas</CardTitle>
+                <AlertTriangle className="h-3 w-3 md:h-4 md:w-4 text-muted-foreground" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-sm md:text-2xl font-bold">R$ {totalDividas.toFixed(2)}</div>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-xs md:text-sm font-medium">Saldo Líquido</CardTitle>
+                <TrendingUp className="h-3 w-3 md:h-4 md:w-4 text-muted-foreground" />
+              </CardHeader>
+              <CardContent>
+                <div className={`text-sm md:text-2xl font-bold ${(receitaMensalSites + receitaInstalacoes - despesasPendentes - totalDividas) >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                  R$ {(receitaMensalSites + receitaInstalacoes - despesasPendentes - totalDividas).toFixed(2)}
+                </div>
               </CardContent>
             </Card>
           </div>
         </TabsContent>
 
-        <TabsContent value="receita" className="space-y-4 md:space-y-6">
+        <TabsContent value="financeiro" className="space-y-4 md:space-y-6">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2 text-sm md:text-base">
                   <TrendingUp className="w-4 h-4 md:w-5 md:h-5 text-green-600" />
-                  Receita Mensal Detalhada
+                  Receitas ({nomesMeses[mesEscolhido]} {anoEscolhido})
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-3 md:space-y-4">
                 <div className="flex justify-between items-center p-2 md:p-3 bg-blue-50 rounded-lg">
-                  <span className="font-medium text-xs md:text-sm">Sites (Recorrente)</span>
+                  <span className="font-medium text-xs md:text-sm">Sites Recorrentes</span>
                   <span className="text-sm md:text-lg font-bold text-blue-600">R$ {receitaMensalSites.toFixed(2)}</span>
                 </div>
                 <div className="flex justify-between items-center p-2 md:p-3 bg-orange-50 rounded-lg">
-                  <span className="font-medium text-xs md:text-sm">Instalações (Mês Atual)</span>
-                  <span className="text-sm md:text-lg font-bold text-orange-600">R$ {receitaInstalacoesMesAtual.toFixed(2)}</span>
+                  <span className="font-medium text-xs md:text-sm">Instalações</span>
+                  <span className="text-sm md:text-lg font-bold text-orange-600">R$ {receitaInstalacoes.toFixed(2)}</span>
                 </div>
                 <div className="flex justify-between items-center p-2 md:p-3 bg-green-50 rounded-lg border-2 border-green-200">
                   <span className="font-bold text-xs md:text-sm">Total</span>
-                  <span className="text-lg md:text-xl font-bold text-green-600">R$ {(receitaMensalSites + receitaInstalacoesMesAtual).toFixed(2)}</span>
+                  <span className="text-lg md:text-xl font-bold text-green-600">R$ {(receitaMensalSites + receitaInstalacoes).toFixed(2)}</span>
                 </div>
                 <button 
                   onClick={() => exportarRelatorio('receita')}
                   className="w-full mt-4 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center justify-center gap-2 transition-colors text-sm"
                 >
                   <Download className="w-4 h-4" />
-                  Exportar Relatório de Receita
+                  Exportar Receitas
                 </button>
               </CardContent>
             </Card>
@@ -293,23 +356,29 @@ export const Relatorios = () => {
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2 text-sm md:text-base">
-                  <Globe className="w-4 h-4 md:w-5 md:h-5 text-blue-600" />
-                  Performance de Sites
+                  <CreditCard className="w-4 h-4 md:w-5 md:h-5 text-red-600" />
+                  Despesas ({nomesMeses[mesEscolhido]} {anoEscolhido})
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-3">
-                {Object.entries(sitesPorStatus).map(([status, quantidade]) => (
-                  <div key={status} className="flex justify-between items-center p-2 border rounded text-xs md:text-sm">
-                    <span>{status}</span>
-                    <span className="font-semibold">{quantidade}</span>
-                  </div>
-                ))}
+                <div className="flex justify-between items-center p-2 border rounded text-xs md:text-sm bg-red-50">
+                  <span>Total do Período</span>
+                  <span className="font-semibold text-red-600">R$ {totalDespesas.toFixed(2)}</span>
+                </div>
+                <div className="flex justify-between items-center p-2 border rounded text-xs md:text-sm bg-green-50">
+                  <span>Pagas</span>
+                  <span className="font-semibold text-green-600">R$ {despesasPagas.toFixed(2)}</span>
+                </div>
+                <div className="flex justify-between items-center p-2 border rounded text-xs md:text-sm bg-yellow-50">
+                  <span>Pendentes</span>
+                  <span className="font-semibold text-yellow-600">R$ {despesasPendentes.toFixed(2)}</span>
+                </div>
                 <button 
-                  onClick={() => exportarRelatorio('sites')}
-                  className="w-full mt-4 bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg flex items-center justify-center gap-2 transition-colors text-sm"
+                  onClick={() => exportarRelatorio('despesas')}
+                  className="w-full mt-4 bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg flex items-center justify-center gap-2 transition-colors text-sm"
                 >
                   <Download className="w-4 h-4" />
-                  Exportar Relatório de Sites
+                  Exportar Despesas
                 </button>
               </CardContent>
             </Card>
@@ -336,29 +405,29 @@ export const Relatorios = () => {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="p-3 md:p-4 bg-blue-50 rounded-lg">
                   <h4 className="font-medium text-blue-900 mb-2 text-sm">Primeira Quinzena (1-15)</h4>
-                  <div className="text-xl md:text-2xl font-bold text-blue-600">{primeiraQuinzena.length}</div>
+                  <div className="text-xl md:text-2xl font-bold text-blue-600">{0}</div>
                   <p className="text-xs md:text-sm text-blue-700">instalações</p>
                   <div className="mt-2 text-xs md:text-sm">
-                    Receita: R$ {primeiraQuinzena.filter(i => i.status === 'Concluído').reduce((acc, inst) => acc + inst.valor_total, 0).toFixed(2)}
+                    Receita: R$ {0}
                   </div>
                 </div>
                 
                 <div className="p-3 md:p-4 bg-orange-50 rounded-lg">
                   <h4 className="font-medium text-orange-900 mb-2 text-sm">Segunda Quinzena (16-30)</h4>
-                  <div className="text-xl md:text-2xl font-bold text-orange-600">{segundaQuinzena.length}</div>
+                  <div className="text-xl md:text-2xl font-bold text-orange-600">{0}</div>
                   <p className="text-xs md:text-sm text-orange-700">instalações</p>
                   <div className="mt-2 text-xs md:text-sm">
-                    Receita: R$ {segundaQuinzena.filter(i => i.status === 'Concluído').reduce((acc, inst) => acc + inst.valor_total, 0).toFixed(2)}
+                    Receita: R$ {0}
                   </div>
                 </div>
               </div>
 
               <div className="p-3 md:p-4 bg-green-50 rounded-lg">
                 <h4 className="font-medium text-green-900 mb-2 text-sm">Total do Mês</h4>
-                <div className="text-xl md:text-2xl font-bold text-green-600">{instalacoesMesEscolhido.length}</div>
+                <div className="text-xl md:text-2xl font-bold text-green-600">{0}</div>
                 <p className="text-xs md:text-sm text-green-700">instalações</p>
                 <div className="mt-2 text-xs md:text-sm">
-                  Receita Total: R$ {receitaInstalacoesMesEscolhido.toFixed(2)}
+                  Receita Total: R$ {0}
                 </div>
               </div>
               
@@ -399,7 +468,7 @@ export const Relatorios = () => {
                         <div className="text-xs md:text-sm font-medium">R$ {site.valor_mensal.toFixed(2)}</div>
                       </div>
                     ))}
-                  {proximosVencimentos === 0 && (
+                  {0 === 0 && (
                     <p className="text-xs md:text-sm text-muted-foreground">Nenhum vencimento próximo</p>
                   )}
                 </div>
@@ -430,6 +499,60 @@ export const Relatorios = () => {
                   {instalacoes.filter(inst => inst.status === 'Agendado').length === 0 && (
                     <p className="text-xs md:text-sm text-muted-foreground">Nenhuma instalação agendada</p>
                   )}
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        </TabsContent>
+
+        <TabsContent value="detalhado" className="space-y-4 md:space-y-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-sm md:text-base">Status dos Sites</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-2">
+                  {Object.entries(sitesPorStatus).map(([status, quantidade]) => (
+                    <div key={status} className="flex justify-between items-center p-2 border rounded text-xs md:text-sm">
+                      <span>{status}</span>
+                      <span className="font-semibold">{quantidade}</span>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-sm md:text-base">Resumo Geral</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-2 text-xs md:text-sm">
+                  <div className="flex justify-between">
+                    <span>Clientes cadastrados:</span>
+                    <span className="font-semibold">{dadosFiltrados.clientes.length}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>Sites totais:</span>
+                    <span className="font-semibold">{dadosFiltrados.sites.length}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>Instalações período:</span>
+                    <span className="font-semibold">{dadosFiltrados.instalacoes.length}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>Despesas período:</span>
+                    <span className="font-semibold">{dadosFiltrados.despesas.length}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>Empréstimos ativos:</span>
+                    <span className="font-semibold">{dadosFiltrados.emprestimos.length}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>Dívidas ativas:</span>
+                    <span className="font-semibold">{dadosFiltrados.dividasNegativadas.filter(d => !d.pago).length}</span>
+                  </div>
                 </div>
               </CardContent>
             </Card>
