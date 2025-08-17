@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { DashboardCard } from '../components/DashboardCard';
 import { RevenueChart } from '../components/RevenueChart';
@@ -13,13 +12,28 @@ export const Dashboard = () => {
   const { data: instalacoes = [], isLoading: instalacoesLoading } = useInstalacoes();
   const { data: despesas = [], isLoading: despesasLoading } = useDespesas();
 
-  // Calcular receita mensal dos sites
-  const receitaMensalSites = sites
-    .filter(site => site.status === 'Ativo' && (site.tipo_plano.includes('assinatura') || site.tipo_plano.includes('hospedagem')))
+  const hoje = new Date();
+  const inicioMesAtual = new Date(hoje.getFullYear(), hoje.getMonth(), 1);
+  const fimMesAtual = new Date(hoje.getFullYear(), hoje.getMonth() + 1, 0);
+
+  // Calcular sites ativos no mês atual (que não venceram ainda)
+  const sitesAtivosNoMes = sites.filter(site => {
+    const dataVencimento = new Date(site.data_vencimento);
+    const dataInicio = new Date(site.data_inicio);
+    
+    return site.status === 'Ativo' && 
+           dataInicio <= hoje && // Site já iniciou
+           dataVencimento >= hoje; // Site ainda não venceu
+  });
+
+  const sitesAtivos = sitesAtivosNoMes.length;
+
+  // Calcular receita mensal dos sites ativos no mês atual
+  const receitaMensalSites = sitesAtivosNoMes
+    .filter(site => site.tipo_plano.includes('assinatura') || site.tipo_plano.includes('hospedagem'))
     .reduce((total, site) => total + site.valor_mensal, 0);
 
   // Calcular receita das instalações da quinzena atual
-  const hoje = new Date();
   const inicioQuinzena = hoje.getDate() <= 15 ? 1 : 16;
   const fimQuinzena = hoje.getDate() <= 15 ? 15 : new Date(hoje.getFullYear(), hoje.getMonth() + 1, 0).getDate();
   
@@ -38,7 +52,6 @@ export const Dashboard = () => {
   const receitaTotal = receitaMensalSites + receitaQuinzenaInstalacoes;
 
   // Estatísticas gerais
-  const sitesAtivos = sites.filter(site => site.status === 'Ativo').length;
   const clientesAtivos = clientes.length;
   const mediaSites = clientesAtivos > 0 ? (sitesAtivos / clientesAtivos).toFixed(1) : 'N/A';
 
@@ -57,11 +70,9 @@ export const Dashboard = () => {
   }).sort((a, b) => new Date(a.data_instalacao).getTime() - new Date(b.data_instalacao).getTime()).slice(0, 3);
 
   // Instalações concluídas no mês
-  const inicioMes = new Date(hoje.getFullYear(), hoje.getMonth(), 1);
-  const fimMes = new Date(hoje.getFullYear(), hoje.getMonth() + 1, 0);
   const instalacoesConcluidasMes = instalacoes.filter(instalacao => {
     const dataInstalacao = new Date(instalacao.data_instalacao);
-    return instalacao.status === 'Concluído' && dataInstalacao >= inicioMes && dataInstalacao <= fimMes;
+    return instalacao.status === 'Concluído' && dataInstalacao >= inicioMesAtual && dataInstalacao <= fimMesAtual;
   }).sort((a, b) => new Date(b.data_instalacao).getTime() - new Date(a.data_instalacao).getTime()).slice(0, 3);
 
   const todasInstalacoes = [...proximasInstalacoes, ...instalacoesConcluidasMes];
