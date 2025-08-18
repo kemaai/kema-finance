@@ -16,22 +16,20 @@ export const Dashboard = () => {
   const inicioMesAtual = new Date(hoje.getFullYear(), hoje.getMonth(), 1);
   const fimMesAtual = new Date(hoje.getFullYear(), hoje.getMonth() + 1, 0);
 
-  // Calcular sites ativos no mês atual (que não venceram ainda)
-  const sitesAtivosNoMes = sites.filter(site => {
-    const dataVencimento = new Date(site.data_vencimento);
-    const dataInicio = new Date(site.data_inicio);
-    
-    return site.status === 'Ativo' && 
-           dataInicio <= hoje && // Site já iniciou
-           dataVencimento >= hoje; // Site ainda não venceu
-  });
+  // Calcular sites ativos (apenas status "Ativo")
+  const sitesAtivos = sites.filter(site => site.status === 'Ativo').length;
 
-  const sitesAtivos = sitesAtivosNoMes.length;
-
-  // Calcular receita mensal dos sites ativos no mês atual
-  const receitaMensalSites = sitesAtivosNoMes
-    .filter(site => site.tipo_plano.includes('assinatura') || site.tipo_plano.includes('hospedagem'))
-    .reduce((total, site) => total + site.valor_mensal, 0);
+  // Calcular receita mensal dos sites ativos
+  const receitaMensalSites = sites
+    .filter(site => site.status === 'Ativo' && (site.tipo_plano.includes('assinatura') || site.hospedagem))
+    .reduce((total, site) => {
+      if (site.tipo_plano.includes('assinatura')) {
+        return total + site.valor_mensal;
+      } else if (site.hospedagem) {
+        return total + 40; // Valor da hospedagem
+      }
+      return total;
+    }, 0);
 
   // Calcular receita das instalações da quinzena atual
   const inicioQuinzena = hoje.getDate() <= 15 ? 1 : 16;
