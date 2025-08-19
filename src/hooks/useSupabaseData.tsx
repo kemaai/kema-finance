@@ -99,7 +99,7 @@ export const useSites = () => {
   const { user } = useAuth();
   
   return useQuery({
-    queryKey: ['sites'],
+    queryKey: ['sites', user?.id],
     queryFn: async (): Promise<Site[]> => {
       if (!user) {
         console.log('No user found, returning empty array');
@@ -129,7 +129,7 @@ export const useClientes = () => {
   const { user } = useAuth();
   
   return useQuery({
-    queryKey: ['clientes'],
+    queryKey: ['clientes', user?.id],
     queryFn: async (): Promise<Cliente[]> => {
       if (!user) {
         console.log('No user found, returning empty array');
@@ -159,7 +159,7 @@ export const useInstalacoes = () => {
   const { user } = useAuth();
   
   return useQuery({
-    queryKey: ['instalacoes'],
+    queryKey: ['instalacoes', user?.id],
     queryFn: async (): Promise<Instalacao[]> => {
       if (!user) {
         console.log('No user found, returning empty array');
@@ -191,9 +191,15 @@ export const useDespesas = () => {
   return useQuery({
     queryKey: ['despesas', user?.id],
     queryFn: async () => {
+      if (!user) {
+        console.log('No user found, returning empty array');
+        return [];
+      }
+
       const { data, error } = await supabase
         .from('despesas')
         .select('*')
+        .eq('user_id', user.id)
         .order('data_vencimento', { ascending: true });
 
       if (error) {
@@ -210,7 +216,7 @@ export const useEmprestimos = () => {
   const { user } = useAuth();
   
   return useQuery({
-    queryKey: ['emprestimos'],
+    queryKey: ['emprestimos', user?.id],
     queryFn: async (): Promise<Emprestimo[]> => {
       if (!user) {
         console.log('No user found, returning empty array');
@@ -222,6 +228,7 @@ export const useEmprestimos = () => {
       const { data, error } = await supabase
         .from('emprestimos')
         .select('*')
+        .eq('user_id', user.id)
         .order('created_at', { ascending: false });
 
       if (error) {
@@ -240,7 +247,7 @@ export const usePagamentosEmprestimo = () => {
   const { user } = useAuth();
   
   return useQuery({
-    queryKey: ['pagamentos_emprestimo'],
+    queryKey: ['pagamentos_emprestimo', user?.id],
     queryFn: async (): Promise<PagamentoEmprestimo[]> => {
       if (!user) {
         console.log('No user found, returning empty array');
@@ -270,7 +277,7 @@ export const useDividasNegativadas = () => {
   const { user } = useAuth();
   
   return useQuery({
-    queryKey: ['dividas_negativadas'],
+    queryKey: ['dividas_negativadas', user?.id],
     queryFn: async (): Promise<DividaNegativada[]> => {
       if (!user) {
         console.log('No user found, returning empty array');
@@ -282,6 +289,7 @@ export const useDividasNegativadas = () => {
       const { data, error } = await supabase
         .from('dividas_negativadas')
         .select('*')
+        .eq('user_id', user.id)
         .order('created_at', { ascending: false });
 
       if (error) {
