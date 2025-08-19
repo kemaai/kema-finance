@@ -70,6 +70,31 @@ interface DividaNegativada {
   updated_at: string;
 }
 
+interface ExtendedInstalacao extends Instalacao {
+  valor: number;
+}
+
+interface ExtendedDespesa extends Despesa {
+  data_despesa: string;
+}
+
+interface ExtendedEmprestimo extends Emprestimo {
+  valor_emprestimo: number;
+}
+
+interface ExtendedDivida extends DividaNegativada {
+  valor_divida: number;
+}
+
+interface AggregatedData {
+  sites: Site[];
+  clientes: Cliente[];
+  instalacoes: ExtendedInstalacao[];
+  despesas: ExtendedDespesa[];
+  emprestimos: ExtendedEmprestimo[];
+  dividasNegativadas: ExtendedDivida[];
+}
+
 export const useSites = () => {
   const { user } = useAuth();
   
@@ -269,4 +294,58 @@ export const useDividasNegativadas = () => {
     },
     enabled: !!user,
   });
+};
+
+export const useSupabaseData = (): AggregatedData => {
+  const sitesQuery = useSites();
+  const clientesQuery = useClientes();
+  const instalacoesQuery = useInstalacoes();
+  const despesasQuery = useDespesas();
+  const emprestimosQuery = useEmprestimos();
+  const dividasQuery = useDividasNegativadas();
+
+  const sites = sitesQuery.data ?? [];
+  const clientes = clientesQuery.data ?? [];
+
+  const instalacoesRaw = instalacoesQuery.data ?? [];
+  const despesasRaw = despesasQuery.data ?? [];
+  const emprestimosRaw = emprestimosQuery.data ?? [];
+  const dividasRaw = dividasQuery.data ?? [];
+
+  const instalacoes = (instalacoesRaw as Instalacao[]).map((i) => ({
+    ...i,
+    valor: (i as any).valor ?? (i as any).valor_total ?? 0,
+  })) as ExtendedInstalacao[];
+
+  const despesas = (despesasRaw as Despesa[]).map((d) => ({
+    ...d,
+    data_despesa: (d as any).data_despesa ?? (d as any).data_vencimento,
+  })) as ExtendedDespesa[];
+
+  const emprestimos = (emprestimosRaw as Emprestimo[]).map((e) => ({
+    ...e,
+    valor_emprestimo:
+      (e as any).valor_emprestimo ??
+      (e as any).valor_atual ??
+      (e as any).valor_original ??
+      0,
+  })) as ExtendedEmprestimo[];
+
+  const dividasNegativadas = (dividasRaw as DividaNegativada[]).map((v) => ({
+    ...v,
+    valor_divida:
+      (v as any).valor_divida ??
+      (v as any).valor_atual ??
+      (v as any).valor_original ??
+      0,
+  })) as ExtendedDivida[];
+
+  return {
+    sites,
+    clientes,
+    instalacoes,
+    despesas,
+    emprestimos,
+    dividasNegativadas,
+  };
 };
