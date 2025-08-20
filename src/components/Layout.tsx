@@ -38,7 +38,7 @@ export const Layout: React.FC<LayoutProps> = ({
         
         {/* Main Content Area */}
         <div className="flex-1 flex flex-col">
-          {/* Mobile Header with Trigger */}
+          {/* Mobile Header with Trigger - apenas no mobile */}
           <header className="md:hidden bg-white border-b border-border p-4 flex items-center justify-between">
             <div>
               <h1 className="text-xl font-bold text-foreground">{getPageTitle(location.pathname)}</h1>
