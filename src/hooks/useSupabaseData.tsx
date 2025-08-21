@@ -11,6 +11,7 @@ interface Site {
   data_inicio: string;
   cliente_nome: string;
   descricao_projeto: string;
+  hospedagem: boolean;
 }
 
 interface Cliente {
