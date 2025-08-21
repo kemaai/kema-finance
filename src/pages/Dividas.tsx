@@ -125,7 +125,7 @@ export const Dividas = () => {
             <h2 className="text-2xl font-semibold">Empréstimos</h2>
             <Button onClick={() => setIsEmprestimoFormOpen(true)}>
               <Plus className="w-4 h-4 mr-2" />
-              Novo Empréstimo
+              Empréstimo
             </Button>
           </div>
 
