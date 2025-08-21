@@ -87,8 +87,8 @@ export const ProfileCard: React.FC = () => {
             </div>
             <div>
               <div className="font-semibold text-foreground">CRM Pessoal</div>
-              <div className="text-sm text-muted-foreground">Proprietário</div>
-              <div className="text-xs text-muted-foreground">ks.kr@exemplo.com</div>
+              
+              
             </div>
           </div>
         </div>
