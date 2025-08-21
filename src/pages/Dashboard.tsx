@@ -25,43 +25,49 @@ export const Dashboard = () => {
   // Calculate metrics
   const totalClientes = clientes?.length || 0;
   const totalActiveSites = activeSites.length;
-  const monthlyRevenue = activeSites.reduce((sum, site) => sum + site.valor_mensal, 0);
+  const monthlyRevenue = activeSites.reduce((sum, site) => sum + site.valor, 0);
   const totalInstalacoes = instalacoes?.length || 0;
   const totalInstalacoesRevenue = instalacoes?.reduce((sum, instalacao) => sum + instalacao.valor, 0) || 0;
 
   return (
-    <div className="p-2 md:p-3 space-y-4">
+    <div className="p-4 md:p-6 space-y-6">
+      {/* Apenas no desktop mostra o título, no mobile já está no header */}
+      <div className="hidden md:block">
+        <h1 className="text-3xl font-bold text-gray-900 mb-2">Dashboard</h1>
+        <p className="text-gray-600">Visão geral do seu negócio</p>
+      </div>
+
       {/* Cards Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4">
         <DashboardCard
           title="Clientes"
           value={totalClientes.toString()}
           icon={Users}
-          iconColor="bg-blue-500"
+          color="bg-blue-500"
         />
         
         <DashboardCard
           title="Sites Ativos"
           value={totalActiveSites.toString()}
-          subValue={`R$ ${monthlyRevenue.toFixed(2)}`}
+          subtitle={`R$ ${monthlyRevenue.toFixed(2)}`}
           icon={Globe}
-          iconColor="bg-green-500"
+          color="bg-green-500"
         />
         
         <DashboardCard
           title="Instalações"
           value={totalInstalacoes.toString()}
-          subValue={`R$ ${totalInstalacoesRevenue.toFixed(2)}`}
+          subtitle={`R$ ${totalInstalacoesRevenue.toFixed(2)}`}
           icon={Wrench}
-          iconColor="bg-purple-500"
+          color="bg-purple-500"
         />
         
         <DashboardCard
           title="Relatórios"
           value="12"
-          subValue="Este mês"
+          subtitle="Este mês"
           icon={BarChart3}
-          iconColor="bg-orange-500"
+          color="bg-orange-500"
         />
       </div>
 
