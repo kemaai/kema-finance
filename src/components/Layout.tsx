@@ -4,7 +4,6 @@ import { useLocation } from 'react-router-dom';
 import { SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar';
 import { AppSidebar } from './AppSidebar';
 import { MobileNavigation } from './MobileNavigation';
-import { PWAInstallPrompt } from './PWAInstallPrompt';
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -54,9 +53,6 @@ export const Layout: React.FC<LayoutProps> = ({
 
         {/* Mobile Bottom Navigation */}
         <MobileNavigation />
-
-        {/* PWA Install Prompt */}
-        <PWAInstallPrompt />
       </div>
     </SidebarProvider>;
 };
