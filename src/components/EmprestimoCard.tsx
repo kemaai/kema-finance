@@ -9,6 +9,7 @@ import { toast } from 'sonner';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { EmprestimoEditForm } from './EmprestimoEditForm';
 
 interface EmprestimoCardProps {
   emprestimo: {
@@ -34,6 +35,7 @@ export const EmprestimoCard: React.FC<EmprestimoCardProps> = ({
 }) => {
   const [isPaymentDialogOpen, setIsPaymentDialogOpen] = useState(false);
   const [isHistoryDialogOpen, setIsHistoryDialogOpen] = useState(false);
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [paymentAmount, setPaymentAmount] = useState('');
   const [paymentDate, setPaymentDate] = useState(new Date().toISOString().split('T')[0]);
 
@@ -121,9 +123,19 @@ export const EmprestimoCard: React.FC<EmprestimoCardProps> = ({
               Criado em {new Date(emprestimo.created_at).toLocaleDateString('pt-BR')}
             </CardDescription>
           </div>
-          <Badge variant={isFullyPaid ? "default" : "secondary"} className="shrink-0">
-            {isFullyPaid ? 'Quitado' : 'Em andamento'}
-          </Badge>
+          <div className="flex items-center gap-1">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setIsEditDialogOpen(true)}
+              className="h-8 w-8 p-0"
+            >
+              <Edit className="w-3 h-3" />
+            </Button>
+            <Badge variant={isFullyPaid ? "default" : "secondary"} className="shrink-0">
+              {isFullyPaid ? 'Quitado' : 'Em andamento'}
+            </Badge>
+          </div>
         </div>
       </CardHeader>
       
@@ -241,6 +253,14 @@ export const EmprestimoCard: React.FC<EmprestimoCardProps> = ({
           </Button>
         </div>
       </CardContent>
+
+      {/* Formulário de Edição */}
+      <EmprestimoEditForm
+        isOpen={isEditDialogOpen}
+        onClose={() => setIsEditDialogOpen(false)}
+        onSuccess={onUpdate}
+        emprestimo={emprestimo}
+      />
     </Card>
   );
 };
