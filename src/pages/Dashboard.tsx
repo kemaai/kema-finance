@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { DashboardCard } from '../components/DashboardCard';
 import { RevenueChart } from '../components/RevenueChart';
@@ -16,12 +17,19 @@ export const Dashboard = () => {
   const inicioMesAtual = new Date(hoje.getFullYear(), hoje.getMonth(), 1);
   const fimMesAtual = new Date(hoje.getFullYear(), hoje.getMonth() + 1, 0);
 
-  // Calcular sites ativos (apenas status "Ativo")
-  const sitesAtivos = sites.filter(site => site.status === 'Ativo').length;
+  // Calcular sites ativos no mês atual (status "Ativo" E que tenham vencimento no mês atual)
+  const sitesAtivosMes = sites.filter(site => {
+    const dataVencimento = new Date(site.data_vencimento);
+    return site.status === 'Ativo' && 
+           dataVencimento >= inicioMesAtual && 
+           dataVencimento <= fimMesAtual;
+  });
 
-  // Calcular receita mensal dos sites ativos
-  const receitaMensalSites = sites
-    .filter(site => site.status === 'Ativo' && (site.tipo_plano.includes('assinatura') || site.hospedagem))
+  const sitesAtivos = sitesAtivosMes.length;
+
+  // Calcular receita mensal dos sites ativos no mês atual
+  const receitaMensalSites = sitesAtivosMes
+    .filter(site => site.tipo_plano.includes('assinatura') || site.hospedagem)
     .reduce((total, site) => {
       if (site.tipo_plano.includes('assinatura')) {
         return total + site.valor_mensal;
@@ -67,7 +75,6 @@ export const Dashboard = () => {
     return instalacao.status === 'Agendado' && dataInstalacao >= hoje && dataInstalacao <= proximosDois;
   }).sort((a, b) => new Date(a.data_instalacao).getTime() - new Date(b.data_instalacao).getTime()).slice(0, 3);
 
-  // Instalações concluídas no mês
   const instalacoesConcluidasMes = instalacoes.filter(instalacao => {
     const dataInstalacao = new Date(instalacao.data_instalacao);
     return instalacao.status === 'Concluído' && dataInstalacao >= inicioMesAtual && dataInstalacao <= fimMesAtual;
@@ -75,7 +82,6 @@ export const Dashboard = () => {
 
   const todasInstalacoes = [...proximasInstalacoes, ...instalacoesConcluidasMes];
 
-  // Calcular métricas das despesas
   const despesasDoMes = despesas.filter(despesa => {
     const dataVencimento = new Date(despesa.data_vencimento);
     return dataVencimento.getMonth() === hoje.getMonth() && 
@@ -88,7 +94,6 @@ export const Dashboard = () => {
   const totalDespesasPagas = despesasPagas.reduce((total, despesa) => total + Number(despesa.valor), 0);
   const totalDespesasPendentes = despesasPendentes.reduce((total, despesa) => total + Number(despesa.valor), 0);
 
-  // Próximas despesas a vencer (próximos 15 dias)
   const proximasDespesas = new Date();
   proximasDespesas.setDate(proximasDespesas.getDate() + 15);
   const despesasProximasVencimento = despesas.filter(despesa => {
@@ -162,7 +167,7 @@ export const Dashboard = () => {
           <DashboardCard 
             title="Sites Ativos" 
             value={sitesAtivos.toString()} 
-            subValue={`${sitesAtivos} contratos ativos`} 
+            subValue={`${sitesAtivos} contratos ativos este mês`} 
             icon={Globe} 
             iconColor="bg-gradient-to-br from-blue-500 to-blue-600" 
             trendColor="text-blue-600" 
