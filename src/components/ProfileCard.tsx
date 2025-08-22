@@ -72,8 +72,8 @@ export const ProfileCard: React.FC = () => {
               <User className="w-4 h-4 text-primary-foreground" />
             </div>
             <div className="hidden sm:block text-left">
-              <div className="font-medium text-sm text-foreground">KS & KR</div>
-              <div className="text-xs text-muted-foreground">Proprietário</div>
+              
+              
             </div>
           </div>
         </Button>
