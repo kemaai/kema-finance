@@ -6,6 +6,7 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider } from "@/hooks/useAuth";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 import { Layout } from "./components/Layout";
+import { PWAInstallPrompt } from "./components/PWAInstallPrompt";
 import Index from "./pages/Index";
 import { Dashboard } from "./pages/Dashboard";
 import { Clientes } from "./pages/Clientes";
@@ -25,6 +26,7 @@ function App() {
       <AuthProvider>
         <TooltipProvider>
           <Toaster />
+          <PWAInstallPrompt />
           <BrowserRouter>
             <Routes>
               <Route path="/login" element={<Login />} />

@@ -97,6 +97,10 @@ All colors MUST be HSL.
   body {
     @apply bg-background text-foreground;
     font-feature-settings: "rlig" 1, "calt" 1;
+    /* PWA-specific improvements */
+    overscroll-behavior: none;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
   }
   
   /* Ensure proper dark mode transitions */
@@ -110,6 +114,32 @@ All colors MUST be HSL.
   
   html:not(.dark) {
     color-scheme: light;
+  }
+
+  /* PWA Status Bar Support */
+  @supports (padding-top: constant(safe-area-inset-top)) {
+    body {
+      padding-top: constant(safe-area-inset-top);
+    }
+  }
+  
+  @supports (padding-top: env(safe-area-inset-top)) {
+    body {
+      padding-top: env(safe-area-inset-top);
+    }
+  }
+
+  /* iOS PWA improvements */
+  @media screen and (display-mode: standalone) {
+    body {
+      -webkit-user-select: none;
+      -webkit-touch-callout: none;
+    }
+    
+    /* Prevent pull-to-refresh */
+    html, body {
+      overscroll-behavior-y: none;
+    }
   }
   
   /* Grid pattern for hero section */
