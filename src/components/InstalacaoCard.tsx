@@ -52,7 +52,9 @@ export const InstalacaoCard: React.FC<InstalacaoCardProps> = ({ instalacao, onEd
           </span>
         </div>
         
-        <div className="flex items-center gap-2 mb-3 p-2 bg-gray-50 rounded-lg">
+        <div className={`flex items-center gap-2 mb-3 p-2 rounded-lg transition-colors ${
+          instalacao.pedido_recebido ? 'bg-green-100 border border-green-300' : 'bg-gray-50'
+        }`}>
           <Checkbox 
             id={`pedido-${instalacao.id}`}
             checked={instalacao.pedido_recebido}
@@ -60,7 +62,9 @@ export const InstalacaoCard: React.FC<InstalacaoCardProps> = ({ instalacao, onEd
           />
           <label 
             htmlFor={`pedido-${instalacao.id}`}
-            className="text-sm font-medium cursor-pointer select-none"
+            className={`text-sm font-medium cursor-pointer select-none ${
+              instalacao.pedido_recebido ? 'text-green-800' : ''
+            }`}
           >
             Pedido Recebido
           </label>
