@@ -16,6 +16,7 @@ interface Instalacao {
   data_instalacao: string;
   valor_total: number;
   status: string;
+  pedido_recebido: boolean;
   created_at: string;
   updated_at: string;
 }
@@ -40,7 +41,8 @@ export const InstalacaoForm: React.FC<InstalacaoFormProps> = ({
     ambiente: '',
     endereco: '',
     valor_total: 0,
-    status: 'Agendado'
+    status: 'Agendado',
+    pedido_recebido: false
   });
 
   useEffect(() => {
@@ -52,7 +54,8 @@ export const InstalacaoForm: React.FC<InstalacaoFormProps> = ({
         ambiente: instalacao.ambiente || '',
         endereco: instalacao.endereco || '',
         valor_total: instalacao.valor_total || 0,
-        status: instalacao.status || 'Agendado'
+        status: instalacao.status || 'Agendado',
+        pedido_recebido: instalacao.pedido_recebido || false
       });
     } else {
       setFormData({
@@ -62,7 +65,8 @@ export const InstalacaoForm: React.FC<InstalacaoFormProps> = ({
         ambiente: '',
         endereco: '',
         valor_total: 0,
-        status: 'Agendado'
+        status: 'Agendado',
+        pedido_recebido: false
       });
     }
   }, [instalacao]);

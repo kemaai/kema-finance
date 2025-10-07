@@ -11,6 +11,7 @@ interface Instalacao {
   data_instalacao: string;
   valor_total: number;
   status: string;
+  pedido_recebido: boolean;
   created_at: string;
   updated_at: string;
 }

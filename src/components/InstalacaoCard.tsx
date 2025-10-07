@@ -1,6 +1,7 @@
 
 import React, { useState } from 'react';
 import { Scissors, Edit, Trash2, ChevronDown, ChevronUp, Calendar, DollarSign, MapPin } from 'lucide-react';
+import { Checkbox } from '@/components/ui/checkbox';
 
 interface Instalacao {
   id: string;
@@ -12,6 +13,7 @@ interface Instalacao {
   data_instalacao: string;
   valor_total: number;
   status: string;
+  pedido_recebido: boolean;
   created_at: string;
   updated_at: string;
 }
@@ -20,6 +22,7 @@ interface InstalacaoCardProps {
   instalacao: Instalacao;
   onEdit: (instalacao: Instalacao) => void;
   onDelete: (id: string) => void;
+  onTogglePedidoRecebido: (id: string, recebido: boolean) => void;
 }
 
 const getStatusColor = (status: string) => {
@@ -32,7 +35,7 @@ const getStatusColor = (status: string) => {
   }
 };
 
-export const InstalacaoCard: React.FC<InstalacaoCardProps> = ({ instalacao, onEdit, onDelete }) => {
+export const InstalacaoCard: React.FC<InstalacaoCardProps> = ({ instalacao, onEdit, onDelete, onTogglePedidoRecebido }) => {
   const [isExpanded, setIsExpanded] = useState(false);
 
   return (
@@ -47,6 +50,20 @@ export const InstalacaoCard: React.FC<InstalacaoCardProps> = ({ instalacao, onEd
           <span className={`px-2 py-1 rounded-full text-xs font-medium whitespace-nowrap ml-2 ${getStatusColor(instalacao.status)}`}>
             {instalacao.status}
           </span>
+        </div>
+        
+        <div className="flex items-center gap-2 mb-3 p-2 bg-gray-50 rounded-lg">
+          <Checkbox 
+            id={`pedido-${instalacao.id}`}
+            checked={instalacao.pedido_recebido}
+            onCheckedChange={(checked) => onTogglePedidoRecebido(instalacao.id, checked as boolean)}
+          />
+          <label 
+            htmlFor={`pedido-${instalacao.id}`}
+            className="text-sm font-medium cursor-pointer select-none"
+          >
+            Pedido Recebido
+          </label>
         </div>
 
         <div className="flex items-center justify-between">

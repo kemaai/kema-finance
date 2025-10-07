@@ -20,6 +20,7 @@ interface Instalacao {
   data_instalacao: string;
   valor_total: number;
   status: string;
+  pedido_recebido: boolean;
   created_at: string;
   updated_at: string;
 }
@@ -48,7 +49,10 @@ export const Instalacoes = () => {
       }
       
       console.log('Instalacoes fetched:', data);
-      return data as Instalacao[];
+      return (data || []).map((instalacao: any) => ({
+        ...instalacao,
+        pedido_recebido: instalacao.pedido_recebido ?? false
+      })) as Instalacao[];
     },
     enabled: !!user,
   });
@@ -199,6 +203,35 @@ export const Instalacoes = () => {
     setEditingInstalacao(instalacao);
   };
 
+  const togglePedidoRecebidoMutation = useMutation({
+    mutationFn: async ({ id, recebido }: { id: string; recebido: boolean }) => {
+      if (!user) {
+        throw new Error('Usuário não autenticado');
+      }
+
+      const { error } = await supabase
+        .from('instalacoes')
+        .update({ pedido_recebido: recebido })
+        .eq('id', id)
+        .eq('user_id', user.id);
+
+      if (error) {
+        throw error;
+      }
+    },
+    onSuccess: () => {
+      toast.success('Status do pedido atualizado!');
+      queryClient.invalidateQueries({ queryKey: ['instalacoes'] });
+    },
+    onError: (error) => {
+      toast.error('Erro ao atualizar status: ' + error.message);
+    },
+  });
+
+  const handleTogglePedidoRecebido = (id: string, recebido: boolean) => {
+    togglePedidoRecebidoMutation.mutate({ id, recebido });
+  };
+
   if (!user) {
     return (
       <div className="flex items-center justify-center h-64">
@@ -282,6 +315,7 @@ export const Instalacoes = () => {
               instalacao={instalacao}
               onEdit={handleEditInstalacao}
               onDelete={handleDeleteInstalacao}
+              onTogglePedidoRecebido={handleTogglePedidoRecebido}
             />
           ))
         )}

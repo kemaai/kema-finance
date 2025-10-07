@@ -30,6 +30,7 @@ interface Instalacao {
   status: string;
   arquiteto_nome: string;
   ambiente: string;
+  pedido_recebido: boolean;
 }
 
 interface RevenueChartProps {
