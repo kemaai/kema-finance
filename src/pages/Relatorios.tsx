@@ -4,7 +4,7 @@ import { useIsMobile } from '../hooks/use-mobile';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
-import { useSites, useClientes, useInstalacoes, useDespesas, useEmprestimos, useDividasNegativadas } from '../hooks/useSupabaseData';
+import { useSites, useClientes, useInstalacoes, useDespesas, useEmprestimos, usePagamentosEmprestimo, useDividasNegativadas } from '../hooks/useSupabaseData';
 import { RelatorioFilter } from '../components/RelatorioFilter';
 
 export const Relatorios = () => {
@@ -13,6 +13,7 @@ export const Relatorios = () => {
   const { data: instalacoes = [], isLoading: instalacoesLoading } = useInstalacoes();
   const { data: despesas = [], isLoading: despesasLoading } = useDespesas();
   const { data: emprestimos = [], isLoading: emprestimosLoading } = useEmprestimos();
+  const { data: pagamentosEmprestimo = [], isLoading: pagamentosLoading } = usePagamentosEmprestimo();
   const { data: dividasNegativadas = [], isLoading: dividasLoading } = useDividasNegativadas();
   
   const [mesEscolhido, setMesEscolhido] = useState(new Date().getMonth());
@@ -20,7 +21,7 @@ export const Relatorios = () => {
   const [tipoRelatorio, setTipoRelatorio] = useState('todos');
   const isMobile = useIsMobile();
 
-  const isLoading = sitesLoading || clientesLoading || instalacoesLoading || despesasLoading || emprestimosLoading || dividasLoading;
+  const isLoading = sitesLoading || clientesLoading || instalacoesLoading || despesasLoading || emprestimosLoading || pagamentosLoading || dividasLoading;
 
   // Função para resetar filtros
   const resetarFiltros = () => {
@@ -48,9 +49,10 @@ export const Relatorios = () => {
       });
     }
 
-    // Filtrar sites por período de vencimento
+    // Filtrar sites ativos com vencimento no período
     if (tipo === 'sites' || tipo === 'todos') {
       dadosFiltrados.sites = sites.filter(site => {
+        if (site.status !== 'Ativo') return false;
         const dataVencimento = new Date(site.data_vencimento);
         return dataVencimento.getMonth() === mes && dataVencimento.getFullYear() === ano;
       });
@@ -86,10 +88,21 @@ export const Relatorios = () => {
   const inicioMesAtual = new Date(hoje.getFullYear(), hoje.getMonth(), 1);
   const fimMesAtual = new Date(hoje.getFullYear(), hoje.getMonth() + 1, 0);
 
-  // Receitas
+  // Receitas de Sites (só planos com assinatura + hospedagem)
   const receitaMensalSites = dadosFiltrados.sites
     .filter(site => site.status === 'Ativo')
-    .reduce((total, site) => total + site.valor_mensal, 0);
+    .reduce((total, site) => {
+      let valorSite = 0;
+      // Adiciona valor mensal se for plano com assinatura
+      if (site.tipo_plano.toLowerCase().includes('assinatura')) {
+        valorSite += Number(site.valor_mensal);
+      }
+      // Adiciona R$ 40 se tiver hospedagem
+      if (site.hospedagem) {
+        valorSite += 40;
+      }
+      return total + valorSite;
+    }, 0);
 
   const receitaInstalacoes = dadosFiltrados.instalacoes
     .filter(inst => inst.status === 'Concluído')
@@ -105,9 +118,15 @@ export const Relatorios = () => {
 
   const despesasPendentes = totalDespesas - despesasPagas;
 
-  // Empréstimos
+  // Empréstimos - calcular valor restante (valor_atual - pagamentos)
   const totalEmprestimos = dadosFiltrados.emprestimos
-    .reduce((total, emprestimo) => total + emprestimo.valor_atual, 0);
+    .reduce((total, emprestimo) => {
+      const pagamentosDoEmprestimo = pagamentosEmprestimo
+        .filter(p => p.emprestimo_id === emprestimo.id)
+        .reduce((sum, p) => sum + Number(p.valor_pago), 0);
+      const valorRestante = Number(emprestimo.valor_atual) - pagamentosDoEmprestimo;
+      return total + Math.max(0, valorRestante);
+    }, 0);
 
   // Dívidas
   const totalDividas = dadosFiltrados.dividasNegativadas
@@ -145,7 +164,7 @@ export const Relatorios = () => {
         dados += `Clientes: ${dadosFiltrados.clientes.length}\n`;
         dados += `Sites Ativos: ${sitesPorStatus['Ativo'] || 0}\n`;
         dados += `Instalações: ${dadosFiltrados.instalacoes.length}\n`;
-        dados += `Empréstimos Ativos: R$ ${totalEmprestimos.toFixed(2)}\n`;
+        dados += `Empréstimos Restantes: R$ ${totalEmprestimos.toFixed(2)}\n`;
         dados += `Dívidas Pendentes: R$ ${totalDividas.toFixed(2)}\n`;
         nomeArquivo = `relatorio-geral-${periodoSelecionado.replace(' ', '-')}.txt`;
         break;
@@ -168,6 +187,79 @@ export const Relatorios = () => {
           dados += `- ${despesa.nome}: R$ ${despesa.valor.toFixed(2)} ${despesa.paga ? '(PAGA)' : '(PENDENTE)'}\n`;
         });
         nomeArquivo = `relatorio-despesas-${periodoSelecionado.replace(' ', '-')}.txt`;
+        break;
+
+      case 'sites':
+        dados = `Relatório de Sites - ${periodoSelecionado}\n\n`;
+        dados += `Total de Sites Ativos: ${dadosFiltrados.sites.filter(s => s.status === 'Ativo').length}\n\n`;
+        dadosFiltrados.sites.forEach(site => {
+          dados += `Cliente: ${site.cliente_nome}\n`;
+          dados += `Status: ${site.status}\n`;
+          dados += `Plano: ${site.tipo_plano}\n`;
+          dados += `Valor Mensal: R$ ${site.valor_mensal.toFixed(2)}\n`;
+          dados += `Vencimento: ${new Date(site.data_vencimento).toLocaleDateString('pt-BR')}\n`;
+          dados += `---\n`;
+        });
+        nomeArquivo = `relatorio-sites-${periodoSelecionado.replace(' ', '-')}.txt`;
+        break;
+
+      case 'instalacoes':
+        dados = `Relatório de Instalações - ${periodoSelecionado}\n\n`;
+        dados += `Total de Instalações: ${dadosFiltrados.instalacoes.length}\n`;
+        dados += `Receita Total: R$ ${receitaInstalacoes.toFixed(2)}\n\n`;
+        dadosFiltrados.instalacoes.forEach(inst => {
+          dados += `Pedido: ${inst.numero_pedido}\n`;
+          dados += `Arquiteto: ${inst.arquiteto_nome}\n`;
+          dados += `Data: ${new Date(inst.data_instalacao).toLocaleDateString('pt-BR')}\n`;
+          dados += `Status: ${inst.status}\n`;
+          dados += `Valor: R$ ${inst.valor_total.toFixed(2)}\n`;
+          dados += `---\n`;
+        });
+        nomeArquivo = `relatorio-instalacoes-${periodoSelecionado.replace(' ', '-')}.txt`;
+        break;
+
+      case 'clientes':
+        dados = `Relatório de Clientes - ${dataAtual}\n\n`;
+        dados += `Total de Clientes: ${dadosFiltrados.clientes.length}\n\n`;
+        dadosFiltrados.clientes.forEach(cliente => {
+          dados += `Nome: ${cliente.nome}\n`;
+          dados += `Email: ${cliente.email}\n`;
+          dados += `Telefone: ${cliente.telefone}\n`;
+          dados += `Cidade: ${cliente.cidade} - ${cliente.estado}\n`;
+          dados += `---\n`;
+        });
+        nomeArquivo = `relatorio-clientes-${dataAtual.replace(/\//g, '-')}.txt`;
+        break;
+
+      case 'emprestimos':
+        dados = `Relatório de Empréstimos - ${dataAtual}\n\n`;
+        dados += `Total Restante: R$ ${totalEmprestimos.toFixed(2)}\n\n`;
+        dadosFiltrados.emprestimos.forEach(emp => {
+          const pagamentos = pagamentosEmprestimo
+            .filter(p => p.emprestimo_id === emp.id)
+            .reduce((sum, p) => sum + Number(p.valor_pago), 0);
+          const restante = Number(emp.valor_atual) - pagamentos;
+          dados += `Nome: ${emp.nome}\n`;
+          dados += `Valor Original: R$ ${Number(emp.valor_original).toFixed(2)}\n`;
+          dados += `Valor Atual: R$ ${Number(emp.valor_atual).toFixed(2)}\n`;
+          dados += `Pago: R$ ${pagamentos.toFixed(2)}\n`;
+          dados += `Restante: R$ ${restante.toFixed(2)}\n`;
+          dados += `---\n`;
+        });
+        nomeArquivo = `relatorio-emprestimos-${dataAtual.replace(/\//g, '-')}.txt`;
+        break;
+
+      case 'dividas':
+        dados = `Relatório de Dívidas Negativadas - ${dataAtual}\n\n`;
+        dados += `Total Pendente: R$ ${totalDividas.toFixed(2)}\n\n`;
+        dadosFiltrados.dividasNegativadas.forEach(divida => {
+          dados += `Nome: ${divida.nome}\n`;
+          dados += `Valor Original: R$ ${Number(divida.valor_original).toFixed(2)}\n`;
+          dados += `Valor Atual: R$ ${Number(divida.valor_atual).toFixed(2)}\n`;
+          dados += `Status: ${divida.pago ? 'PAGA' : 'PENDENTE'}\n`;
+          dados += `---\n`;
+        });
+        nomeArquivo = `relatorio-dividas-${dataAtual.replace(/\//g, '-')}.txt`;
         break;
     }
 
@@ -313,8 +405,8 @@ export const Relatorios = () => {
                 <TrendingUp className="h-3 w-3 md:h-4 md:w-4 text-muted-foreground" />
               </CardHeader>
               <CardContent>
-                <div className={`text-sm md:text-2xl font-bold ${(receitaMensalSites + receitaInstalacoes - despesasPendentes - totalDividas) >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                  R$ {(receitaMensalSites + receitaInstalacoes - despesasPendentes - totalDividas).toFixed(2)}
+                <div className={`text-sm md:text-2xl font-bold ${(receitaMensalSites + receitaInstalacoes - despesasPendentes - totalEmprestimos - totalDividas) >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                  R$ {(receitaMensalSites + receitaInstalacoes - despesasPendentes - totalEmprestimos - totalDividas).toFixed(2)}
                 </div>
               </CardContent>
             </Card>
@@ -402,34 +494,56 @@ export const Relatorios = () => {
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="p-3 md:p-4 bg-blue-50 rounded-lg">
-                  <h4 className="font-medium text-blue-900 mb-2 text-sm">Primeira Quinzena (1-15)</h4>
-                  <div className="text-xl md:text-2xl font-bold text-blue-600">{0}</div>
-                  <p className="text-xs md:text-sm text-blue-700">instalações</p>
-                  <div className="mt-2 text-xs md:text-sm">
-                    Receita: R$ {0}
-                  </div>
-                </div>
+              {(() => {
+                // Calcular instalações por quinzena
+                const primeiraQuinzena = dadosFiltrados.instalacoes.filter(inst => {
+                  const dia = new Date(inst.data_instalacao).getDate();
+                  return dia >= 1 && dia <= 15 && inst.status === 'Concluído';
+                });
                 
-                <div className="p-3 md:p-4 bg-orange-50 rounded-lg">
-                  <h4 className="font-medium text-orange-900 mb-2 text-sm">Segunda Quinzena (16-30)</h4>
-                  <div className="text-xl md:text-2xl font-bold text-orange-600">{0}</div>
-                  <p className="text-xs md:text-sm text-orange-700">instalações</p>
-                  <div className="mt-2 text-xs md:text-sm">
-                    Receita: R$ {0}
-                  </div>
-                </div>
-              </div>
+                const segundaQuinzena = dadosFiltrados.instalacoes.filter(inst => {
+                  const dia = new Date(inst.data_instalacao).getDate();
+                  return dia >= 16 && inst.status === 'Concluído';
+                });
 
-              <div className="p-3 md:p-4 bg-green-50 rounded-lg">
-                <h4 className="font-medium text-green-900 mb-2 text-sm">Total do Mês</h4>
-                <div className="text-xl md:text-2xl font-bold text-green-600">{0}</div>
-                <p className="text-xs md:text-sm text-green-700">instalações</p>
-                <div className="mt-2 text-xs md:text-sm">
-                  Receita Total: R$ {0}
-                </div>
-              </div>
+                const receitaPrimeiraQuinzena = primeiraQuinzena.reduce((sum, inst) => sum + Number(inst.valor_total), 0);
+                const receitaSegundaQuinzena = segundaQuinzena.reduce((sum, inst) => sum + Number(inst.valor_total), 0);
+                const totalInstalacoesConcluidas = dadosFiltrados.instalacoes.filter(i => i.status === 'Concluído').length;
+                const receitaTotalMes = receitaPrimeiraQuinzena + receitaSegundaQuinzena;
+
+                return (
+                  <>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div className="p-3 md:p-4 bg-blue-50 rounded-lg">
+                        <h4 className="font-medium text-blue-900 mb-2 text-sm">Primeira Quinzena (1-15)</h4>
+                        <div className="text-xl md:text-2xl font-bold text-blue-600">{primeiraQuinzena.length}</div>
+                        <p className="text-xs md:text-sm text-blue-700">instalações</p>
+                        <div className="mt-2 text-xs md:text-sm">
+                          Receita: R$ {receitaPrimeiraQuinzena.toFixed(2)}
+                        </div>
+                      </div>
+                      
+                      <div className="p-3 md:p-4 bg-orange-50 rounded-lg">
+                        <h4 className="font-medium text-orange-900 mb-2 text-sm">Segunda Quinzena (16-31)</h4>
+                        <div className="text-xl md:text-2xl font-bold text-orange-600">{segundaQuinzena.length}</div>
+                        <p className="text-xs md:text-sm text-orange-700">instalações</p>
+                        <div className="mt-2 text-xs md:text-sm">
+                          Receita: R$ {receitaSegundaQuinzena.toFixed(2)}
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="p-3 md:p-4 bg-green-50 rounded-lg">
+                      <h4 className="font-medium text-green-900 mb-2 text-sm">Total do Mês</h4>
+                      <div className="text-xl md:text-2xl font-bold text-green-600">{totalInstalacoesConcluidas}</div>
+                      <p className="text-xs md:text-sm text-green-700">instalações concluídas</p>
+                      <div className="mt-2 text-xs md:text-sm">
+                        Receita Total: R$ {receitaTotalMes.toFixed(2)}
+                      </div>
+                    </div>
+                  </>
+                );
+              })()}
               
               <button 
                 onClick={() => exportarRelatorio('instalacoes')}

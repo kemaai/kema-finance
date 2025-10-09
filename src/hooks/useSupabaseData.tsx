@@ -17,6 +17,17 @@ interface Site {
 interface Cliente {
   id: string;
   nome: string;
+  cpf_cnpj: string;
+  email: string;
+  telefone: string;
+  endereco: string;
+  cidade: string;
+  estado: string;
+  cep: string;
+  observacoes?: string;
+  user_id: string;
+  created_at: string;
+  updated_at: string;
 }
 
 interface Instalacao {
