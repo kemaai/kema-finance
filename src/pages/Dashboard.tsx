@@ -5,9 +5,11 @@ import { RevenueChart } from '../components/RevenueChart';
 import { ProfileCard } from '../components/ProfileCard';
 import { QuickActions } from '../components/QuickActions';
 import { useSites, useClientes, useInstalacoes, useDespesas } from '../hooks/useSupabaseData';
+import { useAuth } from '../hooks/useAuth';
 import { DollarSign, Globe, Scissors, Users, TrendingUp, Calendar, Bell, CheckCircle, Sparkles, CreditCard, AlertTriangle } from 'lucide-react';
 
 export const Dashboard = () => {
+  const { profile } = useAuth();
   const { data: sites = [], isLoading: sitesLoading } = useSites();
   const { data: clientes = [], isLoading: clientesLoading } = useClientes();
   const { data: instalacoes = [], isLoading: instalacoesLoading } = useInstalacoes();
@@ -136,7 +138,7 @@ export const Dashboard = () => {
                 {/* Welcome message with better typography */}
                 <div className="space-y-3">
                   <p className="text-xl md:text-2xl font-medium text-foreground/90 leading-relaxed">
-                    Bem-vindo de volta Adriano! 👋
+                    Bem-vindo de volta {profile?.first_name || 'Usuário'}! 👋
                   </p>
                 </div>
               </div>

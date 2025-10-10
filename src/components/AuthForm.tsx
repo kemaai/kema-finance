@@ -53,6 +53,8 @@ export const AuthForm = () => {
     e.preventDefault();
     setIsLoading(true);
     try {
+      const redirectUrl = `${window.location.origin}/dashboard`;
+      
       const {
         data,
         error
@@ -60,6 +62,7 @@ export const AuthForm = () => {
         email: formData.email,
         password: formData.password,
         options: {
+          emailRedirectTo: redirectUrl,
           data: {
             full_name: formData.fullName
           }
@@ -70,7 +73,9 @@ export const AuthForm = () => {
         return;
       }
       if (data.user) {
-        toast.success('Conta criada com sucesso! Verifique seu email para confirmação.');
+        toast.success('Conta criada com sucesso! Faça login para continuar.');
+        // Limpar formulário
+        setFormData({ email: '', password: '', fullName: '' });
       }
     } catch (error) {
       toast.error('Erro inesperado no cadastro');
