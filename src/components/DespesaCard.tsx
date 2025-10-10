@@ -5,6 +5,7 @@ import { Badge } from '@/components/ui/badge';
 import { Copy, Edit, Trash2, Check, X } from 'lucide-react';
 import { format, isAfter, isBefore, isToday } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
+import { parseLocalDate } from '@/lib/utils';
 
 interface Despesa {
   id: string;
@@ -32,7 +33,7 @@ export const DespesaCard: React.FC<DespesaCardProps> = ({
   onDuplicate,
   onTogglePaga,
 }) => {
-  const dataVencimento = new Date(despesa.data_vencimento);
+  const dataVencimento = parseLocalDate(despesa.data_vencimento);
   const hoje = new Date();
   
   const isVencida = !despesa.paga && isBefore(dataVencimento, hoje) && !isToday(dataVencimento);

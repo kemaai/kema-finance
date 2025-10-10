@@ -2,6 +2,7 @@
 import React from 'react';
 import { Edit, Trash2, Globe, Calendar, DollarSign, Copy } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
+import { parseLocalDate } from '@/lib/utils';
 
 interface Site {
   id: string;
@@ -129,7 +130,7 @@ export const SiteCard: React.FC<SiteCardProps> = ({ site, onEdit, onDelete, onDu
               <span className="text-muted-foreground">Vencimento:</span>
               <div className="flex items-center gap-1 flex-shrink-0">
                 <Calendar className="w-3 h-3" />
-                <span>{new Date(site.data_vencimento).toLocaleDateString('pt-BR')}</span>
+                <span>{parseLocalDate(site.data_vencimento).toLocaleDateString('pt-BR')}</span>
               </div>
             </div>
           </div>

@@ -2,6 +2,7 @@
 import React, { useState } from 'react';
 import { Scissors, Edit, Trash2, ChevronDown, ChevronUp, Calendar, DollarSign, MapPin } from 'lucide-react';
 import { Checkbox } from '@/components/ui/checkbox';
+import { parseLocalDate } from '@/lib/utils';
 
 interface Instalacao {
   id: string;
@@ -74,7 +75,7 @@ export const InstalacaoCard: React.FC<InstalacaoCardProps> = ({ instalacao, onEd
           <div>
             <div className="flex items-center gap-1 mb-1">
               <Calendar className="w-3 h-3 text-muted-foreground" />
-              <p className="text-xs text-muted-foreground">{new Date(instalacao.data_instalacao).toLocaleDateString('pt-BR')}</p>
+              <p className="text-xs text-muted-foreground">{parseLocalDate(instalacao.data_instalacao).toLocaleDateString('pt-BR')}</p>
             </div>
             <div className="flex items-center gap-1 mb-1">
               <MapPin className="w-3 h-3 text-muted-foreground" />
