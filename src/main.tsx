@@ -4,6 +4,14 @@ import { createRoot } from 'react-dom/client'
 import App from './App.tsx'
 import './index.css'
 
+// Disable console logs in production to prevent sensitive data leakage
+if (!import.meta.env.DEV) {
+  const c = console as any;
+  ['log', 'info', 'debug', 'warn', 'error'].forEach((m) => {
+    c[m] = () => {};
+  });
+}
+
 // Register Service Worker
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
