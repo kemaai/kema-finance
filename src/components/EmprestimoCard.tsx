@@ -36,8 +36,14 @@ export const EmprestimoCard: React.FC<EmprestimoCardProps> = ({
   const [isPaymentDialogOpen, setIsPaymentDialogOpen] = useState(false);
   const [isHistoryDialogOpen, setIsHistoryDialogOpen] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+  const [isEditPaymentDialogOpen, setIsEditPaymentDialogOpen] = useState(false);
   const [paymentAmount, setPaymentAmount] = useState('');
   const [paymentDate, setPaymentDate] = useState(new Date().toISOString().split('T')[0]);
+  const [editingPayment, setEditingPayment] = useState<{
+    id: string;
+    valor_pago: number;
+    data_pagamento: string;
+  } | null>(null);
 
   const emprestimoPayments = pagamentos.filter(p => p.emprestimo_id === emprestimo.id);
   const totalPago = emprestimoPayments.reduce((sum, p) => sum + Number(p.valor_pago), 0);
@@ -108,6 +114,88 @@ export const EmprestimoCard: React.FC<EmprestimoCardProps> = ({
     } catch (error) {
       console.error('Erro ao excluir empréstimo:', error);
       toast.error('Erro ao excluir empréstimo');
+    }
+  };
+
+  const handleEditPayment = (pagamento: { id: string; valor_pago: number; data_pagamento: string }) => {
+    setEditingPayment(pagamento);
+    setPaymentAmount(pagamento.valor_pago.toString());
+    setPaymentDate(pagamento.data_pagamento);
+    setIsEditPaymentDialogOpen(true);
+  };
+
+  const handleUpdatePayment = async () => {
+    if (!editingPayment || !paymentAmount || !paymentDate) {
+      toast.error('Por favor, preencha todos os campos');
+      return;
+    }
+
+    const novoValorPago = Number(paymentAmount);
+    if (novoValorPago <= 0) {
+      toast.error('O valor deve ser maior que zero');
+      return;
+    }
+
+    try {
+      const valorAntigoPago = Number(editingPayment.valor_pago);
+      const diferencaValor = novoValorPago - valorAntigoPago;
+      
+      const { error: paymentError } = await supabase
+        .from('pagamentos_emprestimo')
+        .update({
+          valor_pago: novoValorPago,
+          data_pagamento: paymentDate
+        })
+        .eq('id', editingPayment.id);
+
+      if (paymentError) throw paymentError;
+
+      const novoValorAtual = remainingAmount - diferencaValor;
+      
+      const { error: updateError } = await supabase
+        .from('emprestimos')
+        .update({ valor_atual: novoValorAtual })
+        .eq('id', emprestimo.id);
+
+      if (updateError) throw updateError;
+
+      toast.success('Pagamento atualizado com sucesso!');
+      setPaymentAmount('');
+      setPaymentDate(new Date().toISOString().split('T')[0]);
+      setEditingPayment(null);
+      setIsEditPaymentDialogOpen(false);
+      onUpdate();
+    } catch (error) {
+      console.error('Erro ao atualizar pagamento:', error);
+      toast.error('Erro ao atualizar pagamento');
+    }
+  };
+
+  const handleDeletePayment = async (pagamentoId: string, valorPago: number) => {
+    if (!confirm('Tem certeza que deseja excluir este pagamento?')) return;
+
+    try {
+      const { error: deleteError } = await supabase
+        .from('pagamentos_emprestimo')
+        .delete()
+        .eq('id', pagamentoId);
+
+      if (deleteError) throw deleteError;
+
+      const novoValorAtual = remainingAmount + valorPago;
+      
+      const { error: updateError } = await supabase
+        .from('emprestimos')
+        .update({ valor_atual: novoValorAtual })
+        .eq('id', emprestimo.id);
+
+      if (updateError) throw updateError;
+
+      toast.success('Pagamento excluído com sucesso!');
+      onUpdate();
+    } catch (error) {
+      console.error('Erro ao excluir pagamento:', error);
+      toast.error('Erro ao excluir pagamento');
     }
   };
 
@@ -239,6 +327,24 @@ export const EmprestimoCard: React.FC<EmprestimoCardProps> = ({
                             {new Date(pagamento.data_pagamento).toLocaleDateString('pt-BR')}
                           </p>
                         </div>
+                        <div className="flex gap-2">
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => handleEditPayment(pagamento)}
+                            className="h-8 w-8 p-0"
+                          >
+                            <Edit className="w-4 h-4" />
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => handleDeletePayment(pagamento.id, Number(pagamento.valor_pago))}
+                            className="h-8 w-8 p-0 text-destructive hover:text-destructive"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </Button>
+                        </div>
                       </div>
                     ))
                   )}
@@ -254,13 +360,47 @@ export const EmprestimoCard: React.FC<EmprestimoCardProps> = ({
         </div>
       </CardContent>
 
-      {/* Formulário de Edição */}
+      {/* Formulário de Edição do Empréstimo */}
       <EmprestimoEditForm
         isOpen={isEditDialogOpen}
         onClose={() => setIsEditDialogOpen(false)}
         onSuccess={onUpdate}
         emprestimo={emprestimo}
       />
+
+      {/* Formulário de Edição de Pagamento */}
+      <Dialog open={isEditPaymentDialogOpen} onOpenChange={setIsEditPaymentDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Editar Pagamento</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div>
+              <Label htmlFor="edit-valor">Valor do Pagamento</Label>
+              <Input
+                id="edit-valor"
+                type="number"
+                step="0.01"
+                value={paymentAmount}
+                onChange={(e) => setPaymentAmount(e.target.value)}
+                placeholder="0,00"
+              />
+            </div>
+            <div>
+              <Label htmlFor="edit-data">Data do Pagamento</Label>
+              <Input
+                id="edit-data"
+                type="date"
+                value={paymentDate}
+                onChange={(e) => setPaymentDate(e.target.value)}
+              />
+            </div>
+            <Button onClick={handleUpdatePayment} className="w-full">
+              Atualizar Pagamento
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </Card>
   );
 };
