@@ -53,11 +53,34 @@ export const useQuinzenaFilter = (instalacoes: Instalacao[]) => {
     }, 0);
   }, [filteredInstalacoes]);
 
+  const totalMetrosQuadrados = useMemo(() => {
+    return filteredInstalacoes.reduce((total, instalacao) => {
+      return total + (Number(instalacao.valor_total || 0) / 20);
+    }, 0);
+  }, [filteredInstalacoes]);
+
+  const totalMetrosQuadradosMes = useMemo(() => {
+    if (!instalacoes || instalacoes.length === 0) return 0;
+
+    const instalacoesMes = instalacoes.filter((instalacao) => {
+      const dataInstalacao = new Date(instalacao.data_instalacao);
+      const isSameMonth = dataInstalacao.getMonth() === selectedMonth.getMonth();
+      const isSameYear = dataInstalacao.getFullYear() === selectedMonth.getFullYear();
+      return isSameMonth && isSameYear;
+    });
+    
+    return instalacoesMes.reduce((total, instalacao) => {
+      return total + (Number(instalacao.valor_total || 0) / 20);
+    }, 0);
+  }, [instalacoes, selectedMonth]);
+
   return {
     selectedMonth,
     selectedQuinzena,
     filteredInstalacoes,
     totalValorQuinzena,
+    totalMetrosQuadrados,
+    totalMetrosQuadradosMes,
     setSelectedMonth,
     setSelectedQuinzena,
   };
