@@ -2,8 +2,6 @@
 import React from 'react';
 import { DashboardCard } from '../components/DashboardCard';
 import { RevenueChart } from '../components/RevenueChart';
-import { ProfileCard } from '../components/ProfileCard';
-import { QuickActions } from '../components/QuickActions';
 import { useSites, useClientes, useInstalacoes, useDespesas } from '../hooks/useSupabaseData';
 import { useAuth } from '../hooks/useAuth';
 import { DollarSign, Globe, Scissors, Users, TrendingUp, Calendar, Bell, CheckCircle, Sparkles, CreditCard, AlertTriangle } from 'lucide-react';
@@ -140,14 +138,6 @@ export const Dashboard = () => {
                   <p className="text-xl md:text-2xl font-medium text-foreground/90 leading-relaxed">
                     Bem-vindo de volta {profile?.first_name || 'Usuário'}! 👋
                   </p>
-                </div>
-              </div>
-              
-              {/* Combined action card */}
-              <div className="bg-white/80 backdrop-blur-sm border border-white/90 rounded-2xl p-4 shadow-xl">
-                <div className="flex items-center gap-3">
-                  <ProfileCard />
-                  <QuickActions />
                 </div>
               </div>
             </div>
