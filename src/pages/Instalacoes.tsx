@@ -62,6 +62,8 @@ export const Instalacoes = () => {
     selectedQuinzena,
     filteredInstalacoes,
     totalValorQuinzena,
+    totalMetrosQuadrados,
+    totalMetrosQuadradosMes,
     setSelectedMonth,
     setSelectedQuinzena,
   } = useQuinzenaFilter(instalacoes);
@@ -269,12 +271,20 @@ export const Instalacoes = () => {
         onQuinzenaChange={setSelectedQuinzena}
       />
 
-      {totalValorQuinzena > 0 && (
-        <div className="bg-blue-50 border-l-4 border-blue-400 p-3 lg:p-4 rounded-r-lg">
+      {(totalValorQuinzena > 0 || totalMetrosQuadrados > 0) && (
+        <div className="bg-blue-50 border-l-4 border-blue-400 p-3 lg:p-4 rounded-r-lg space-y-1">
           <p className="text-blue-800 font-medium text-sm lg:text-base">
             Total da {selectedQuinzena === 'primeira' ? '1ª quinzena' : 
                      selectedQuinzena === 'segunda' ? '2ª quinzena' : 
                      'quinzena'}: R$ {totalValorQuinzena.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+          </p>
+          <p className="text-blue-700 text-sm">
+            Metragem da {selectedQuinzena === 'primeira' ? '1ª quinzena' : 
+                         selectedQuinzena === 'segunda' ? '2ª quinzena' : 
+                         'quinzena'}: {totalMetrosQuadrados.toFixed(2)} m²
+          </p>
+          <p className="text-blue-600 text-sm">
+            Total do mês: {totalMetrosQuadradosMes.toFixed(2)} m²
           </p>
         </div>
       )}

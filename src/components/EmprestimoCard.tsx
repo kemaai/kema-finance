@@ -1,5 +1,6 @@
 
 import React, { useState } from 'react';
+import { useQueryClient } from '@tanstack/react-query';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -33,6 +34,7 @@ export const EmprestimoCard: React.FC<EmprestimoCardProps> = ({
   pagamentos = [],
   onUpdate 
 }) => {
+  const queryClient = useQueryClient();
   const [isPaymentDialogOpen, setIsPaymentDialogOpen] = useState(false);
   const [isHistoryDialogOpen, setIsHistoryDialogOpen] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
@@ -50,19 +52,30 @@ export const EmprestimoCard: React.FC<EmprestimoCardProps> = ({
   const remainingAmount = Number(emprestimo.valor_original) - totalPago;
   const progressPercentage = (totalPago / Number(emprestimo.valor_original)) * 100;
 
-  const handleAddPayment = async (data: PagamentoEmprestimoFormData) => {
+  const handleAddPayment = async () => {
+    if (!paymentAmount || !paymentDate) {
+      toast.error('Por favor, preencha todos os campos');
+      return;
+    }
+
+    const valorPago = parseFloat(paymentAmount);
+    if (isNaN(valorPago) || valorPago <= 0) {
+      toast.error('Valor inválido');
+      return;
+    }
+
     try {
       const { error: paymentError } = await supabase
         .from('pagamentos_emprestimo')
         .insert([{
           emprestimo_id: emprestimo.id,
-          valor_pago: data.valor_pago,
-          data_pagamento: data.data_pagamento
+          valor_pago: valorPago,
+          data_pagamento: paymentDate
         }]);
 
       if (paymentError) throw paymentError;
 
-      const novoValorAtual = Math.max(0, emprestimo.valor_atual - data.valor_pago);
+      const novoValorAtual = Math.max(0, emprestimo.valor_atual - valorPago);
 
       const { error: updateError } = await supabase
         .from('emprestimos')
@@ -75,120 +88,12 @@ export const EmprestimoCard: React.FC<EmprestimoCardProps> = ({
       queryClient.invalidateQueries({ queryKey: ['emprestimos'] });
       queryClient.invalidateQueries({ queryKey: ['pagamentos', emprestimo.id] });
       setIsPaymentDialogOpen(false);
-      paymentForm.reset();
+      setPaymentAmount('');
+      setPaymentDate(new Date().toISOString().split('T')[0]);
+      onUpdate();
     } catch (error: any) {
       console.error('Error adding payment:', error);
       toast.error('Erro ao adicionar pagamento: ' + error.message);
-    }
-  };
-
-  const handleEditPayment = (payment: any) => {
-    setEditingPayment(payment);
-    setPaymentAmount(payment.valor_pago.toString());
-    setPaymentDate(payment.data_pagamento);
-    setIsEditPaymentDialogOpen(true);
-  };
-
-  const handleUpdatePayment = async () => {
-    if (!editingPayment || !paymentAmount || !paymentDate) {
-      toast.error('Por favor, preencha todos os campos');
-      return;
-    }
-
-    const valorPago = parseFloat(paymentAmount);
-    if (isNaN(valorPago) || valorPago <= 0) {
-      toast.error('Valor inválido');
-      return;
-    }
-
-    try {
-      // Calculate the difference
-      const oldValor = editingPayment.valor_pago;
-      const difference = valorPago - oldValor;
-
-      // Update payment
-      const { error: paymentError } = await supabase
-        .from('pagamentos_emprestimo')
-        .update({
-          valor_pago: valorPago,
-          data_pagamento: paymentDate
-        })
-        .eq('id', editingPayment.id);
-
-      if (paymentError) throw paymentError;
-
-      // Update emprestimo valor_atual
-      const novoValorAtual = Math.max(0, emprestimo.valor_atual - difference);
-
-      const { error: updateError } = await supabase
-        .from('emprestimos')
-        .update({ valor_atual: novoValorAtual })
-        .eq('id', emprestimo.id);
-
-      if (updateError) throw updateError;
-
-      toast.success('Pagamento atualizado com sucesso!');
-      queryClient.invalidateQueries({ queryKey: ['emprestimos'] });
-      queryClient.invalidateQueries({ queryKey: ['pagamentos', emprestimo.id] });
-      setIsEditPaymentDialogOpen(false);
-      setEditingPayment(null);
-      setPaymentAmount('');
-      setPaymentDate('');
-    } catch (error: any) {
-      console.error('Error updating payment:', error);
-      toast.error('Erro ao atualizar pagamento: ' + error.message);
-    }
-  };
-
-  const handleDeletePayment = async (payment: any) => {
-    if (!confirm('Tem certeza que deseja excluir este pagamento?')) {
-      return;
-    }
-
-    try {
-      // Delete payment
-      const { error: deleteError } = await supabase
-        .from('pagamentos_emprestimo')
-        .delete()
-        .eq('id', payment.id);
-
-      if (deleteError) throw deleteError;
-
-      // Restore valor_atual
-      const novoValorAtual = emprestimo.valor_atual + payment.valor_pago;
-
-      const { error: updateError } = await supabase
-        .from('emprestimos')
-        .update({ valor_atual: novoValorAtual })
-        .eq('id', emprestimo.id);
-
-      if (updateError) throw updateError;
-
-      toast.success('Pagamento excluído com sucesso!');
-      queryClient.invalidateQueries({ queryKey: ['emprestimos'] });
-      queryClient.invalidateQueries({ queryKey: ['pagamentos', emprestimo.id] });
-    } catch (error: any) {
-      console.error('Error deleting payment:', error);
-      toast.error('Erro ao excluir pagamento: ' + error.message);
-    }
-  };
-
-  const handleDelete = async () => {
-    if (!confirm('Tem certeza que deseja excluir este empréstimo?')) return;
-
-    try {
-      const { error } = await supabase
-        .from('emprestimos')
-        .delete()
-        .eq('id', emprestimo.id);
-
-      if (error) throw error;
-
-      toast.success('Empréstimo excluído com sucesso!');
-      onUpdate();
-    } catch (error) {
-      console.error('Erro ao excluir empréstimo:', error);
-      toast.error('Erro ao excluir empréstimo');
     }
   };
 
@@ -235,6 +140,8 @@ export const EmprestimoCard: React.FC<EmprestimoCardProps> = ({
       if (updateError) throw updateError;
 
       toast.success('Pagamento atualizado com sucesso!');
+      queryClient.invalidateQueries({ queryKey: ['emprestimos'] });
+      queryClient.invalidateQueries({ queryKey: ['pagamentos', emprestimo.id] });
       setPaymentAmount('');
       setPaymentDate(new Date().toISOString().split('T')[0]);
       setEditingPayment(null);
@@ -267,10 +174,31 @@ export const EmprestimoCard: React.FC<EmprestimoCardProps> = ({
       if (updateError) throw updateError;
 
       toast.success('Pagamento excluído com sucesso!');
+      queryClient.invalidateQueries({ queryKey: ['emprestimos'] });
+      queryClient.invalidateQueries({ queryKey: ['pagamentos', emprestimo.id] });
       onUpdate();
     } catch (error) {
       console.error('Erro ao excluir pagamento:', error);
       toast.error('Erro ao excluir pagamento');
+    }
+  };
+
+  const handleDelete = async () => {
+    if (!confirm('Tem certeza que deseja excluir este empréstimo?')) return;
+
+    try {
+      const { error } = await supabase
+        .from('emprestimos')
+        .delete()
+        .eq('id', emprestimo.id);
+
+      if (error) throw error;
+
+      toast.success('Empréstimo excluído com sucesso!');
+      onUpdate();
+    } catch (error) {
+      console.error('Erro ao excluir empréstimo:', error);
+      toast.error('Erro ao excluir empréstimo');
     }
   };
 
