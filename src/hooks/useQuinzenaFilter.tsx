@@ -1,5 +1,5 @@
-
 import { useState, useMemo } from 'react';
+import { parseLocalDate } from '@/lib/utils';
 
 interface Instalacao {
   id: string;
@@ -24,7 +24,7 @@ export const useQuinzenaFilter = (instalacoes: Instalacao[]) => {
     if (!instalacoes || instalacoes.length === 0) return [];
 
     return instalacoes.filter((instalacao) => {
-      const dataInstalacao = new Date(instalacao.data_instalacao);
+      const dataInstalacao = parseLocalDate(instalacao.data_instalacao);
       
       // Filtrar por mês e ano
       const isSameMonth = dataInstalacao.getMonth() === selectedMonth.getMonth();
@@ -63,7 +63,7 @@ export const useQuinzenaFilter = (instalacoes: Instalacao[]) => {
     if (!instalacoes || instalacoes.length === 0) return 0;
 
     const instalacoesMes = instalacoes.filter((instalacao) => {
-      const dataInstalacao = new Date(instalacao.data_instalacao);
+      const dataInstalacao = parseLocalDate(instalacao.data_instalacao);
       const isSameMonth = dataInstalacao.getMonth() === selectedMonth.getMonth();
       const isSameYear = dataInstalacao.getFullYear() === selectedMonth.getFullYear();
       return isSameMonth && isSameYear;
