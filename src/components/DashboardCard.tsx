@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { LucideIcon } from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -21,12 +20,12 @@ export const DashboardCard: React.FC<DashboardCardProps> = ({
   icon: Icon,
   iconColor,
   trend,
-  trendColor = 'text-green-500',
+  trendColor = 'text-green-400',
   className
 }) => {
   return (
     <div className={cn(
-      "bg-white rounded-2xl p-4 md:p-6 shadow-sm border border-border",
+      "card-tech p-4 md:p-6 transition-all duration-300 hover:border-primary/50",
       className
     )}>
       <div className="flex items-start justify-between">
@@ -41,7 +40,7 @@ export const DashboardCard: React.FC<DashboardCardProps> = ({
           )}
         </div>
         <div className={cn(
-          "w-10 h-10 md:w-12 md:h-12 rounded-xl flex items-center justify-center flex-shrink-0 ml-2 shadow-sm",
+          "w-10 h-10 md:w-12 md:h-12 rounded-xl flex items-center justify-center flex-shrink-0 ml-2",
           iconColor
         )}>
           <Icon className="w-5 h-5 md:w-6 md:h-6 text-white" />

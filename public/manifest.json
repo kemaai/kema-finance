@@ -1,11 +1,11 @@
 {
-  "name": "Assistente Fácil - CRM Pessoal",
-  "short_name": "Assistente Fácil",
+  "name": "KemaAI - Sistema de Gestão Inteligente",
+  "short_name": "KemaAI",
   "description": "Sistema completo de gestão financeira pessoal e empresarial",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#1E3A8A",
-  "theme_color": "#FF6B35",
+  "background_color": "#1C1410",
+  "theme_color": "#F97316",
   "orientation": "portrait-primary",
   "scope": "/",
   "categories": ["finance", "productivity", "business"],
@@ -23,18 +23,12 @@
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "maskable any"
-    },
-    {
-      "src": "/lovable-uploads/12a47b3b-542f-425c-bb13-d515e29a89f2.png",
-      "sizes": "any",
-      "type": "image/png",
-      "purpose": "any"
     }
   ],
   "screenshots": [
     {
-      "src": "/lovable-uploads/12a47b3b-542f-425c-bb13-d515e29a89f2.png",
-      "sizes": "any",
+      "src": "/icon-512.png",
+      "sizes": "512x512",
       "type": "image/png",
       "form_factor": "wide"
     }

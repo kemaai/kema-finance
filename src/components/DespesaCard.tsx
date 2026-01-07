@@ -41,23 +41,33 @@ export const DespesaCard: React.FC<DespesaCardProps> = ({
 
   const getStatusBadge = () => {
     if (despesa.paga) {
-      return <Badge variant="default" className="bg-green-100 text-green-800">Paga</Badge>;
+      return <Badge className="bg-green-900/50 text-green-400 border border-green-700/50">Paga</Badge>;
     }
     if (isVencida) {
-      return <Badge variant="destructive">Vencida</Badge>;
+      return <Badge className="bg-red-900/50 text-red-400 border border-red-700/50">Vencida</Badge>;
     }
     if (isVenceHoje) {
-      return <Badge variant="secondary" className="bg-yellow-100 text-yellow-800">Vence Hoje</Badge>;
+      return <Badge className="bg-amber-900/50 text-amber-400 border border-amber-700/50">Vence Hoje</Badge>;
     }
-    return <Badge variant="outline">Pendente</Badge>;
+    return <Badge className="bg-muted text-muted-foreground border border-border">Pendente</Badge>;
+  };
+
+  const getCardStyle = () => {
+    if (isVencida && !despesa.paga) {
+      return 'border-red-700/50 bg-red-900/10';
+    }
+    if (isVenceHoje && !despesa.paga) {
+      return 'border-amber-700/50 bg-amber-900/10';
+    }
+    return 'border-border';
   };
 
   return (
-    <Card className={`w-full ${isVencida && !despesa.paga ? 'border-red-200 bg-red-50' : ''} ${isVenceHoje && !despesa.paga ? 'border-yellow-200 bg-yellow-50' : ''}`}>
+    <Card className={`w-full card-tech ${getCardStyle()} hover:border-primary/50 transition-all duration-300`}>
       <CardHeader className="pb-3">
         <div className="flex justify-between items-start">
           <div className="flex-1">
-            <h3 className="font-semibold text-lg">{despesa.nome}</h3>
+            <h3 className="font-semibold text-lg text-foreground">{despesa.nome}</h3>
             <p className="text-2xl font-bold text-primary mt-1">
               R$ {despesa.valor.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
             </p>
@@ -70,7 +80,7 @@ export const DespesaCard: React.FC<DespesaCardProps> = ({
         <div className="space-y-2">
           <div className="flex justify-between text-sm">
             <span className="text-muted-foreground">Vencimento:</span>
-            <span className="font-medium">
+            <span className="font-medium text-foreground">
               {format(dataVencimento, 'dd/MM/yyyy', { locale: ptBR })}
             </span>
           </div>
@@ -78,7 +88,7 @@ export const DespesaCard: React.FC<DespesaCardProps> = ({
           {despesa.anotacao && (
             <div className="text-sm">
               <span className="text-muted-foreground">Anotação:</span>
-              <p className="mt-1">{despesa.anotacao}</p>
+              <p className="mt-1 text-foreground">{despesa.anotacao}</p>
             </div>
           )}
         </div>
@@ -88,7 +98,7 @@ export const DespesaCard: React.FC<DespesaCardProps> = ({
             variant="outline"
             size="sm"
             onClick={() => onEdit(despesa)}
-            className="flex items-center gap-1"
+            className="flex items-center gap-1 border-border text-foreground hover:bg-muted/50 hover:text-primary hover:border-primary/50"
           >
             <Edit className="h-4 w-4" />
             Editar
@@ -98,17 +108,20 @@ export const DespesaCard: React.FC<DespesaCardProps> = ({
             variant="outline"
             size="sm"
             onClick={() => onDuplicate(despesa)}
-            className="flex items-center gap-1"
+            className="flex items-center gap-1 border-border text-foreground hover:bg-muted/50 hover:text-primary hover:border-primary/50"
           >
             <Copy className="h-4 w-4" />
             Duplicar
           </Button>
           
           <Button
-            variant={despesa.paga ? "outline" : "default"}
             size="sm"
             onClick={() => onTogglePaga(despesa.id, !despesa.paga)}
-            className={`flex items-center gap-1 ${despesa.paga ? '' : 'bg-green-600 hover:bg-green-700'}`}
+            className={`flex items-center gap-1 ${
+              despesa.paga 
+                ? 'bg-muted text-foreground hover:bg-muted/80' 
+                : 'bg-green-600 hover:bg-green-700 text-white'
+            }`}
           >
             {despesa.paga ? <X className="h-4 w-4" /> : <Check className="h-4 w-4" />}
             {despesa.paga ? 'Marcar Pendente' : 'Marcar Paga'}
@@ -118,7 +131,7 @@ export const DespesaCard: React.FC<DespesaCardProps> = ({
             variant="outline"
             size="sm"
             onClick={() => onDelete(despesa.id)}
-            className="flex items-center gap-1 text-red-600 hover:text-red-700 hover:bg-red-50"
+            className="flex items-center gap-1 border-red-700/50 text-red-400 hover:bg-red-900/30 hover:text-red-300"
           >
             <Trash2 className="h-4 w-4" />
             Excluir

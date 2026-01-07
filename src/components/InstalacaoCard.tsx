@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Scissors, Edit, Trash2, ChevronDown, ChevronUp, Calendar, DollarSign, MapPin } from 'lucide-react';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -28,11 +27,11 @@ interface InstalacaoCardProps {
 
 const getStatusColor = (status: string) => {
   switch (status) {
-    case 'Agendado': return 'bg-blue-100 text-blue-800';
-    case 'Em Andamento': return 'bg-orange-100 text-orange-800';
-    case 'Concluído': return 'bg-green-100 text-green-800';
-    case 'Cancelado': return 'bg-red-100 text-red-800';
-    default: return 'bg-gray-100 text-gray-800';
+    case 'Agendado': return 'bg-blue-900/50 text-blue-400 border border-blue-700/50';
+    case 'Em Andamento': return 'bg-amber-900/50 text-amber-400 border border-amber-700/50';
+    case 'Concluído': return 'bg-green-900/50 text-green-400 border border-green-700/50';
+    case 'Cancelado': return 'bg-red-900/50 text-red-400 border border-red-700/50';
+    default: return 'bg-muted text-muted-foreground';
   }
 };
 
@@ -40,8 +39,8 @@ export const InstalacaoCard: React.FC<InstalacaoCardProps> = ({ instalacao, onEd
   const [isExpanded, setIsExpanded] = useState(false);
 
   return (
-    <div className="bg-white rounded-lg shadow-sm border border-border overflow-hidden">
-      {/* Card Header - Always Visible */}
+    <div className="card-tech rounded-xl overflow-hidden border border-border hover:border-primary/50 transition-all duration-300">
+      {/* Card Header */}
       <div className="p-4">
         <div className="flex items-start justify-between mb-3">
           <div className="flex-1 min-w-0">
@@ -53,18 +52,21 @@ export const InstalacaoCard: React.FC<InstalacaoCardProps> = ({ instalacao, onEd
           </span>
         </div>
         
-        <div className={`flex items-center gap-2 mb-3 p-2 rounded-lg transition-colors ${
-          instalacao.pedido_recebido ? 'bg-green-100 border border-green-300' : 'bg-gray-50'
+        <div className={`flex items-center gap-2 mb-3 p-2 rounded-lg transition-colors border ${
+          instalacao.pedido_recebido 
+            ? 'bg-green-900/20 border-green-700/50' 
+            : 'bg-muted/30 border-border'
         }`}>
           <Checkbox 
             id={`pedido-${instalacao.id}`}
             checked={instalacao.pedido_recebido}
             onCheckedChange={(checked) => onTogglePedidoRecebido(instalacao.id, checked as boolean)}
+            className="border-primary data-[state=checked]:bg-primary data-[state=checked]:border-primary"
           />
           <label 
             htmlFor={`pedido-${instalacao.id}`}
             className={`text-sm font-medium cursor-pointer select-none ${
-              instalacao.pedido_recebido ? 'text-green-800' : ''
+              instalacao.pedido_recebido ? 'text-green-400' : 'text-foreground'
             }`}
           >
             Pedido Recebido
@@ -82,27 +84,27 @@ export const InstalacaoCard: React.FC<InstalacaoCardProps> = ({ instalacao, onEd
               <p className="text-xs text-muted-foreground truncate">{instalacao.endereco}</p>
             </div>
             <div className="flex items-center gap-1">
-              <DollarSign className="w-3 h-3 text-muted-foreground" />
-              <p className="text-sm font-bold text-foreground">R$ {instalacao.valor_total.toFixed(2)}</p>
+              <DollarSign className="w-3 h-3 text-primary" />
+              <p className="text-sm font-bold text-primary">R$ {instalacao.valor_total.toFixed(2)}</p>
             </div>
           </div>
           
           <div className="flex items-center gap-2 ml-2">
             <button
               onClick={() => onEdit(instalacao)}
-              className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+              className="p-2 text-primary hover:bg-primary/20 rounded-lg transition-colors"
             >
               <Edit className="w-4 h-4" />
             </button>
             <button
               onClick={() => onDelete(instalacao.id)}
-              className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+              className="p-2 text-red-400 hover:bg-red-900/30 rounded-lg transition-colors"
             >
               <Trash2 className="w-4 h-4" />
             </button>
             <button
               onClick={() => setIsExpanded(!isExpanded)}
-              className="p-2 text-gray-600 hover:bg-gray-50 rounded-lg transition-colors"
+              className="p-2 text-muted-foreground hover:bg-muted/50 rounded-lg transition-colors"
             >
               {isExpanded ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
             </button>
@@ -112,26 +114,26 @@ export const InstalacaoCard: React.FC<InstalacaoCardProps> = ({ instalacao, onEd
 
       {/* Expanded Content */}
       {isExpanded && (
-        <div className="px-4 pb-4 border-t border-border bg-gray-50">
+        <div className="px-4 pb-4 border-t border-border bg-muted/20">
           <div className="pt-3 space-y-3">
             <div>
               <span className="text-muted-foreground text-sm">Ambiente:</span>
-              <p className="text-sm mt-1 font-medium">{instalacao.ambiente}</p>
+              <p className="text-sm mt-1 font-medium text-foreground">{instalacao.ambiente}</p>
             </div>
             
             <div>
               <span className="text-muted-foreground text-sm">Endereço Completo:</span>
-              <p className="text-sm mt-1 font-medium">{instalacao.endereco}</p>
+              <p className="text-sm mt-1 font-medium text-foreground">{instalacao.endereco}</p>
             </div>
             
             <div className="grid grid-cols-2 gap-3 text-sm">
               <div>
                 <span className="text-muted-foreground">Metragem Estimada:</span>
-                <p className="font-medium">{(instalacao.valor_total / 20).toFixed(1)} m²</p>
+                <p className="font-medium text-foreground">{(instalacao.valor_total / 20).toFixed(1)} m²</p>
               </div>
               <div>
                 <span className="text-muted-foreground">Valor por m²:</span>
-                <p className="font-medium">R$ 20,00</p>
+                <p className="font-medium text-foreground">R$ 20,00</p>
               </div>
             </div>
           </div>
