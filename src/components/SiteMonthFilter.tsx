@@ -51,7 +51,7 @@ export const SiteMonthFilter: React.FC<SiteMonthFilterProps> = ({
           variant="outline"
           size="sm"
           onClick={onCurrentMonth}
-          className="text-blue-600 hover:text-blue-700"
+          className="text-orange-500 hover:text-orange-400 border-orange-500/30 hover:border-orange-500/50"
         >
           Mês Atual
         </Button>

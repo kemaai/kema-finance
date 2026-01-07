@@ -245,7 +245,7 @@ export const Instalacoes = () => {
   if (isLoading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-orange-500"></div>
       </div>
     );
   }
@@ -253,10 +253,10 @@ export const Instalacoes = () => {
   return (
     <div className="container mx-auto p-4 lg:p-6 space-y-4 lg:space-y-6">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-        <h1 className="text-2xl lg:text-3xl font-bold text-gray-900">Instalações</h1>
+        <h1 className="text-2xl lg:text-3xl font-bold text-foreground">Instalações</h1>
         <Button 
           onClick={() => setShowForm(true)} 
-          className="bg-blue-600 hover:bg-blue-700 w-full sm:w-auto"
+          className="btn-tech w-full sm:w-auto"
           disabled={createInstalacaoMutation.isPending}
         >
           <Plus className="w-4 h-4 mr-2" />
@@ -272,26 +272,26 @@ export const Instalacoes = () => {
       />
 
       {(totalValorQuinzena > 0 || totalMetrosQuadrados > 0) && (
-        <div className="bg-blue-50 border-l-4 border-blue-400 p-3 lg:p-4 rounded-r-lg space-y-1">
-          <p className="text-blue-800 font-medium text-sm lg:text-base">
+        <div className="card-tech border-l-4 border-orange-500 p-3 lg:p-4 rounded-r-lg space-y-1">
+          <p className="text-orange-400 font-medium text-sm lg:text-base">
             Total da {selectedQuinzena === 'primeira' ? '1ª quinzena' : 
                      selectedQuinzena === 'segunda' ? '2ª quinzena' : 
                      'quinzena'}: R$ {totalValorQuinzena.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
           </p>
-          <p className="text-blue-700 text-sm">
+          <p className="text-orange-300 text-sm">
             Metragem da {selectedQuinzena === 'primeira' ? '1ª quinzena' : 
                          selectedQuinzena === 'segunda' ? '2ª quinzena' : 
                          'quinzena'}: {totalMetrosQuadrados.toFixed(2)} m²
           </p>
-          <p className="text-blue-600 text-sm">
+          <p className="text-orange-200 text-sm">
             Total do mês: {totalMetrosQuadradosMes.toFixed(2)} m²
           </p>
         </div>
       )}
 
       {(showForm || editingInstalacao) && (
-        <div className="bg-white p-4 lg:p-6 rounded-lg border shadow-sm">
-          <h2 className="text-lg lg:text-xl font-semibold mb-4">
+        <div className="card-tech p-4 lg:p-6">
+          <h2 className="text-lg lg:text-xl font-semibold mb-4 text-foreground">
             {editingInstalacao ? 'Editar Instalação' : 'Nova Instalação'}
           </h2>
           <InstalacaoForm
@@ -309,10 +309,10 @@ export const Instalacoes = () => {
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 lg:gap-6">
         {filteredInstalacoes.length === 0 ? (
           <div className="col-span-full text-center py-8 lg:py-12">
-            <p className="text-gray-500 text-base lg:text-lg">
+            <p className="text-muted-foreground text-base lg:text-lg">
               Nenhuma instalação encontrada para este período.
             </p>
-            <p className="text-gray-400 text-sm lg:text-base mt-2">
+            <p className="text-muted-foreground/70 text-sm lg:text-base mt-2">
               {selectedQuinzena === 'primeira' ? 'Primeira quinzena (01-15)' :
                selectedQuinzena === 'segunda' ? 'Segunda quinzena (16-30)' :
                'Todas as quinzenas'} de {selectedMonth.toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' })}

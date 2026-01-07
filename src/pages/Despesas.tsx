@@ -266,60 +266,60 @@ export default function Despesas() {
 
       {/* Estatísticas */}
       <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
-        <Card>
+        <Card className="card-tech">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Total do Mês</CardTitle>
-            <Calculator className="h-4 w-4 text-muted-foreground" />
+            <Calculator className="h-4 w-4 text-orange-500" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">
+            <div className="text-2xl font-bold text-orange-500">
               R$ {estatisticas.total.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
             </div>
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="card-tech">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Pagas</CardTitle>
-            <CheckCircle className="h-4 w-4 text-green-600" />
+            <CheckCircle className="h-4 w-4 text-green-500" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-green-600">
+            <div className="text-2xl font-bold text-green-500">
               R$ {estatisticas.pagas.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
             </div>
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="card-tech">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Pendentes</CardTitle>
-            <Clock className="h-4 w-4 text-yellow-600" />
+            <Clock className="h-4 w-4 text-yellow-500" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-yellow-600">
+            <div className="text-2xl font-bold text-yellow-500">
               R$ {estatisticas.pendentes.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
             </div>
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="card-tech">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Vencidas</CardTitle>
-            <XCircle className="h-4 w-4 text-red-600" />
+            <XCircle className="h-4 w-4 text-red-500" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-red-600">
+            <div className="text-2xl font-bold text-red-500">
               {estatisticas.vencidas}
             </div>
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="card-tech">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Total Contas</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">
+            <div className="text-2xl font-bold text-foreground">
               {estatisticas.totalContas}
             </div>
           </CardContent>
@@ -328,13 +328,13 @@ export default function Despesas() {
 
       {/* Botões de ação */}
       <div className="flex gap-2 flex-wrap">
-        <Button onClick={() => setIsFormOpen(true)}>
+        <Button onClick={() => setIsFormOpen(true)} className="btn-tech">
           <Plus className="h-4 w-4 mr-2" />
           Nova Despesa
         </Button>
         
         {despesasDoMes.length === 0 && (
-          <Button variant="outline" onClick={criarContasDoMes}>
+          <Button variant="outline" onClick={criarContasDoMes} className="border-orange-500/30 hover:bg-orange-500/10">
             Criar Contas do Mês
           </Button>
         )}

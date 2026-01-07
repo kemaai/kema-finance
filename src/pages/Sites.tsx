@@ -198,21 +198,21 @@ export const Sites = () => {
         <div>
           <h1 className="text-xl md:text-2xl font-bold text-foreground">Sites</h1>
           <p className="text-sm md:text-base text-muted-foreground">Gerencie contratos e assinaturas</p>
-          <p className="text-sm text-green-600 font-medium mt-1">
+          <p className="text-sm text-orange-500 font-medium mt-1">
             Receita mensal recorrente: R$ {receitaMensalRecorrente.toFixed(2)}
           </p>
         </div>
         <button
           onClick={() => setIsFormOpen(true)}
-          className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center justify-center gap-2 transition-colors w-full md:w-auto"
+          className="btn-tech px-4 py-2 rounded-lg flex items-center justify-center gap-2 transition-colors w-full md:w-auto"
         >
           <Plus className="w-4 h-4" />
           Novo Site
         </button>
       </div>
 
-      <div className="bg-white rounded-xl shadow-sm border border-border">
-        <div className="p-3 md:p-4 border-b border-border">
+      <div className="card-tech">
+        <div className="p-3 md:p-4 border-b border-orange-500/20">
           <SiteMonthFilter
             selectedMonth={selectedMonth}
             onPreviousMonth={goToPreviousMonth}
@@ -228,10 +228,10 @@ export const Sites = () => {
                 placeholder="Buscar sites..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full pl-10 pr-4 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+                className="input-tech w-full pl-10 pr-4 py-2 rounded-lg text-sm"
               />
             </div>
-            <button className="px-4 py-2 border border-border rounded-lg flex items-center justify-center gap-2 hover:bg-muted transition-colors">
+            <button className="px-4 py-2 border border-orange-500/30 rounded-lg flex items-center justify-center gap-2 hover:bg-orange-500/10 transition-colors text-foreground">
               <Filter className="w-4 h-4" />
               Filtros
             </button>

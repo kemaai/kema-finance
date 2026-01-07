@@ -53,13 +53,13 @@ export const Dividas = () => {
 
       {/* Cards de Resumo */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-        <Card>
+        <Card className="card-tech">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Total Empréstimos</CardTitle>
-            <DollarSign className="h-4 w-4 text-muted-foreground" />
+            <DollarSign className="h-4 w-4 text-orange-500" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-blue-600">
+            <div className="text-2xl font-bold text-orange-500">
               R$ {totalEmprestimos.toFixed(2)}
             </div>
             <p className="text-xs text-muted-foreground">
@@ -68,13 +68,13 @@ export const Dividas = () => {
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="card-tech">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Restante Empréstimos</CardTitle>
-            <AlertTriangle className="h-4 w-4 text-muted-foreground" />
+            <AlertTriangle className="h-4 w-4 text-yellow-500" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-orange-600">
+            <div className="text-2xl font-bold text-yellow-500">
               R$ {totalRestanteEmprestimos.toFixed(2)}
             </div>
             <p className="text-xs text-muted-foreground">
@@ -83,13 +83,13 @@ export const Dividas = () => {
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="card-tech">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Dívidas Negativadas</CardTitle>
-            <AlertTriangle className="h-4 w-4 text-muted-foreground" />
+            <AlertTriangle className="h-4 w-4 text-red-500" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-red-600">
+            <div className="text-2xl font-bold text-red-500">
               R$ {totalDividasPendentes.toFixed(2)}
             </div>
             <p className="text-xs text-muted-foreground">
@@ -98,13 +98,13 @@ export const Dividas = () => {
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="card-tech">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Dívidas Quitadas</CardTitle>
-            <CheckCircle className="h-4 w-4 text-muted-foreground" />
+            <CheckCircle className="h-4 w-4 text-green-500" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-green-600">
+            <div className="text-2xl font-bold text-green-500">
               {dividasPagas.length}
             </div>
             <p className="text-xs text-muted-foreground">
@@ -122,22 +122,22 @@ export const Dividas = () => {
 
         <TabsContent value="emprestimos" className="space-y-6">
           <div className="flex justify-between items-center">
-            <h2 className="text-2xl font-semibold">Empréstimos</h2>
-            <Button onClick={() => setIsEmprestimoFormOpen(true)}>
+            <h2 className="text-2xl font-semibold text-foreground">Empréstimos</h2>
+            <Button onClick={() => setIsEmprestimoFormOpen(true)} className="btn-tech">
               <Plus className="w-4 h-4 mr-2" />
               Empréstimo
             </Button>
           </div>
 
           {emprestimos.length === 0 ? (
-            <Card>
+            <Card className="card-tech">
               <CardContent className="flex flex-col items-center justify-center py-10">
-                <DollarSign className="h-12 w-12 text-muted-foreground mb-4" />
-                <h3 className="text-lg font-medium mb-2">Nenhum empréstimo cadastrado</h3>
+                <DollarSign className="h-12 w-12 text-orange-500 mb-4" />
+                <h3 className="text-lg font-medium mb-2 text-foreground">Nenhum empréstimo cadastrado</h3>
                 <p className="text-muted-foreground text-center mb-4">
                   Comece adicionando seu primeiro empréstimo para acompanhar os pagamentos.
                 </p>
-                <Button onClick={() => setIsEmprestimoFormOpen(true)}>
+                <Button onClick={() => setIsEmprestimoFormOpen(true)} className="btn-tech">
                   <Plus className="w-4 h-4 mr-2" />
                   Adicionar Empréstimo
                 </Button>
@@ -159,22 +159,22 @@ export const Dividas = () => {
 
         <TabsContent value="dividas" className="space-y-6">
           <div className="flex justify-between items-center">
-            <h2 className="text-2xl font-semibold">Dívidas Negativadas</h2>
-            <Button onClick={() => setIsDividaFormOpen(true)}>
+            <h2 className="text-2xl font-semibold text-foreground">Dívidas Negativadas</h2>
+            <Button onClick={() => setIsDividaFormOpen(true)} className="btn-tech">
               <Plus className="w-4 h-4 mr-2" />
               Nova Dívida
             </Button>
           </div>
 
           {dividasNegativadas.length === 0 ? (
-            <Card>
+            <Card className="card-tech">
               <CardContent className="flex flex-col items-center justify-center py-10">
-                <AlertTriangle className="h-12 w-12 text-muted-foreground mb-4" />
-                <h3 className="text-lg font-medium mb-2">Nenhuma dívida cadastrada</h3>
+                <AlertTriangle className="h-12 w-12 text-orange-500 mb-4" />
+                <h3 className="text-lg font-medium mb-2 text-foreground">Nenhuma dívida cadastrada</h3>
                 <p className="text-muted-foreground text-center mb-4">
                   Adicione suas dívidas negativadas para acompanhar os pagamentos.
                 </p>
-                <Button onClick={() => setIsDividaFormOpen(true)}>
+                <Button onClick={() => setIsDividaFormOpen(true)} className="btn-tech">
                   <Plus className="w-4 h-4 mr-2" />
                   Adicionar Dívida
                 </Button>

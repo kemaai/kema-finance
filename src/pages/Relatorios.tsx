@@ -296,7 +296,7 @@ export const Relatorios = () => {
         </div>
         <button 
           onClick={() => exportarRelatorio('geral')}
-          className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center justify-center gap-2 transition-colors w-full md:w-auto"
+          className="btn-tech px-4 py-2 rounded-lg flex items-center justify-center gap-2 transition-colors w-full md:w-auto"
         >
           <Download className="w-4 h-4" />
           Exportar Geral
@@ -324,88 +324,88 @@ export const Relatorios = () => {
 
         <TabsContent value="visao-geral" className="space-y-4 md:space-y-6">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-6">
-            <Card>
+            <Card className="card-tech">
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className="text-xs md:text-sm font-medium">Total Clientes</CardTitle>
-                <Users className="h-3 w-3 md:h-4 md:w-4 text-muted-foreground" />
+                <Users className="h-3 w-3 md:h-4 md:w-4 text-orange-500" />
               </CardHeader>
               <CardContent>
-                <div className="text-lg md:text-2xl font-bold">{dadosFiltrados.clientes.length}</div>
+                <div className="text-lg md:text-2xl font-bold text-orange-500">{dadosFiltrados.clientes.length}</div>
               </CardContent>
             </Card>
 
-            <Card>
+            <Card className="card-tech">
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className="text-xs md:text-sm font-medium">Sites Ativos</CardTitle>
-                <Globe className="h-3 w-3 md:h-4 md:w-4 text-muted-foreground" />
+                <Globe className="h-3 w-3 md:h-4 md:w-4 text-orange-500" />
               </CardHeader>
               <CardContent>
-                <div className="text-lg md:text-2xl font-bold">{sitesPorStatus['Ativo'] || 0}</div>
+                <div className="text-lg md:text-2xl font-bold text-orange-500">{sitesPorStatus['Ativo'] || 0}</div>
               </CardContent>
             </Card>
 
-            <Card>
+            <Card className="card-tech">
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className="text-xs md:text-sm font-medium">Receita Total</CardTitle>
-                <DollarSign className="h-3 w-3 md:h-4 md:w-4 text-muted-foreground" />
+                <DollarSign className="h-3 w-3 md:h-4 md:w-4 text-green-500" />
               </CardHeader>
               <CardContent>
-                <div className="text-sm md:text-2xl font-bold">R$ {(receitaMensalSites + receitaInstalacoes).toFixed(2)}</div>
+                <div className="text-sm md:text-2xl font-bold text-green-500">R$ {(receitaMensalSites + receitaInstalacoes).toFixed(2)}</div>
               </CardContent>
             </Card>
 
-            <Card>
+            <Card className="card-tech">
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className="text-xs md:text-sm font-medium">Instalações</CardTitle>
-                <Scissors className="h-3 w-3 md:h-4 md:w-4 text-muted-foreground" />
+                <Scissors className="h-3 w-3 md:h-4 md:w-4 text-orange-500" />
               </CardHeader>
               <CardContent>
-                <div className="text-lg md:text-2xl font-bold">{dadosFiltrados.instalacoes.length}</div>
+                <div className="text-lg md:text-2xl font-bold text-orange-500">{dadosFiltrados.instalacoes.length}</div>
               </CardContent>
             </Card>
           </div>
 
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-6">
-            <Card>
+            <Card className="card-tech">
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className="text-xs md:text-sm font-medium">Despesas</CardTitle>
-                <CreditCard className="h-3 w-3 md:h-4 md:w-4 text-muted-foreground" />
+                <CreditCard className="h-3 w-3 md:h-4 md:w-4 text-red-500" />
               </CardHeader>
               <CardContent>
-                <div className="text-sm md:text-2xl font-bold">R$ {totalDespesas.toFixed(2)}</div>
+                <div className="text-sm md:text-2xl font-bold text-red-500">R$ {totalDespesas.toFixed(2)}</div>
                 <p className="text-xs text-muted-foreground">
                   {despesasPendentes > 0 ? `R$ ${despesasPendentes.toFixed(2)} pendente` : 'Tudo pago'}
                 </p>
               </CardContent>
             </Card>
 
-            <Card>
+            <Card className="card-tech">
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className="text-xs md:text-sm font-medium">Empréstimos</CardTitle>
-                <Banknote className="h-3 w-3 md:h-4 md:w-4 text-muted-foreground" />
+                <Banknote className="h-3 w-3 md:h-4 md:w-4 text-yellow-500" />
               </CardHeader>
               <CardContent>
-                <div className="text-sm md:text-2xl font-bold">R$ {totalEmprestimos.toFixed(2)}</div>
+                <div className="text-sm md:text-2xl font-bold text-yellow-500">R$ {totalEmprestimos.toFixed(2)}</div>
               </CardContent>
             </Card>
 
-            <Card>
+            <Card className="card-tech">
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className="text-xs md:text-sm font-medium">Dívidas</CardTitle>
-                <AlertTriangle className="h-3 w-3 md:h-4 md:w-4 text-muted-foreground" />
+                <AlertTriangle className="h-3 w-3 md:h-4 md:w-4 text-red-500" />
               </CardHeader>
               <CardContent>
-                <div className="text-sm md:text-2xl font-bold">R$ {totalDividas.toFixed(2)}</div>
+                <div className="text-sm md:text-2xl font-bold text-red-500">R$ {totalDividas.toFixed(2)}</div>
               </CardContent>
             </Card>
 
-            <Card>
+            <Card className="card-tech">
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className="text-xs md:text-sm font-medium">Saldo Líquido</CardTitle>
-                <TrendingUp className="h-3 w-3 md:h-4 md:w-4 text-muted-foreground" />
+                <TrendingUp className="h-3 w-3 md:h-4 md:w-4 text-orange-500" />
               </CardHeader>
               <CardContent>
-                <div className={`text-sm md:text-2xl font-bold ${(receitaMensalSites + receitaInstalacoes - despesasPendentes - totalEmprestimos - totalDividas) >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                <div className={`text-sm md:text-2xl font-bold ${(receitaMensalSites + receitaInstalacoes - despesasPendentes - totalEmprestimos - totalDividas) >= 0 ? 'text-green-500' : 'text-red-500'}`}>
                   R$ {(receitaMensalSites + receitaInstalacoes - despesasPendentes - totalEmprestimos - totalDividas).toFixed(2)}
                 </div>
               </CardContent>
