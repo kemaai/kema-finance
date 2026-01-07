@@ -202,7 +202,7 @@ export const Clientes = () => {
   if (isLoading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-orange-500"></div>
       </div>
     );
   }
@@ -210,10 +210,10 @@ export const Clientes = () => {
   return (
     <div className="container mx-auto p-6 space-y-6">
       <div className="flex justify-between items-center">
-        <h1 className="text-3xl font-bold text-gray-900">Clientes</h1>
+        <h1 className="text-3xl font-bold text-foreground">Clientes</h1>
         <Button 
           onClick={() => setShowForm(true)} 
-          className="bg-blue-600 hover:bg-blue-700"
+          className="btn-tech"
           disabled={createClienteMutation.isPending}
         >
           <Plus className="w-4 h-4 mr-2" />
@@ -222,8 +222,8 @@ export const Clientes = () => {
       </div>
 
       {(showForm || editingCliente) && (
-        <div className="bg-white p-6 rounded-lg border shadow-sm">
-          <h2 className="text-xl font-semibold mb-4">
+        <div className="card-tech p-6">
+          <h2 className="text-xl font-semibold mb-4 text-foreground">
             {editingCliente ? 'Editar Cliente' : 'Novo Cliente'}
           </h2>
           <ClienteForm
@@ -241,8 +241,8 @@ export const Clientes = () => {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {clientes.length === 0 ? (
           <div className="col-span-full text-center py-12">
-            <p className="text-gray-500 text-lg">Nenhum cliente cadastrado ainda.</p>
-            <p className="text-gray-400">Clique em "Novo Cliente" para começar.</p>
+            <p className="text-muted-foreground text-lg">Nenhum cliente cadastrado ainda.</p>
+            <p className="text-muted-foreground/70">Clique em "Novo Cliente" para começar.</p>
           </div>
         ) : (
           clientes.map((cliente) => (

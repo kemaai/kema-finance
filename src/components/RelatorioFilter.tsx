@@ -46,10 +46,10 @@ export const RelatorioFilter: React.FC<RelatorioFilterProps> = ({
   );
 
   return (
-    <Card className="mb-6">
+    <Card className="card-tech mb-6">
       <CardHeader>
         <CardTitle className="flex items-center gap-2 text-sm md:text-base">
-          <Filter className="w-4 h-4 md:w-5 md:h-5 text-blue-600" />
+          <Filter className="w-4 h-4 md:w-5 md:h-5 text-orange-500" />
           Filtros de Relatório
         </CardTitle>
       </CardHeader>
@@ -57,7 +57,7 @@ export const RelatorioFilter: React.FC<RelatorioFilterProps> = ({
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
           {/* Seletor de Tipo */}
           <div className="space-y-2">
-            <label className="text-sm font-medium text-gray-700">Categoria:</label>
+            <label className="text-sm font-medium text-foreground">Categoria:</label>
             <Select value={tipoRelatorio} onValueChange={onTipoChange}>
               <SelectTrigger className="w-full">
                 <SelectValue placeholder="Selecione a categoria" />
@@ -74,7 +74,7 @@ export const RelatorioFilter: React.FC<RelatorioFilterProps> = ({
 
           {/* Seletor de Mês */}
           <div className="space-y-2">
-            <label className="text-sm font-medium text-gray-700">Mês:</label>
+            <label className="text-sm font-medium text-foreground">Mês:</label>
             <Select value={mesEscolhido.toString()} onValueChange={(value) => onMesChange(parseInt(value))}>
               <SelectTrigger className="w-full">
                 <SelectValue placeholder="Selecione o mês" />
@@ -91,7 +91,7 @@ export const RelatorioFilter: React.FC<RelatorioFilterProps> = ({
 
           {/* Seletor de Ano */}
           <div className="space-y-2">
-            <label className="text-sm font-medium text-gray-700">Ano:</label>
+            <label className="text-sm font-medium text-foreground">Ano:</label>
             <Select value={anoEscolhido.toString()} onValueChange={(value) => onAnoChange(parseInt(value))}>
               <SelectTrigger className="w-full">
                 <SelectValue placeholder="Selecione o ano" />
@@ -111,7 +111,7 @@ export const RelatorioFilter: React.FC<RelatorioFilterProps> = ({
             <Button 
               variant="outline" 
               onClick={onResetFilter}
-              className="w-full"
+              className="w-full border-orange-500/30 hover:bg-orange-500/10"
             >
               <Calendar className="w-4 h-4 mr-2" />
               Limpar
@@ -120,8 +120,8 @@ export const RelatorioFilter: React.FC<RelatorioFilterProps> = ({
         </div>
 
         {/* Indicador do período selecionado */}
-        <div className="mt-4 p-3 bg-blue-50 rounded-lg">
-          <p className="text-sm text-blue-800">
+        <div className="mt-4 p-3 bg-orange-500/10 border border-orange-500/30 rounded-lg">
+          <p className="text-sm text-orange-400">
             <strong>Período:</strong> {nomesMeses[mesEscolhido]} de {anoEscolhido}
             {tipoRelatorio !== 'todos' && (
               <span className="ml-2">

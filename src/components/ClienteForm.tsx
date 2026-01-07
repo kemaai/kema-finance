@@ -96,7 +96,7 @@ export const ClienteForm: React.FC<ClienteFormProps> = ({
   };
 
   return (
-    <Card className="w-full max-w-md md:max-w-2xl max-h-[90vh] overflow-y-auto">
+    <Card className="card-tech w-full max-w-md md:max-w-2xl max-h-[90vh] overflow-y-auto">
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
         <CardTitle className="text-lg md:text-xl font-semibold">
           {cliente ? 'Editar Cliente' : 'Novo Cliente'}
@@ -197,7 +197,7 @@ export const ClienteForm: React.FC<ClienteFormProps> = ({
                 id="estado"
                 value={formData.estado}
                 onChange={(e) => handleInputChange('estado', e.target.value)}
-                className="w-full h-10 px-3 py-2 text-sm bg-background border border-input rounded-md focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
+                className="input-tech w-full h-10 px-3 py-2 text-sm rounded-md"
                 required
               >
                 <option value="">Selecione</option>
@@ -257,7 +257,7 @@ export const ClienteForm: React.FC<ClienteFormProps> = ({
           </div>
 
           <div className="flex flex-col sm:flex-row gap-2 pt-4">
-            <Button type="submit" className="flex-1" disabled={isLoading}>
+            <Button type="submit" className="btn-tech flex-1" disabled={isLoading}>
               <Save className="w-4 h-4 mr-2" />
               {isLoading ? 'Salvando...' : 'Salvar'}
             </Button>

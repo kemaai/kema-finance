@@ -96,7 +96,7 @@ export const InstalacaoForm: React.FC<InstalacaoFormProps> = ({
   const metragem = formData.valor_total / 20;
 
   return (
-    <Card className="w-full max-w-2xl mx-auto">
+    <Card className="card-tech w-full max-w-2xl mx-auto">
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
         <CardTitle className="text-lg md:text-xl font-semibold">
           {instalacao ? 'Editar Instalação' : 'Nova Instalação'}
@@ -198,7 +198,7 @@ export const InstalacaoForm: React.FC<InstalacaoFormProps> = ({
               id="status"
               value={formData.status}
               onChange={(e) => handleInputChange('status', e.target.value)}
-              className="w-full h-10 px-3 py-2 text-sm bg-background border border-input rounded-md focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
+              className="input-tech w-full h-10 px-3 py-2 text-sm rounded-md"
               required
             >
               <option value="Agendado">Agendado</option>
@@ -209,7 +209,7 @@ export const InstalacaoForm: React.FC<InstalacaoFormProps> = ({
           </div>
 
           <div className="flex flex-col sm:flex-row gap-2 pt-4">
-            <Button type="submit" className="flex-1" disabled={isLoading}>
+            <Button type="submit" className="btn-tech flex-1" disabled={isLoading}>
               <Save className="w-4 h-4 mr-2" />
               {isLoading ? 'Salvando...' : 'Salvar'}
             </Button>

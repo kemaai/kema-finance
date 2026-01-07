@@ -41,7 +41,7 @@ export const QuinzenaFilter: React.FC<QuinzenaFilterProps> = ({
   };
 
   return (
-    <div className="flex flex-col sm:flex-row gap-4 items-center bg-white p-4 rounded-lg border shadow-sm">
+    <div className="flex flex-col sm:flex-row gap-4 items-center card-tech p-4">
       <div className="flex items-center gap-2">
         <Button 
           variant="outline" 

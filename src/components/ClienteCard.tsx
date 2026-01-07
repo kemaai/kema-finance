@@ -27,7 +27,7 @@ interface ClienteCardProps {
 
 export const ClienteCard: React.FC<ClienteCardProps> = ({ cliente, onEdit, onDelete }) => {
   return (
-    <Card className="bg-white border border-border hover:shadow-sm transition-shadow">
+    <Card className="card-tech">
       <CardContent className="p-4">
         <div className="flex justify-between items-start mb-3">
           <div className="flex-1">
@@ -37,13 +37,13 @@ export const ClienteCard: React.FC<ClienteCardProps> = ({ cliente, onEdit, onDel
           <div className="flex gap-1">
             <button
               onClick={() => onEdit(cliente)}
-              className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+              className="p-2 text-orange-500 hover:bg-orange-500/10 rounded-lg transition-colors"
             >
               <Edit className="w-4 h-4" />
             </button>
             <button
               onClick={() => onDelete(cliente.id)}
-              className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+              className="p-2 text-red-500 hover:bg-red-500/10 rounded-lg transition-colors"
             >
               <Trash2 className="w-4 h-4" />
             </button>
