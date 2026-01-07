@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -72,16 +71,19 @@ export const DividaNegativadaCard: React.FC<DividaNegativadaCardProps> = ({
   };
 
   return (
-    <Card className="hover:shadow-md transition-shadow">
+    <Card className="card-tech border-border hover:border-primary/50 transition-all duration-300">
       <CardHeader className="pb-3">
         <div className="flex justify-between items-start">
           <div>
-            <CardTitle className="text-lg">{divida.nome}</CardTitle>
+            <CardTitle className="text-lg text-foreground">{divida.nome}</CardTitle>
             <CardDescription>
               Criado em {new Date(divida.created_at).toLocaleDateString('pt-BR')}
             </CardDescription>
           </div>
-          <Badge variant={divida.pago ? "default" : "destructive"}>
+          <Badge className={divida.pago 
+            ? 'bg-green-900/50 text-green-400 border border-green-700/50' 
+            : 'bg-red-900/50 text-red-400 border border-red-700/50'
+          }>
             {divida.pago ? 'Pago' : 'Pendente'}
           </Badge>
         </div>
@@ -91,11 +93,11 @@ export const DividaNegativadaCard: React.FC<DividaNegativadaCardProps> = ({
         <div className="grid grid-cols-2 gap-4 text-sm">
           <div>
             <p className="text-muted-foreground">Valor Original</p>
-            <p className="font-medium text-lg">R$ {Number(divida.valor_original).toFixed(2)}</p>
+            <p className="font-medium text-lg text-foreground">R$ {Number(divida.valor_original).toFixed(2)}</p>
           </div>
           <div>
             <p className="text-muted-foreground">Valor Atual</p>
-            <p className={`font-medium text-lg ${divida.pago ? 'text-green-600' : 'text-red-600'}`}>
+            <p className={`font-medium text-lg ${divida.pago ? 'text-green-400' : 'text-red-400'}`}>
               R$ {Number(divida.valor_atual).toFixed(2)}
             </p>
           </div>
@@ -104,7 +106,7 @@ export const DividaNegativadaCard: React.FC<DividaNegativadaCardProps> = ({
         {divida.pago && divida.data_pagamento && (
           <div className="text-sm">
             <p className="text-muted-foreground">Data do Pagamento</p>
-            <p className="font-medium text-green-600">
+            <p className="font-medium text-green-400">
               {new Date(divida.data_pagamento).toLocaleDateString('pt-BR')}
             </p>
           </div>
@@ -114,26 +116,27 @@ export const DividaNegativadaCard: React.FC<DividaNegativadaCardProps> = ({
           {!divida.pago && (
             <Dialog open={isPaymentDialogOpen} onOpenChange={setIsPaymentDialogOpen}>
               <DialogTrigger asChild>
-                <Button size="sm" className="flex-1">
+                <Button size="sm" className="flex-1 bg-primary hover:bg-primary/90">
                   <Check className="w-4 h-4 mr-1" />
                   Marcar como Pago
                 </Button>
               </DialogTrigger>
-              <DialogContent>
+              <DialogContent className="card-tech border-border">
                 <DialogHeader>
-                  <DialogTitle>Marcar como Pago - {divida.nome}</DialogTitle>
+                  <DialogTitle className="text-foreground">Marcar como Pago - {divida.nome}</DialogTitle>
                 </DialogHeader>
                 <div className="space-y-4">
                   <div>
-                    <Label htmlFor="data">Data do Pagamento</Label>
+                    <Label htmlFor="data" className="text-foreground">Data do Pagamento</Label>
                     <Input
                       id="data"
                       type="date"
                       value={paymentDate}
                       onChange={(e) => setPaymentDate(e.target.value)}
+                      className="bg-input border-border focus:border-primary"
                     />
                   </div>
-                  <Button onClick={handleMarkAsPaid} className="w-full">
+                  <Button onClick={handleMarkAsPaid} className="w-full bg-primary hover:bg-primary/90">
                     Confirmar Pagamento
                   </Button>
                 </div>
@@ -141,7 +144,12 @@ export const DividaNegativadaCard: React.FC<DividaNegativadaCardProps> = ({
             </Dialog>
           )}
           
-          <Button variant="destructive" size="sm" onClick={handleDelete}>
+          <Button 
+            variant="outline" 
+            size="sm" 
+            onClick={handleDelete}
+            className="border-red-700/50 text-red-400 hover:bg-red-900/30"
+          >
             <Trash2 className="w-4 h-4" />
           </Button>
         </div>

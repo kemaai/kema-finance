@@ -7,6 +7,8 @@ import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
 import { useLocalStorage } from '@/hooks/useLocalStorage';
 import { useToast } from '@/hooks/use-toast';
+import logo from '@/assets/logo.png';
+
 const navigation = [{
   title: "Dashboard",
   url: "/dashboard",
@@ -58,12 +60,10 @@ const quickActions = [{
 export function AppSidebar() {
   const location = useLocation();
   const navigate = useNavigate();
-  const {
-    user,
-    signOut
-  } = useAuth();
+  const { user, signOut } = useAuth();
   const { toast } = useToast();
-  const [isDarkMode, setIsDarkMode] = useLocalStorage<boolean>('darkMode', false);
+  const [isDarkMode, setIsDarkMode] = useLocalStorage<boolean>('darkMode', true);
+
   const handleSignOut = async () => {
     await signOut();
     navigate('/login');
@@ -92,75 +92,117 @@ export function AppSidebar() {
       document.documentElement.classList.remove('dark');
     }
   }, [isDarkMode]);
-  return <Sidebar>
-      <SidebarHeader className="p-4">
-        <div className="flex items-center gap-2">
-          <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
-            <span className="text-white font-bold text-sm">KS</span>
+
+  return (
+    <Sidebar className="border-r border-border bg-sidebar">
+      <SidebarHeader className="p-4 border-b border-border">
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 rounded-xl flex items-center justify-center glow-orange-sm">
+            <img src={logo} alt="KemaAI" className="w-8 h-8 object-contain" />
           </div>
           <div>
-            
+            <h1 className="text-lg font-bold text-gradient-orange">KemaAI</h1>
             <p className="text-xs text-muted-foreground">CRM System</p>
           </div>
         </div>
       </SidebarHeader>
 
-      <SidebarContent>
+      <SidebarContent className="px-2">
         <SidebarGroup>
-          <SidebarGroupLabel>Menu Principal</SidebarGroupLabel>
+          <SidebarGroupLabel className="text-muted-foreground text-xs uppercase tracking-wider px-2">
+            Menu Principal
+          </SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
-              {navigation.map(item => <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton asChild isActive={location.pathname === item.url} onClick={() => navigate(item.url)}>
-                    <button className="flex items-center gap-2 w-full">
-                      <item.icon className="w-4 h-4" />
-                      <span>{item.title}</span>
-                    </button>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>)}
+              {navigation.map(item => {
+                const isActive = location.pathname === item.url;
+                return (
+                  <SidebarMenuItem key={item.title}>
+                    <SidebarMenuButton 
+                      asChild 
+                      isActive={isActive}
+                      onClick={() => navigate(item.url)}
+                      className={`
+                        flex items-center gap-3 w-full px-3 py-2.5 rounded-lg transition-all duration-200
+                        ${isActive 
+                          ? 'bg-primary/20 text-primary border border-primary/30' 
+                          : 'text-muted-foreground hover:text-foreground hover:bg-muted/50'
+                        }
+                      `}
+                    >
+                      <button className="flex items-center gap-3 w-full">
+                        <item.icon className={`w-4 h-4 ${isActive ? 'text-primary' : ''}`} />
+                        <span className="font-medium">{item.title}</span>
+                      </button>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                );
+              })}
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
 
-        <SidebarGroup>
-          <SidebarGroupLabel>Ações Rápidas</SidebarGroupLabel>
+        <SidebarGroup className="mt-4">
+          <SidebarGroupLabel className="text-muted-foreground text-xs uppercase tracking-wider px-2">
+            Ações Rápidas
+          </SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
-              {quickActions.map(item => <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton asChild onClick={() => navigate(item.url)}>
-                    <button className="flex items-center gap-2 w-full">
+              {quickActions.map(item => (
+                <SidebarMenuItem key={item.title}>
+                  <SidebarMenuButton 
+                    asChild 
+                    onClick={() => navigate(item.url)}
+                    className="flex items-center gap-3 w-full px-3 py-2 rounded-lg text-muted-foreground hover:text-primary hover:bg-primary/10 transition-all duration-200"
+                  >
+                    <button className="flex items-center gap-3 w-full">
                       <item.icon className="w-4 h-4" />
                       <span>{item.title}</span>
                     </button>
                   </SidebarMenuButton>
-                </SidebarMenuItem>)}
+                </SidebarMenuItem>
+              ))}
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
       </SidebarContent>
 
-      <SidebarFooter className="p-4">
-        <div className="space-y-2">
-          <div className="flex items-center gap-2 p-2 bg-muted/50 rounded-lg">
-            <User className="w-4 h-4" />
-            <div className="flex-1 text-sm">
-              <p className="font-medium">{user?.user_metadata?.full_name || user?.email}</p>
+      <SidebarFooter className="p-4 border-t border-border">
+        <div className="space-y-3">
+          <div className="flex items-center gap-3 p-3 bg-muted/30 rounded-lg border border-border">
+            <div className="w-8 h-8 bg-primary/20 rounded-full flex items-center justify-center">
+              <User className="w-4 h-4 text-primary" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-medium text-foreground truncate">
+                {user?.user_metadata?.full_name || user?.email}
+              </p>
             </div>
           </div>
           
-          <div className="flex items-center justify-between p-2 hover:bg-muted/50 rounded-lg transition-colors">
+          <div className="flex items-center justify-between p-3 rounded-lg hover:bg-muted/30 transition-colors">
             <div className="flex items-center gap-2">
-              {isDarkMode ? <Moon className="w-4 h-4" /> : <Sun className="w-4 h-4" />}
-              <span className="text-sm">Tema Escuro</span>
+              {isDarkMode ? <Moon className="w-4 h-4 text-primary" /> : <Sun className="w-4 h-4 text-amber-500" />}
+              <span className="text-sm text-foreground">Tema Escuro</span>
             </div>
-            <Switch checked={isDarkMode} onCheckedChange={toggleDarkMode} />
+            <Switch 
+              checked={isDarkMode} 
+              onCheckedChange={toggleDarkMode}
+              className="data-[state=checked]:bg-primary"
+            />
           </div>
 
-          <Button onClick={handleSignOut} variant="ghost" size="sm" className="w-full justify-start gap-2">
+          <Button 
+            onClick={handleSignOut} 
+            variant="ghost" 
+            size="sm" 
+            className="w-full justify-start gap-2 text-muted-foreground hover:text-destructive hover:bg-destructive/10"
+          >
             <LogOut className="w-4 h-4" />
             Sair
           </Button>
         </div>
       </SidebarFooter>
-    </Sidebar>;
+    </Sidebar>
+  );
 }

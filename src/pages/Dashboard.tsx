@@ -116,30 +116,22 @@ export const Dashboard = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted/20">
-      {/* Enhanced Hero Section */}
+    <div className="min-h-screen bg-background">
+      {/* Hero Section */}
       <div className="relative overflow-hidden">
-        {/* Background with subtle pattern */}
-        <div className="absolute inset-0 bg-gradient-to-r from-primary/3 via-primary/5 to-primary/3">
-          <div className="absolute inset-0 bg-grid-pattern opacity-30"></div>
-          <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-background/80"></div>
-        </div>
+        <div className="absolute inset-0 bg-tech-particles"></div>
+        <div className="absolute inset-0 bg-grid-pattern opacity-50"></div>
         
-        {/* Floating elements for modern touch */}
+        {/* Glowing orbs */}
         <div className="absolute top-10 right-20 w-32 h-32 bg-primary/10 rounded-full blur-3xl animate-pulse"></div>
-        <div className="absolute bottom-10 left-20 w-24 h-24 bg-blue-500/10 rounded-full blur-2xl animate-pulse delay-1000"></div>
+        <div className="absolute bottom-10 left-20 w-24 h-24 bg-accent/10 rounded-full blur-2xl animate-pulse delay-1000"></div>
         
         <div className="relative p-6 md:p-12 pb-8 md:pb-16">
           <div className="max-w-7xl mx-auto">
-            <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-8">
-              <div className="space-y-6">
-                {/* Welcome message with better typography */}
-                <div className="space-y-3">
-                  <p className="text-xl md:text-2xl font-medium text-foreground/90 leading-relaxed">
-                    Bem-vindo de volta {profile?.first_name || 'Usuário'}! 👋
-                  </p>
-                </div>
-              </div>
+            <div className="space-y-3">
+              <p className="text-xl md:text-2xl font-medium text-foreground leading-relaxed">
+                Bem-vindo de volta {profile?.first_name || 'Usuário'}! 👋
+              </p>
             </div>
           </div>
         </div>
@@ -153,7 +145,7 @@ export const Dashboard = () => {
             subValue={`Sites: R$ ${receitaMensalSites.toFixed(2)} • Instalações: R$ ${receitaQuinzenaInstalacoes.toFixed(2)}`} 
             icon={DollarSign} 
             iconColor="bg-gradient-to-br from-green-500 to-green-600" 
-            className="hover:shadow-lg transition-all duration-300 hover:-translate-y-1" 
+            className="hover:border-green-500/50" 
           />
           
           <DashboardCard 
@@ -162,8 +154,8 @@ export const Dashboard = () => {
             subValue={`${sitesAtivos} contratos ativos este mês`} 
             icon={Globe} 
             iconColor="bg-gradient-to-br from-blue-500 to-blue-600" 
-            trendColor="text-blue-600" 
-            className="hover:shadow-lg transition-all duration-300 hover:-translate-y-1" 
+            trendColor="text-blue-400" 
+            className="hover:border-blue-500/50" 
           />
           
           <DashboardCard 
@@ -171,8 +163,8 @@ export const Dashboard = () => {
             value={instalacoesDaQuinzena.length.toString()} 
             subValue={`${totalM2Quinzena.toFixed(1)} m² esta quinzena`} 
             icon={Scissors} 
-            iconColor="bg-gradient-to-br from-orange-500 to-orange-600" 
-            className="hover:shadow-lg transition-all duration-300 hover:-translate-y-1" 
+            iconColor="bg-gradient-to-br from-primary to-accent" 
+            className="hover:border-primary/50" 
           />
           
           <DashboardCard 
@@ -181,7 +173,7 @@ export const Dashboard = () => {
             subValue={`${mediaSites} sites por cliente`} 
             icon={Users} 
             iconColor="bg-gradient-to-br from-purple-500 to-purple-600" 
-            className="hover:shadow-lg transition-all duration-300 hover:-translate-y-1" 
+            className="hover:border-purple-500/50" 
           />
 
           <DashboardCard 
@@ -190,17 +182,17 @@ export const Dashboard = () => {
             subValue={`Pagas: R$ ${totalDespesasPagas.toFixed(2)} • Pendentes: R$ ${totalDespesasPendentes.toFixed(2)}`} 
             icon={CreditCard} 
             iconColor="bg-gradient-to-br from-red-500 to-red-600" 
-            className="hover:shadow-lg transition-all duration-300 hover:-translate-y-1" 
+            className="hover:border-red-500/50" 
           />
         </div>
 
-        <div className="bg-white rounded-2xl p-6 shadow-sm border hover:shadow-md transition-shadow duration-300">
+        <div className="card-tech p-6 hover:border-primary/50 transition-all duration-300">
           <div className="flex items-center justify-between mb-6">
             <div>
               <h3 className="text-xl font-semibold text-foreground">Performance de Receita</h3>
               <p className="text-muted-foreground">Visão geral dos últimos meses</p>
             </div>
-            <div className="flex items-center gap-2 text-green-600">
+            <div className="flex items-center gap-2 text-green-400">
               <TrendingUp className="w-5 h-5" />
               <span className="font-medium">+8.2%</span>
             </div>
@@ -209,11 +201,11 @@ export const Dashboard = () => {
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          <div className="bg-white rounded-2xl p-6 shadow-sm border hover:shadow-md transition-shadow duration-300">
+          <div className="card-tech p-6 hover:border-primary/50 transition-all duration-300">
             <div className="flex items-center justify-between mb-6">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-amber-100 rounded-xl flex items-center justify-center">
-                  <Calendar className="w-5 h-5 text-amber-600" />
+                <div className="w-10 h-10 bg-amber-900/50 rounded-xl flex items-center justify-center">
+                  <Calendar className="w-5 h-5 text-amber-400" />
                 </div>
                 <div>
                   <h3 className="text-lg font-semibold text-foreground">Próximos Vencimentos</h3>
@@ -235,14 +227,14 @@ export const Dashboard = () => {
                 </div>
               ) : (
                 proximosVencimentos.map(site => (
-                  <div key={site.id} className="flex items-center justify-between p-4 bg-amber-50 rounded-xl border border-amber-100 hover:bg-amber-100 transition-colors">
+                  <div key={site.id} className="flex items-center justify-between p-4 bg-amber-900/20 rounded-xl border border-amber-700/30 hover:border-amber-600/50 transition-colors">
                     <div className="flex-1 min-w-0">
                       <div className="font-medium text-foreground truncate">{site.cliente_nome}</div>
                       <div className="text-sm text-muted-foreground truncate">{site.descricao_projeto}</div>
                     </div>
                     <div className="text-right ml-4">
-                      <div className="font-bold text-amber-700">R$ {site.valor_mensal.toFixed(2)}</div>
-                      <div className="text-xs text-amber-600">
+                      <div className="font-bold text-amber-400">R$ {site.valor_mensal.toFixed(2)}</div>
+                      <div className="text-xs text-amber-500">
                         {new Date(site.data_vencimento).toLocaleDateString('pt-BR')}
                       </div>
                     </div>
@@ -252,11 +244,11 @@ export const Dashboard = () => {
             </div>
           </div>
 
-          <div className="bg-white rounded-2xl p-6 shadow-sm border hover:shadow-md transition-shadow duration-300">
+          <div className="card-tech p-6 hover:border-primary/50 transition-all duration-300">
             <div className="flex items-center justify-between mb-6">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-red-100 rounded-xl flex items-center justify-center">
-                  <AlertTriangle className="w-5 h-5 text-red-600" />
+                <div className="w-10 h-10 bg-red-900/50 rounded-xl flex items-center justify-center">
+                  <AlertTriangle className="w-5 h-5 text-red-400" />
                 </div>
                 <div>
                   <h3 className="text-lg font-semibold text-foreground">Despesas Próximas</h3>
@@ -278,7 +270,7 @@ export const Dashboard = () => {
                 </div>
               ) : (
                 despesasProximasVencimento.map(despesa => (
-                  <div key={despesa.id} className="flex items-center justify-between p-4 bg-red-50 rounded-xl border border-red-100 hover:bg-red-100 transition-colors">
+                  <div key={despesa.id} className="flex items-center justify-between p-4 bg-red-900/20 rounded-xl border border-red-700/30 hover:border-red-600/50 transition-colors">
                     <div className="flex-1 min-w-0">
                       <div className="font-medium text-foreground truncate">{despesa.nome}</div>
                       {despesa.anotacao && (
@@ -286,8 +278,8 @@ export const Dashboard = () => {
                       )}
                     </div>
                     <div className="text-right ml-4">
-                      <div className="font-bold text-red-700">R$ {Number(despesa.valor).toFixed(2)}</div>
-                      <div className="text-xs text-red-600">
+                      <div className="font-bold text-red-400">R$ {Number(despesa.valor).toFixed(2)}</div>
+                      <div className="text-xs text-red-500">
                         {new Date(despesa.data_vencimento).toLocaleDateString('pt-BR')}
                       </div>
                     </div>
@@ -297,11 +289,11 @@ export const Dashboard = () => {
             </div>
           </div>
 
-          <div className="bg-white rounded-2xl p-6 shadow-sm border hover:shadow-md transition-shadow duration-300">
+          <div className="card-tech p-6 hover:border-primary/50 transition-all duration-300">
             <div className="flex items-center justify-between mb-6">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-blue-100 rounded-xl flex items-center justify-center">
-                  <Scissors className="w-5 h-5 text-blue-600" />
+                <div className="w-10 h-10 bg-blue-900/50 rounded-xl flex items-center justify-center">
+                  <Scissors className="w-5 h-5 text-blue-400" />
                 </div>
                 <div>
                   <h3 className="text-lg font-semibold text-foreground">Instalações</h3>
@@ -325,34 +317,30 @@ export const Dashboard = () => {
                 todasInstalacoes.map(instalacao => (
                   <div key={instalacao.id} className={`flex items-center justify-between p-4 rounded-xl border transition-colors ${
                     instalacao.status === 'Concluído' 
-                      ? 'bg-green-50 border-green-100 hover:bg-green-100' 
-                      : 'bg-blue-50 border-blue-100 hover:bg-blue-100'
+                      ? 'bg-green-900/20 border-green-700/30 hover:border-green-600/50' 
+                      : 'bg-blue-900/20 border-blue-700/30 hover:border-blue-600/50'
                   }`}>
                     <div className="flex items-center gap-3 flex-1 min-w-0">
                       {instalacao.status === 'Concluído' && (
-                        <CheckCircle className="w-5 h-5 text-green-600 flex-shrink-0" />
+                        <CheckCircle className="w-5 h-5 text-green-400 flex-shrink-0" />
                       )}
                       <div className="min-w-0 flex-1">
                         <div className="font-medium text-foreground truncate">{instalacao.arquiteto_nome}</div>
                         <div className="text-sm text-muted-foreground truncate">{instalacao.ambiente}</div>
                         <div className={`text-xs px-2 py-1 rounded-full inline-block mt-1 ${
                           instalacao.status === 'Concluído' 
-                            ? 'bg-green-100 text-green-700' 
-                            : 'bg-blue-100 text-blue-700'
+                            ? 'bg-green-900/50 text-green-400' 
+                            : 'bg-blue-900/50 text-blue-400'
                         }`}>
                           {instalacao.status}
                         </div>
                       </div>
                     </div>
                     <div className="text-right ml-4">
-                      <div className={`font-bold ${
-                        instalacao.status === 'Concluído' ? 'text-green-700' : 'text-blue-700'
-                      }`}>
+                      <div className={`font-bold ${instalacao.status === 'Concluído' ? 'text-green-400' : 'text-blue-400'}`}>
                         R$ {instalacao.valor_total.toFixed(2)}
                       </div>
-                      <div className={`text-xs ${
-                        instalacao.status === 'Concluído' ? 'text-green-600' : 'text-blue-600'
-                      }`}>
+                      <div className="text-xs text-muted-foreground">
                         {new Date(instalacao.data_instalacao).toLocaleDateString('pt-BR')}
                       </div>
                     </div>

@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Edit, Trash2, Globe, Calendar, DollarSign, Copy } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
@@ -41,11 +40,11 @@ const getTipoPlanoLabel = (tipo: string) => {
 
 const getStatusColor = (status: string) => {
   const colors: Record<string, string> = {
-    'Ativo': 'bg-green-100 text-green-800',
-    'Suspenso': 'bg-yellow-100 text-yellow-800',
-    'Cancelado': 'bg-red-100 text-red-800'
+    'Ativo': 'bg-green-900/50 text-green-400 border border-green-700/50',
+    'Suspenso': 'bg-amber-900/50 text-amber-400 border border-amber-700/50',
+    'Cancelado': 'bg-red-900/50 text-red-400 border border-red-700/50'
   };
-  return colors[status] || 'bg-gray-100 text-gray-800';
+  return colors[status] || 'bg-muted text-muted-foreground';
 };
 
 const getServicosAdicionais = (site: Site) => {
@@ -57,7 +56,7 @@ const getServicosAdicionais = (site: Site) => {
 
 export const SiteCard: React.FC<SiteCardProps> = ({ site, onEdit, onDelete, onDuplicate }) => {
   return (
-    <Card className="bg-white border border-border hover:shadow-sm transition-shadow">
+    <Card className="card-tech border-border hover:border-primary/50 transition-all duration-300">
       <CardContent className="p-3 sm:p-4">
         <div className="flex flex-col gap-3">
           {/* Header com título e ações */}
@@ -70,7 +69,7 @@ export const SiteCard: React.FC<SiteCardProps> = ({ site, onEdit, onDelete, onDu
                   href={site.url_site}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-blue-600 hover:text-blue-800 text-sm flex items-center gap-1 mt-1 truncate"
+                  className="text-primary hover:text-primary/80 text-sm flex items-center gap-1 mt-1 truncate"
                 >
                   <Globe className="w-3 h-3 flex-shrink-0" />
                   <span className="truncate">{site.url_site}</span>
@@ -78,25 +77,25 @@ export const SiteCard: React.FC<SiteCardProps> = ({ site, onEdit, onDelete, onDu
               )}
             </div>
             
-            {/* Botões de ação - responsivos */}
+            {/* Botões de ação */}
             <div className="flex gap-1 flex-shrink-0">
               <button
                 onClick={() => onDuplicate(site)}
-                className="p-1.5 sm:p-2 text-green-600 hover:bg-green-50 rounded-lg transition-colors"
+                className="p-1.5 sm:p-2 text-green-400 hover:bg-green-900/30 rounded-lg transition-colors"
                 title="Duplicar para próximo mês"
               >
                 <Copy className="w-3 h-3 sm:w-4 sm:h-4" />
               </button>
               <button
                 onClick={() => onEdit(site)}
-                className="p-1.5 sm:p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+                className="p-1.5 sm:p-2 text-primary hover:bg-primary/20 rounded-lg transition-colors"
                 title="Editar"
               >
                 <Edit className="w-3 h-3 sm:w-4 sm:h-4" />
               </button>
               <button
                 onClick={() => onDelete(site.id)}
-                className="p-1.5 sm:p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                className="p-1.5 sm:p-2 text-red-400 hover:bg-red-900/30 rounded-lg transition-colors"
                 title="Excluir"
               >
                 <Trash2 className="w-3 h-3 sm:w-4 sm:h-4" />
@@ -108,19 +107,19 @@ export const SiteCard: React.FC<SiteCardProps> = ({ site, onEdit, onDelete, onDu
           <div className="space-y-2">
             <div className="flex items-center justify-between text-sm">
               <span className="text-muted-foreground">Plano:</span>
-              <span className="font-medium text-right truncate ml-2">{getTipoPlanoLabel(site.tipo_plano)}</span>
+              <span className="font-medium text-foreground text-right truncate ml-2">{getTipoPlanoLabel(site.tipo_plano)}</span>
             </div>
             
             {getServicosAdicionais(site) && (
               <div className="flex items-center justify-between text-sm">
                 <span className="text-muted-foreground">Serviços:</span>
-                <span className="font-medium text-right truncate ml-2">{getServicosAdicionais(site)}</span>
+                <span className="font-medium text-foreground text-right truncate ml-2">{getServicosAdicionais(site)}</span>
               </div>
             )}
 
             <div className="flex items-center justify-between text-sm">
               <span className="text-muted-foreground">Valor:</span>
-              <div className="flex items-center gap-1 flex-shrink-0">
+              <div className="flex items-center gap-1 flex-shrink-0 text-primary">
                 <DollarSign className="w-3 h-3" />
                 <span className="font-medium">R$ {site.valor_mensal.toFixed(2)}</span>
               </div>
@@ -128,7 +127,7 @@ export const SiteCard: React.FC<SiteCardProps> = ({ site, onEdit, onDelete, onDu
 
             <div className="flex items-center justify-between text-sm">
               <span className="text-muted-foreground">Vencimento:</span>
-              <div className="flex items-center gap-1 flex-shrink-0">
+              <div className="flex items-center gap-1 flex-shrink-0 text-foreground">
                 <Calendar className="w-3 h-3" />
                 <span>{parseLocalDate(site.data_vencimento).toLocaleDateString('pt-BR')}</span>
               </div>
@@ -146,7 +145,7 @@ export const SiteCard: React.FC<SiteCardProps> = ({ site, onEdit, onDelete, onDu
           {site.observacoes && (
             <div className="pt-3 border-t border-border">
               <p className="text-sm text-muted-foreground line-clamp-2">
-                <strong>Obs:</strong> {site.observacoes}
+                <strong className="text-foreground">Obs:</strong> {site.observacoes}
               </p>
             </div>
           )}
