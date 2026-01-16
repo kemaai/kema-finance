@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { 
   LineChart, 
@@ -16,6 +15,15 @@ import {
   Legend
 } from 'recharts';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+
+// Paleta de cores KemaAI
+const COLORS = {
+  sites: '#F97316',        // Laranja KemaAI
+  instalacoes: '#F59E0B',  // Amber
+  grid: '#374151',         // Grid escuro
+  text: '#D1D5DB',         // Texto claro
+  textMuted: '#9CA3AF'     // Texto secundário
+};
 
 interface Site {
   id: string;
@@ -44,14 +52,25 @@ interface RevenueChartProps {
   instalacoes?: Instalacao[];
 }
 
+// Tooltip customizado com tema escuro KemaAI
+const CustomTooltip = ({ active, payload, label }: any) => {
+  if (active && payload && payload.length) {
+    return (
+      <div className="bg-stone-900 border border-orange-500/50 rounded-lg p-3 shadow-lg">
+        <p className="text-orange-400 font-medium mb-2">{label}</p>
+        {payload.map((entry: any, index: number) => (
+          <p key={index} className="text-sm" style={{ color: entry.color }}>
+            {entry.name}: R$ {Number(entry.value).toFixed(2)}
+          </p>
+        ))}
+      </div>
+    );
+  }
+  return null;
+};
+
 export const RevenueChart: React.FC<RevenueChartProps> = ({ sites = [], instalacoes = [] }) => {
   const [activeTab, setActiveTab] = useState('linha');
-
-  // Cores para os gráficos
-  const COLORS = {
-    sites: '#3b82f6',
-    instalacoes: '#10b981'
-  };
 
   // Gerar dados dos últimos 6 meses baseados nos dados reais
   const generateChartData = () => {
@@ -104,33 +123,51 @@ export const RevenueChart: React.FC<RevenueChartProps> = ({ sites = [], instalac
     { name: 'Instalações', value: totalInstalacoes }
   ];
 
+  const pieColors = [COLORS.sites, COLORS.instalacoes];
+
   return (
     <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-      <TabsList className="grid w-full max-w-md grid-cols-3 mb-4">
-        <TabsTrigger value="linha">Linha</TabsTrigger>
-        <TabsTrigger value="pizza">Pizza</TabsTrigger>
-        <TabsTrigger value="barra">Barra</TabsTrigger>
+      <TabsList className="grid w-full max-w-md grid-cols-3 mb-4 bg-stone-900/50 border border-orange-500/30">
+        <TabsTrigger 
+          value="linha"
+          className="data-[state=active]:bg-orange-500 data-[state=active]:text-white"
+        >
+          Linha
+        </TabsTrigger>
+        <TabsTrigger 
+          value="pizza"
+          className="data-[state=active]:bg-orange-500 data-[state=active]:text-white"
+        >
+          Pizza
+        </TabsTrigger>
+        <TabsTrigger 
+          value="barra"
+          className="data-[state=active]:bg-orange-500 data-[state=active]:text-white"
+        >
+          Barra
+        </TabsTrigger>
       </TabsList>
 
       <TabsContent value="linha" className="h-80">
         <ResponsiveContainer width="100%" height="100%">
           <LineChart data={data}>
-            <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
+            <CartesianGrid strokeDasharray="3 3" stroke={COLORS.grid} opacity={0.3} />
             <XAxis 
               dataKey="month" 
-              stroke="#6b7280"
+              stroke={COLORS.textMuted}
               fontSize={12}
+              tickLine={false}
             />
             <YAxis 
-              stroke="#6b7280"
+              stroke={COLORS.textMuted}
               fontSize={12}
               tickFormatter={(value) => `R$ ${value}`}
+              tickLine={false}
             />
-            <Tooltip 
-              formatter={(value) => [`R$ ${value}`, '']}
-              labelStyle={{ color: '#374151' }}
+            <Tooltip content={<CustomTooltip />} />
+            <Legend 
+              formatter={(value) => <span style={{ color: COLORS.text }}>{value}</span>}
             />
-            <Legend />
             <Line 
               type="monotone" 
               dataKey="sites" 
@@ -138,6 +175,7 @@ export const RevenueChart: React.FC<RevenueChartProps> = ({ sites = [], instalac
               strokeWidth={3}
               name="Sites"
               dot={{ fill: COLORS.sites, strokeWidth: 2, r: 4 }}
+              activeDot={{ r: 6, fill: COLORS.sites }}
             />
             <Line 
               type="monotone" 
@@ -146,6 +184,7 @@ export const RevenueChart: React.FC<RevenueChartProps> = ({ sites = [], instalac
               strokeWidth={3}
               name="Instalações"
               dot={{ fill: COLORS.instalacoes, strokeWidth: 2, r: 4 }}
+              activeDot={{ r: 6, fill: COLORS.instalacoes }}
             />
           </LineChart>
         </ResponsiveContainer>
@@ -164,13 +203,22 @@ export const RevenueChart: React.FC<RevenueChartProps> = ({ sites = [], instalac
               fill="#8884d8"
               dataKey="value"
             >
-              <Cell fill={COLORS.sites} />
-              <Cell fill={COLORS.instalacoes} />
+              {pieData.map((entry, index) => (
+                <Cell key={`cell-${index}`} fill={pieColors[index]} />
+              ))}
             </Pie>
             <Tooltip 
-              formatter={(value) => `R$ ${value}`}
+              formatter={(value) => `R$ ${Number(value).toFixed(2)}`}
+              contentStyle={{
+                backgroundColor: '#1C1917',
+                border: '1px solid rgba(249, 115, 22, 0.5)',
+                borderRadius: '8px',
+                color: '#F3F4F6'
+              }}
             />
-            <Legend />
+            <Legend 
+              formatter={(value) => <span style={{ color: COLORS.text }}>{value}</span>}
+            />
           </PieChart>
         </ResponsiveContainer>
       </TabsContent>
@@ -178,22 +226,23 @@ export const RevenueChart: React.FC<RevenueChartProps> = ({ sites = [], instalac
       <TabsContent value="barra" className="h-80">
         <ResponsiveContainer width="100%" height="100%">
           <BarChart data={data}>
-            <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
+            <CartesianGrid strokeDasharray="3 3" stroke={COLORS.grid} opacity={0.3} />
             <XAxis 
               dataKey="month" 
-              stroke="#6b7280"
+              stroke={COLORS.textMuted}
               fontSize={12}
+              tickLine={false}
             />
             <YAxis 
-              stroke="#6b7280"
+              stroke={COLORS.textMuted}
               fontSize={12}
               tickFormatter={(value) => `R$ ${value}`}
+              tickLine={false}
             />
-            <Tooltip 
-              formatter={(value) => [`R$ ${value}`, '']}
-              labelStyle={{ color: '#374151' }}
+            <Tooltip content={<CustomTooltip />} />
+            <Legend 
+              formatter={(value) => <span style={{ color: COLORS.text }}>{value}</span>}
             />
-            <Legend />
             <Bar 
               dataKey="sites" 
               fill={COLORS.sites}

@@ -1,12 +1,13 @@
 import React, { useState, useMemo } from 'react';
-import { FileText, Download, TrendingUp, Scissors, Calendar, DollarSign, Users, Globe, CreditCard, AlertTriangle, Banknote, Ruler } from 'lucide-react';
+import { FileText, Download, TrendingUp, Scissors, Calendar, DollarSign, Users, Globe, CreditCard, AlertTriangle, Banknote, Ruler, BarChart3 } from 'lucide-react';
 import { useIsMobile } from '../hooks/use-mobile';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
 import { useSites, useClientes, useInstalacoes, useDespesas, useEmprestimos, usePagamentosEmprestimo, useDividasNegativadas } from '../hooks/useSupabaseData';
 import { RelatorioFilter } from '../components/RelatorioFilter';
-import { getWeekNumber, getPeriodoDatas, formatPeriodo, isDateInPeriod } from '@/lib/dateUtils';
+import { RelatorioChart } from '../components/RelatorioChart';
+import { getWeekNumber, getPeriodoDatas, formatPeriodo, isDateInPeriod, getHistoricoPeriodos } from '@/lib/dateUtils';
 
 export const Relatorios = () => {
   const { data: sites = [], isLoading: sitesLoading } = useSites();
@@ -183,6 +184,58 @@ export const Relatorios = () => {
       saldoLiquido: receitaMensalSites + receitaInstalacoes - despesasPendentes - totalEmprestimos - totalDividas
     };
   }, [dadosFiltrados, pagamentosEmprestimo, clientes, periodoRelatorio, semanaEscolhida, mesEscolhido, anoEscolhido]);
+
+  // Dados para os gráficos de evolução
+  const dadosGrafico = useMemo(() => {
+    const quantidadePeriodos = periodoRelatorio === 'semanal' ? 8 : periodoRelatorio === 'mensal' ? 6 : 5;
+    const periodos = getHistoricoPeriodos(periodoRelatorio, quantidadePeriodos);
+    
+    return periodos.map(periodo => {
+      // Filtrar instalações concluídas no período
+      const instPeriodo = instalacoes.filter(inst => {
+        const dataInst = new Date(inst.data_instalacao);
+        return inst.status === 'Concluído' && isDateInPeriod(dataInst, periodo.inicio, periodo.fim);
+      });
+      
+      const receitaInstalacoes = instPeriodo.reduce((sum, inst) => sum + Number(inst.valor_total), 0);
+      const metragem = receitaInstalacoes / 20;
+      
+      // Filtrar sites ativos com vencimento no período
+      const sitesAtivos = sites.filter(site => {
+        if (site.status !== 'Ativo') return false;
+        const dataVenc = new Date(site.data_vencimento);
+        return isDateInPeriod(dataVenc, periodo.inicio, periodo.fim);
+      });
+      
+      const receitaSites = sitesAtivos.reduce((total, site) => {
+        let valor = 0;
+        if (site.tipo_plano.toLowerCase().includes('assinatura')) {
+          valor += Number(site.valor_mensal);
+        }
+        if (site.hospedagem) {
+          valor += 40;
+        }
+        return total + valor;
+      }, 0);
+      
+      // Filtrar despesas do período
+      const despesasPeriodo = despesas.filter(desp => {
+        const dataDesp = new Date(desp.data_vencimento);
+        return isDateInPeriod(dataDesp, periodo.inicio, periodo.fim);
+      });
+      const totalDespesasPeriodo = despesasPeriodo.reduce((sum, d) => sum + Number(d.valor), 0);
+      
+      return {
+        periodo: periodo.label,
+        receita: receitaSites + receitaInstalacoes,
+        receitaSites,
+        receitaInstalacoes,
+        instalacoes: instPeriodo.length,
+        metragem,
+        despesas: totalDespesasPeriodo
+      };
+    });
+  }, [instalacoes, sites, despesas, periodoRelatorio]);
 
   const hoje = new Date();
   const nomesMeses = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 
@@ -457,11 +510,12 @@ export const Relatorios = () => {
       </Card>
 
       <Tabs defaultValue="visao-geral" className="space-y-4 md:space-y-6">
-        <TabsList className={`grid w-full ${isMobile ? 'grid-cols-2 h-auto gap-1' : 'grid-cols-4'} bg-background/50 border border-orange-500/30`}>
-          <TabsTrigger value="visao-geral" className="data-[state=active]:bg-orange-500 data-[state=active]:text-white">Visão Geral</TabsTrigger>
-          <TabsTrigger value="financeiro" className="data-[state=active]:bg-orange-500 data-[state=active]:text-white">Financeiro</TabsTrigger>
-          <TabsTrigger value="operacional" className="data-[state=active]:bg-orange-500 data-[state=active]:text-white">Operacional</TabsTrigger>
-          <TabsTrigger value="detalhado" className="data-[state=active]:bg-orange-500 data-[state=active]:text-white">Detalhado</TabsTrigger>
+        <TabsList className={`grid w-full ${isMobile ? 'grid-cols-3 h-auto gap-1' : 'grid-cols-5'} bg-background/50 border border-orange-500/30`}>
+          <TabsTrigger value="visao-geral" className="data-[state=active]:bg-orange-500 data-[state=active]:text-white text-xs md:text-sm">Visão Geral</TabsTrigger>
+          <TabsTrigger value="graficos" className="data-[state=active]:bg-orange-500 data-[state=active]:text-white text-xs md:text-sm">Gráficos</TabsTrigger>
+          <TabsTrigger value="financeiro" className="data-[state=active]:bg-orange-500 data-[state=active]:text-white text-xs md:text-sm">Financeiro</TabsTrigger>
+          <TabsTrigger value="operacional" className="data-[state=active]:bg-orange-500 data-[state=active]:text-white text-xs md:text-sm">Operacional</TabsTrigger>
+          <TabsTrigger value="detalhado" className="data-[state=active]:bg-orange-500 data-[state=active]:text-white text-xs md:text-sm">Detalhado</TabsTrigger>
         </TabsList>
 
         <TabsContent value="visao-geral" className="space-y-4 md:space-y-6">
@@ -557,6 +611,107 @@ export const Relatorios = () => {
                 </div>
               </CardContent>
             </Card>
+          </div>
+        </TabsContent>
+
+        {/* Tab Gráficos */}
+        <TabsContent value="graficos" className="space-y-4 md:space-y-6">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-6">
+            {/* Gráfico de Evolução de Receitas */}
+            <Card className="card-tech">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2 text-sm md:text-base">
+                  <BarChart3 className="w-4 h-4 md:w-5 md:h-5 text-orange-500" />
+                  Evolução de Receitas
+                </CardTitle>
+                <CardDescription className="text-xs md:text-sm text-muted-foreground">
+                  Comparativo de receitas por período ({periodoRelatorio})
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="h-80">
+                <RelatorioChart 
+                  data={dadosGrafico}
+                  tipo="area"
+                  metricas={['receitaSites', 'receitaInstalacoes']}
+                  showTabs={true}
+                />
+              </CardContent>
+            </Card>
+
+            {/* Gráfico de Instalações e Metragem */}
+            <Card className="card-tech">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2 text-sm md:text-base">
+                  <Scissors className="w-4 h-4 md:w-5 md:h-5 text-orange-500" />
+                  Instalações e Metragem
+                </CardTitle>
+                <CardDescription className="text-xs md:text-sm text-muted-foreground">
+                  Receita vs Metragem instalada (M² = valor/20)
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="h-80">
+                <RelatorioChart 
+                  data={dadosGrafico}
+                  tipo="combinado"
+                  metricas={['receitaInstalacoes', 'metragem']}
+                />
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Linha completa - Balanço Geral */}
+          <Card className="card-tech">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2 text-sm md:text-base">
+                <TrendingUp className="w-4 h-4 md:w-5 md:h-5 text-green-500" />
+                Balanço Geral: Receitas vs Despesas
+              </CardTitle>
+              <CardDescription className="text-xs md:text-sm text-muted-foreground">
+                Evolução comparativa do período ({periodoRelatorio})
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="h-80">
+              <RelatorioChart 
+                data={dadosGrafico}
+                tipo="barra"
+                metricas={['receita', 'despesas']}
+              />
+            </CardContent>
+          </Card>
+
+          {/* Cards com resumo dos dados do gráfico */}
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4">
+            <div className="p-3 bg-orange-500/10 border border-orange-500/30 rounded-lg">
+              <div className="text-xs text-muted-foreground mb-1">Total Instalações</div>
+              <div className="text-lg md:text-xl font-bold text-orange-500">
+                {dadosGrafico.reduce((sum, d) => sum + (d.instalacoes || 0), 0)}
+              </div>
+              <div className="text-xs text-muted-foreground">nos últimos períodos</div>
+            </div>
+            
+            <div className="p-3 bg-green-500/10 border border-green-500/30 rounded-lg">
+              <div className="text-xs text-muted-foreground mb-1">Receita Total</div>
+              <div className="text-lg md:text-xl font-bold text-green-500">
+                R$ {dadosGrafico.reduce((sum, d) => sum + (d.receita || 0), 0).toFixed(0)}
+              </div>
+              <div className="text-xs text-muted-foreground">acumulado</div>
+            </div>
+            
+            <div className="p-3 bg-blue-500/10 border border-blue-500/30 rounded-lg">
+              <div className="text-xs text-muted-foreground mb-1">Metragem Total</div>
+              <div className="text-lg md:text-xl font-bold text-blue-500">
+                {dadosGrafico.reduce((sum, d) => sum + (d.metragem || 0), 0).toFixed(0)} M²
+              </div>
+              <div className="text-xs text-muted-foreground">instalados</div>
+            </div>
+            
+            <div className="p-3 bg-red-500/10 border border-red-500/30 rounded-lg">
+              <div className="text-xs text-muted-foreground mb-1">Despesas Total</div>
+              <div className="text-lg md:text-xl font-bold text-red-500">
+                R$ {dadosGrafico.reduce((sum, d) => sum + (d.despesas || 0), 0).toFixed(0)}
+              </div>
+              <div className="text-xs text-muted-foreground">acumulado</div>
+            </div>
           </div>
         </TabsContent>
 
