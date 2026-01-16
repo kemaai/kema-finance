@@ -7,7 +7,8 @@ import {
   Scissors, 
   Receipt,
   FileText,
-  CreditCard
+  CreditCard,
+  Brain
 } from 'lucide-react';
 import {
   Carousel,
@@ -23,6 +24,7 @@ const menuItems = [
   { name: 'Despesas', icon: Receipt, path: '/despesas' },
   { name: 'Dívidas', icon: CreditCard, path: '/dividas' },
   { name: 'Relatórios', icon: FileText, path: '/relatorios' },
+  { name: 'KemaAI', icon: Brain, path: '/agente' },
 ];
 
 export const MobileNavigation = () => {
