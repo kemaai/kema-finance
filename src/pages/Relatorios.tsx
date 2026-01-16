@@ -1,11 +1,12 @@
-import React, { useState } from 'react';
-import { FileText, Download, TrendingUp, Scissors, Calendar, DollarSign, Users, Globe, CreditCard, AlertTriangle, Banknote } from 'lucide-react';
+import React, { useState, useMemo } from 'react';
+import { FileText, Download, TrendingUp, Scissors, Calendar, DollarSign, Users, Globe, CreditCard, AlertTriangle, Banknote, Ruler } from 'lucide-react';
 import { useIsMobile } from '../hooks/use-mobile';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
 import { useSites, useClientes, useInstalacoes, useDespesas, useEmprestimos, usePagamentosEmprestimo, useDividasNegativadas } from '../hooks/useSupabaseData';
 import { RelatorioFilter } from '../components/RelatorioFilter';
+import { getWeekNumber, getPeriodoDatas, formatPeriodo, isDateInPeriod } from '@/lib/dateUtils';
 
 export const Relatorios = () => {
   const { data: sites = [], isLoading: sitesLoading } = useSites();
@@ -16,6 +17,9 @@ export const Relatorios = () => {
   const { data: pagamentosEmprestimo = [], isLoading: pagamentosLoading } = usePagamentosEmprestimo();
   const { data: dividasNegativadas = [], isLoading: dividasLoading } = useDividasNegativadas();
   
+  // Estados do filtro
+  const [periodoRelatorio, setPeriodoRelatorio] = useState<'semanal' | 'mensal' | 'anual'>('mensal');
+  const [semanaEscolhida, setSemanaEscolhida] = useState(getWeekNumber(new Date()));
   const [mesEscolhido, setMesEscolhido] = useState(new Date().getMonth());
   const [anoEscolhido, setAnoEscolhido] = useState(new Date().getFullYear());
   const [tipoRelatorio, setTipoRelatorio] = useState('todos');
@@ -25,14 +29,18 @@ export const Relatorios = () => {
 
   // Função para resetar filtros
   const resetarFiltros = () => {
+    setPeriodoRelatorio('mensal');
+    setSemanaEscolhida(getWeekNumber(new Date()));
     setMesEscolhido(new Date().getMonth());
     setAnoEscolhido(new Date().getFullYear());
     setTipoRelatorio('todos');
   };
 
   // Função para filtrar dados por período e tipo
-  const filtrarDadosPorPeriodo = (mes: number, ano: number, tipo: string) => {
-    let dadosFiltrados = {
+  const dadosFiltrados = useMemo(() => {
+    const { dataInicio, dataFim } = getPeriodoDatas(periodoRelatorio, semanaEscolhida, mesEscolhido, anoEscolhido);
+
+    let resultado = {
       sites: sites,
       clientes: clientes,
       instalacoes: instalacoes,
@@ -42,85 +50,83 @@ export const Relatorios = () => {
     };
 
     // Filtrar instalações por período
-    if (tipo === 'instalacoes' || tipo === 'todos') {
-      dadosFiltrados.instalacoes = instalacoes.filter(instalacao => {
+    if (tipoRelatorio === 'instalacoes' || tipoRelatorio === 'todos') {
+      resultado.instalacoes = instalacoes.filter(instalacao => {
         const dataInstalacao = new Date(instalacao.data_instalacao);
-        return dataInstalacao.getMonth() === mes && dataInstalacao.getFullYear() === ano;
+        return isDateInPeriod(dataInstalacao, dataInicio, dataFim);
       });
     }
 
     // Filtrar sites ativos com vencimento no período
-    if (tipo === 'sites' || tipo === 'todos') {
-      dadosFiltrados.sites = sites.filter(site => {
+    if (tipoRelatorio === 'sites' || tipoRelatorio === 'todos') {
+      resultado.sites = sites.filter(site => {
         if (site.status !== 'Ativo') return false;
         const dataVencimento = new Date(site.data_vencimento);
-        return dataVencimento.getMonth() === mes && dataVencimento.getFullYear() === ano;
+        return isDateInPeriod(dataVencimento, dataInicio, dataFim);
       });
     }
 
     // Filtrar despesas por período
-    if (tipo === 'despesas' || tipo === 'todos') {
-      dadosFiltrados.despesas = despesas.filter(despesa => {
+    if (tipoRelatorio === 'despesas' || tipoRelatorio === 'todos') {
+      resultado.despesas = despesas.filter(despesa => {
         const dataDespesa = new Date(despesa.data_vencimento);
-        return dataDespesa.getMonth() === mes && dataDespesa.getFullYear() === ano;
+        return isDateInPeriod(dataDespesa, dataInicio, dataFim);
       });
     }
 
-    // Para clientes, empréstimos e dívidas, mantém todos se não for filtro específico
-    if (tipo === 'clientes' || tipo === 'todos') {
-      dadosFiltrados.clientes = clientes;
-    }
-    if (tipo === 'emprestimos' || tipo === 'todos') {
-      dadosFiltrados.emprestimos = emprestimos;
-    }
-    if (tipo === 'dividas' || tipo === 'todos') {
-      dadosFiltrados.dividasNegativadas = dividasNegativadas;
+    // Filtrar clientes criados no período
+    if (tipoRelatorio === 'clientes' || tipoRelatorio === 'todos') {
+      resultado.clientes = clientes.filter(cliente => {
+        const dataCriacao = new Date(cliente.created_at);
+        return isDateInPeriod(dataCriacao, dataInicio, dataFim);
+      });
     }
 
-    return dadosFiltrados;
-  };
+    // Filtrar pagamentos de empréstimos no período
+    if (tipoRelatorio === 'emprestimos' || tipoRelatorio === 'todos') {
+      resultado.emprestimos = emprestimos;
+    }
 
-  // Dados filtrados
-  const dadosFiltrados = filtrarDadosPorPeriodo(mesEscolhido, anoEscolhido, tipoRelatorio);
-  
-  // Cálculos gerais
-  const hoje = new Date();
-  const inicioMesAtual = new Date(hoje.getFullYear(), hoje.getMonth(), 1);
-  const fimMesAtual = new Date(hoje.getFullYear(), hoje.getMonth() + 1, 0);
+    // Filtrar dívidas pagas no período
+    if (tipoRelatorio === 'dividas' || tipoRelatorio === 'todos') {
+      resultado.dividasNegativadas = dividasNegativadas;
+    }
 
-  // Receitas de Sites (só planos com assinatura + hospedagem)
-  const receitaMensalSites = dadosFiltrados.sites
-    .filter(site => site.status === 'Ativo')
-    .reduce((total, site) => {
-      let valorSite = 0;
-      // Adiciona valor mensal se for plano com assinatura
-      if (site.tipo_plano.toLowerCase().includes('assinatura')) {
-        valorSite += Number(site.valor_mensal);
-      }
-      // Adiciona R$ 40 se tiver hospedagem
-      if (site.hospedagem) {
-        valorSite += 40;
-      }
-      return total + valorSite;
-    }, 0);
+    return resultado;
+  }, [sites, clientes, instalacoes, despesas, emprestimos, dividasNegativadas, periodoRelatorio, semanaEscolhida, mesEscolhido, anoEscolhido, tipoRelatorio]);
 
-  const receitaInstalacoes = dadosFiltrados.instalacoes
-    .filter(inst => inst.status === 'Concluído')
-    .reduce((total, instalacao) => total + instalacao.valor_total, 0);
+  // Cálculos de métricas
+  const metricas = useMemo(() => {
+    const { dataInicio, dataFim } = getPeriodoDatas(periodoRelatorio, semanaEscolhida, mesEscolhido, anoEscolhido);
 
-  // Despesas
-  const totalDespesas = dadosFiltrados.despesas
-    .reduce((total, despesa) => total + despesa.valor, 0);
+    // Receitas de Sites (só planos com assinatura + hospedagem)
+    const receitaMensalSites = dadosFiltrados.sites
+      .filter(site => site.status === 'Ativo')
+      .reduce((total, site) => {
+        let valorSite = 0;
+        if (site.tipo_plano.toLowerCase().includes('assinatura')) {
+          valorSite += Number(site.valor_mensal);
+        }
+        if (site.hospedagem) {
+          valorSite += 40;
+        }
+        return total + valorSite;
+      }, 0);
 
-  const despesasPagas = dadosFiltrados.despesas
-    .filter(despesa => despesa.paga)
-    .reduce((total, despesa) => total + despesa.valor, 0);
+    // Instalações concluídas
+    const instalacoesConcluidas = dadosFiltrados.instalacoes.filter(inst => inst.status === 'Concluído');
+    const receitaInstalacoes = instalacoesConcluidas.reduce((total, instalacao) => total + instalacao.valor_total, 0);
+    
+    // Metragem total (valor / 20 = M²)
+    const metragemTotal = instalacoesConcluidas.reduce((total, instalacao) => total + (instalacao.valor_total / 20), 0);
 
-  const despesasPendentes = totalDespesas - despesasPagas;
+    // Despesas
+    const totalDespesas = dadosFiltrados.despesas.reduce((total, despesa) => total + despesa.valor, 0);
+    const despesasPagas = dadosFiltrados.despesas.filter(despesa => despesa.paga).reduce((total, despesa) => total + despesa.valor, 0);
+    const despesasPendentes = totalDespesas - despesasPagas;
 
-  // Empréstimos - calcular valor restante (valor_atual - pagamentos)
-  const totalEmprestimos = dadosFiltrados.emprestimos
-    .reduce((total, emprestimo) => {
+    // Empréstimos - calcular valor restante
+    const totalEmprestimos = dadosFiltrados.emprestimos.reduce((total, emprestimo) => {
       const pagamentosDoEmprestimo = pagamentosEmprestimo
         .filter(p => p.emprestimo_id === emprestimo.id)
         .reduce((sum, p) => sum + Number(p.valor_pago), 0);
@@ -128,138 +134,218 @@ export const Relatorios = () => {
       return total + Math.max(0, valorRestante);
     }, 0);
 
-  // Dívidas
-  const totalDividas = dadosFiltrados.dividasNegativadas
-    .filter(divida => !divida.pago)
-    .reduce((total, divida) => total + divida.valor_atual, 0);
+    // Pagamentos no período
+    const pagamentosNoPeriodo = pagamentosEmprestimo.filter(p => {
+      const dataPagamento = new Date(p.data_pagamento);
+      return isDateInPeriod(dataPagamento, dataInicio, dataFim);
+    });
+    const totalPagoNoPeriodo = pagamentosNoPeriodo.reduce((sum, p) => sum + Number(p.valor_pago), 0);
 
-  // Sites por status
-  const sitesPorStatus = dadosFiltrados.sites.reduce((acc, site) => {
-    acc[site.status] = (acc[site.status] || 0) + 1;
-    return acc;
-  }, {} as Record<string, number>);
+    // Dívidas
+    const totalDividas = dadosFiltrados.dividasNegativadas
+      .filter(divida => !divida.pago)
+      .reduce((total, divida) => total + divida.valor_atual, 0);
 
+    const dividasPagasNoPeriodo = dadosFiltrados.dividasNegativadas.filter(divida => {
+      if (!divida.pago || !divida.data_pagamento) return false;
+      const dataPagamento = new Date(divida.data_pagamento);
+      return isDateInPeriod(dataPagamento, dataInicio, dataFim);
+    });
+    const valorDividasPagasNoPeriodo = dividasPagasNoPeriodo.reduce((sum, d) => sum + d.valor_atual, 0);
+
+    // Sites por status
+    const sitesPorStatus = dadosFiltrados.sites.reduce((acc, site) => {
+      acc[site.status] = (acc[site.status] || 0) + 1;
+      return acc;
+    }, {} as Record<string, number>);
+
+    // Clientes novos no período
+    const clientesNovos = dadosFiltrados.clientes.length;
+    const totalClientesGeral = clientes.length;
+
+    return {
+      receitaMensalSites,
+      receitaInstalacoes,
+      metragemTotal,
+      instalacoesConcluidas: instalacoesConcluidas.length,
+      totalInstalacoes: dadosFiltrados.instalacoes.length,
+      totalDespesas,
+      despesasPagas,
+      despesasPendentes,
+      totalEmprestimos,
+      totalPagoNoPeriodo,
+      totalDividas,
+      valorDividasPagasNoPeriodo,
+      sitesPorStatus,
+      clientesNovos,
+      totalClientesGeral,
+      receitaTotal: receitaMensalSites + receitaInstalacoes,
+      saldoLiquido: receitaMensalSites + receitaInstalacoes - despesasPendentes - totalEmprestimos - totalDividas
+    };
+  }, [dadosFiltrados, pagamentosEmprestimo, clientes, periodoRelatorio, semanaEscolhida, mesEscolhido, anoEscolhido]);
+
+  const hoje = new Date();
+  const nomesMeses = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 
+                      'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'];
+
+  // Função de exportação atualizada
   const exportarRelatorio = (categoria: string) => {
     let dados = '';
     let nomeArquivo = '';
-    const nomesMeses = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 
-                        'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'];
-
+    
     const dataAtual = hoje.toLocaleDateString('pt-BR');
-    const periodoSelecionado = `${nomesMeses[mesEscolhido]} ${anoEscolhido}`;
+    const periodoLabel = formatPeriodo(periodoRelatorio, semanaEscolhida, mesEscolhido, anoEscolhido);
+    const periodoNomeArquivo = periodoRelatorio === 'semanal' 
+      ? `semana${semanaEscolhida}-${anoEscolhido}`
+      : periodoRelatorio === 'mensal'
+        ? `${nomesMeses[mesEscolhido].toLowerCase()}-${anoEscolhido}`
+        : `anual-${anoEscolhido}`;
 
     switch (categoria) {
       case 'geral':
-        dados = `Relatório Geral - ${dataAtual}\n`;
-        dados += `Período: ${periodoSelecionado}\n\n`;
+        dados = `Relatório Geral - ${periodoLabel}\n`;
+        dados += `Gerado em: ${dataAtual}\n`;
+        dados += `Tipo de Período: ${periodoRelatorio.toUpperCase()}\n\n`;
         dados += `=== RECEITAS ===\n`;
-        dados += `Sites Ativos: R$ ${receitaMensalSites.toFixed(2)}\n`;
-        dados += `Instalações: R$ ${receitaInstalacoes.toFixed(2)}\n`;
-        dados += `Total Receitas: R$ ${(receitaMensalSites + receitaInstalacoes).toFixed(2)}\n\n`;
+        dados += `Sites Ativos: R$ ${metricas.receitaMensalSites.toFixed(2)}\n`;
+        dados += `Instalações: R$ ${metricas.receitaInstalacoes.toFixed(2)}\n`;
+        dados += `Total Receitas: R$ ${metricas.receitaTotal.toFixed(2)}\n\n`;
+        dados += `=== INSTALAÇÕES ===\n`;
+        dados += `Total: ${metricas.totalInstalacoes}\n`;
+        dados += `Concluídas: ${metricas.instalacoesConcluidas}\n`;
+        dados += `Metragem Total: ${metricas.metragemTotal.toFixed(2)} M²\n\n`;
         dados += `=== DESPESAS ===\n`;
-        dados += `Total Despesas: R$ ${totalDespesas.toFixed(2)}\n`;
-        dados += `Pagas: R$ ${despesasPagas.toFixed(2)}\n`;
-        dados += `Pendentes: R$ ${despesasPendentes.toFixed(2)}\n\n`;
+        dados += `Total Despesas: R$ ${metricas.totalDespesas.toFixed(2)}\n`;
+        dados += `Pagas: R$ ${metricas.despesasPagas.toFixed(2)}\n`;
+        dados += `Pendentes: R$ ${metricas.despesasPendentes.toFixed(2)}\n\n`;
         dados += `=== RESUMO ===\n`;
-        dados += `Clientes: ${dadosFiltrados.clientes.length}\n`;
-        dados += `Sites Ativos: ${sitesPorStatus['Ativo'] || 0}\n`;
-        dados += `Instalações: ${dadosFiltrados.instalacoes.length}\n`;
-        dados += `Empréstimos Restantes: R$ ${totalEmprestimos.toFixed(2)}\n`;
-        dados += `Dívidas Pendentes: R$ ${totalDividas.toFixed(2)}\n`;
-        nomeArquivo = `relatorio-geral-${periodoSelecionado.replace(' ', '-')}.txt`;
+        dados += `Clientes Novos no Período: ${metricas.clientesNovos}\n`;
+        dados += `Total de Clientes: ${metricas.totalClientesGeral}\n`;
+        dados += `Sites Ativos: ${metricas.sitesPorStatus['Ativo'] || 0}\n`;
+        dados += `Empréstimos Restantes: R$ ${metricas.totalEmprestimos.toFixed(2)}\n`;
+        dados += `Pagamentos de Empréstimos no Período: R$ ${metricas.totalPagoNoPeriodo.toFixed(2)}\n`;
+        dados += `Dívidas Pendentes: R$ ${metricas.totalDividas.toFixed(2)}\n`;
+        dados += `Dívidas Quitadas no Período: R$ ${metricas.valorDividasPagasNoPeriodo.toFixed(2)}\n`;
+        dados += `\n=== SALDO ===\n`;
+        dados += `Saldo Líquido: R$ ${metricas.saldoLiquido.toFixed(2)}\n`;
+        nomeArquivo = `relatorio-geral-${periodoNomeArquivo}.txt`;
         break;
         
       case 'receita':
-        dados = `Relatório de Receitas - ${periodoSelecionado}\n\n`;
-        dados += `Sites Ativos: R$ ${receitaMensalSites.toFixed(2)}\n`;
-        dados += `Instalações Concluídas: R$ ${receitaInstalacoes.toFixed(2)}\n`;
-        dados += `Total: R$ ${(receitaMensalSites + receitaInstalacoes).toFixed(2)}\n`;
-        nomeArquivo = `relatorio-receitas-${periodoSelecionado.replace(' ', '-')}.txt`;
+        dados = `Relatório de Receitas - ${periodoLabel}\n\n`;
+        dados += `Sites Ativos: R$ ${metricas.receitaMensalSites.toFixed(2)}\n`;
+        dados += `Instalações Concluídas: R$ ${metricas.receitaInstalacoes.toFixed(2)}\n`;
+        dados += `Total: R$ ${metricas.receitaTotal.toFixed(2)}\n`;
+        nomeArquivo = `relatorio-receitas-${periodoNomeArquivo}.txt`;
         break;
         
       case 'despesas':
-        dados = `Relatório de Despesas - ${periodoSelecionado}\n\n`;
-        dados += `Total: R$ ${totalDespesas.toFixed(2)}\n`;
-        dados += `Pagas: R$ ${despesasPagas.toFixed(2)}\n`;
-        dados += `Pendentes: R$ ${despesasPendentes.toFixed(2)}\n\n`;
+        dados = `Relatório de Despesas - ${periodoLabel}\n\n`;
+        dados += `Total: R$ ${metricas.totalDespesas.toFixed(2)}\n`;
+        dados += `Pagas: R$ ${metricas.despesasPagas.toFixed(2)}\n`;
+        dados += `Pendentes: R$ ${metricas.despesasPendentes.toFixed(2)}\n\n`;
         dados += `Detalhamento:\n`;
         dadosFiltrados.despesas.forEach(despesa => {
           dados += `- ${despesa.nome}: R$ ${despesa.valor.toFixed(2)} ${despesa.paga ? '(PAGA)' : '(PENDENTE)'}\n`;
         });
-        nomeArquivo = `relatorio-despesas-${periodoSelecionado.replace(' ', '-')}.txt`;
+        nomeArquivo = `relatorio-despesas-${periodoNomeArquivo}.txt`;
         break;
 
       case 'sites':
-        dados = `Relatório de Sites - ${periodoSelecionado}\n\n`;
-        dados += `Total de Sites Ativos: ${dadosFiltrados.sites.filter(s => s.status === 'Ativo').length}\n\n`;
+        dados = `Relatório de Sites - ${periodoLabel}\n\n`;
+        dados += `Total de Sites Ativos: ${dadosFiltrados.sites.filter(s => s.status === 'Ativo').length}\n`;
+        dados += `Receita Recorrente: R$ ${metricas.receitaMensalSites.toFixed(2)}\n\n`;
+        dados += `Detalhamento:\n`;
         dadosFiltrados.sites.forEach(site => {
-          dados += `Cliente: ${site.cliente_nome}\n`;
+          dados += `\nCliente: ${site.cliente_nome}\n`;
           dados += `Status: ${site.status}\n`;
           dados += `Plano: ${site.tipo_plano}\n`;
           dados += `Valor Mensal: R$ ${site.valor_mensal.toFixed(2)}\n`;
+          dados += `Hospedagem: ${site.hospedagem ? 'Sim (+R$ 40)' : 'Não'}\n`;
           dados += `Vencimento: ${new Date(site.data_vencimento).toLocaleDateString('pt-BR')}\n`;
           dados += `---\n`;
         });
-        nomeArquivo = `relatorio-sites-${periodoSelecionado.replace(' ', '-')}.txt`;
+        nomeArquivo = `relatorio-sites-${periodoNomeArquivo}.txt`;
         break;
 
       case 'instalacoes':
-        dados = `Relatório de Instalações - ${periodoSelecionado}\n\n`;
-        dados += `Total de Instalações: ${dadosFiltrados.instalacoes.length}\n`;
-        dados += `Receita Total: R$ ${receitaInstalacoes.toFixed(2)}\n\n`;
+        dados = `Relatório de Instalações - ${periodoLabel}\n\n`;
+        dados += `=== RESUMO ===\n`;
+        dados += `Total de Instalações: ${metricas.totalInstalacoes}\n`;
+        dados += `Instalações Concluídas: ${metricas.instalacoesConcluidas}\n`;
+        dados += `Receita Total: R$ ${metricas.receitaInstalacoes.toFixed(2)}\n`;
+        dados += `Metragem Total: ${metricas.metragemTotal.toFixed(2)} M²\n`;
+        dados += `Média por Instalação: R$ ${metricas.instalacoesConcluidas > 0 ? (metricas.receitaInstalacoes / metricas.instalacoesConcluidas).toFixed(2) : '0.00'}\n`;
+        dados += `Média M² por Instalação: ${metricas.instalacoesConcluidas > 0 ? (metricas.metragemTotal / metricas.instalacoesConcluidas).toFixed(2) : '0.00'} M²\n\n`;
+        dados += `=== DETALHAMENTO ===\n`;
         dadosFiltrados.instalacoes.forEach(inst => {
-          dados += `Pedido: ${inst.numero_pedido}\n`;
+          const metragem = inst.valor_total / 20;
+          dados += `\nPedido: ${inst.numero_pedido}\n`;
           dados += `Arquiteto: ${inst.arquiteto_nome}\n`;
           dados += `Data: ${new Date(inst.data_instalacao).toLocaleDateString('pt-BR')}\n`;
           dados += `Status: ${inst.status}\n`;
           dados += `Valor: R$ ${inst.valor_total.toFixed(2)}\n`;
+          dados += `Metragem: ${metragem.toFixed(2)} M²\n`;
+          dados += `Ambiente: ${inst.ambiente}\n`;
           dados += `---\n`;
         });
-        nomeArquivo = `relatorio-instalacoes-${periodoSelecionado.replace(' ', '-')}.txt`;
+        nomeArquivo = `relatorio-instalacoes-${periodoNomeArquivo}.txt`;
         break;
 
       case 'clientes':
-        dados = `Relatório de Clientes - ${dataAtual}\n\n`;
-        dados += `Total de Clientes: ${dadosFiltrados.clientes.length}\n\n`;
+        dados = `Relatório de Clientes - ${periodoLabel}\n\n`;
+        dados += `Novos Clientes no Período: ${metricas.clientesNovos}\n`;
+        dados += `Total de Clientes: ${metricas.totalClientesGeral}\n\n`;
+        dados += `=== CLIENTES DO PERÍODO ===\n`;
         dadosFiltrados.clientes.forEach(cliente => {
-          dados += `Nome: ${cliente.nome}\n`;
+          dados += `\nNome: ${cliente.nome}\n`;
           dados += `Email: ${cliente.email}\n`;
           dados += `Telefone: ${cliente.telefone}\n`;
           dados += `Cidade: ${cliente.cidade} - ${cliente.estado}\n`;
+          dados += `Cadastrado em: ${new Date(cliente.created_at).toLocaleDateString('pt-BR')}\n`;
           dados += `---\n`;
         });
-        nomeArquivo = `relatorio-clientes-${dataAtual.replace(/\//g, '-')}.txt`;
+        nomeArquivo = `relatorio-clientes-${periodoNomeArquivo}.txt`;
         break;
 
       case 'emprestimos':
-        dados = `Relatório de Empréstimos - ${dataAtual}\n\n`;
-        dados += `Total Restante: R$ ${totalEmprestimos.toFixed(2)}\n\n`;
+        dados = `Relatório de Empréstimos - ${periodoLabel}\n\n`;
+        dados += `=== RESUMO ===\n`;
+        dados += `Total Restante: R$ ${metricas.totalEmprestimos.toFixed(2)}\n`;
+        dados += `Pagamentos no Período: R$ ${metricas.totalPagoNoPeriodo.toFixed(2)}\n\n`;
+        dados += `=== DETALHAMENTO ===\n`;
         dadosFiltrados.emprestimos.forEach(emp => {
           const pagamentos = pagamentosEmprestimo
             .filter(p => p.emprestimo_id === emp.id)
             .reduce((sum, p) => sum + Number(p.valor_pago), 0);
           const restante = Number(emp.valor_atual) - pagamentos;
-          dados += `Nome: ${emp.nome}\n`;
+          dados += `\nNome: ${emp.nome}\n`;
           dados += `Valor Original: R$ ${Number(emp.valor_original).toFixed(2)}\n`;
           dados += `Valor Atual: R$ ${Number(emp.valor_atual).toFixed(2)}\n`;
-          dados += `Pago: R$ ${pagamentos.toFixed(2)}\n`;
+          dados += `Total Pago: R$ ${pagamentos.toFixed(2)}\n`;
           dados += `Restante: R$ ${restante.toFixed(2)}\n`;
           dados += `---\n`;
         });
-        nomeArquivo = `relatorio-emprestimos-${dataAtual.replace(/\//g, '-')}.txt`;
+        nomeArquivo = `relatorio-emprestimos-${periodoNomeArquivo}.txt`;
         break;
 
       case 'dividas':
-        dados = `Relatório de Dívidas Negativadas - ${dataAtual}\n\n`;
-        dados += `Total Pendente: R$ ${totalDividas.toFixed(2)}\n\n`;
+        dados = `Relatório de Dívidas Negativadas - ${periodoLabel}\n\n`;
+        dados += `=== RESUMO ===\n`;
+        dados += `Total Pendente: R$ ${metricas.totalDividas.toFixed(2)}\n`;
+        dados += `Quitadas no Período: R$ ${metricas.valorDividasPagasNoPeriodo.toFixed(2)}\n\n`;
+        dados += `=== DETALHAMENTO ===\n`;
         dadosFiltrados.dividasNegativadas.forEach(divida => {
-          dados += `Nome: ${divida.nome}\n`;
+          dados += `\nNome: ${divida.nome}\n`;
           dados += `Valor Original: R$ ${Number(divida.valor_original).toFixed(2)}\n`;
           dados += `Valor Atual: R$ ${Number(divida.valor_atual).toFixed(2)}\n`;
           dados += `Status: ${divida.pago ? 'PAGA' : 'PENDENTE'}\n`;
+          if (divida.data_pagamento) {
+            dados += `Data Pagamento: ${new Date(divida.data_pagamento).toLocaleDateString('pt-BR')}\n`;
+          }
           dados += `---\n`;
         });
-        nomeArquivo = `relatorio-dividas-${dataAtual.replace(/\//g, '-')}.txt`;
+        nomeArquivo = `relatorio-dividas-${periodoNomeArquivo}.txt`;
         break;
     }
 
@@ -274,14 +360,12 @@ export const Relatorios = () => {
     URL.revokeObjectURL(url);
   };
 
-  const nomesMeses = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 
-                      'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'];
-
   if (isLoading) {
     return (
       <div className="p-3 md:p-6 pb-20 md:pb-6">
         <div className="flex items-center justify-center h-64">
-          <div className="text-lg">Carregando relatórios...</div>
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-orange-500 mr-3"></div>
+          <div className="text-lg text-foreground">Carregando relatórios...</div>
         </div>
       </div>
     );
@@ -292,7 +376,9 @@ export const Relatorios = () => {
       <div className="flex flex-col gap-3 md:gap-4 md:flex-row md:items-center justify-between mb-4 md:mb-6">
         <div>
           <h1 className="text-xl md:text-2xl font-bold text-foreground">Relatórios</h1>
-          <p className="text-sm md:text-base text-muted-foreground">Análises completas de todos os dados do sistema</p>
+          <p className="text-sm md:text-base text-muted-foreground">
+            Análises {periodoRelatorio === 'semanal' ? 'semanais' : periodoRelatorio === 'mensal' ? 'mensais' : 'anuais'} de todos os dados
+          </p>
         </div>
         <button 
           onClick={() => exportarRelatorio('geral')}
@@ -305,21 +391,77 @@ export const Relatorios = () => {
 
       {/* Componente de Filtros */}
       <RelatorioFilter
+        periodoRelatorio={periodoRelatorio}
+        semanaEscolhida={semanaEscolhida}
         mesEscolhido={mesEscolhido}
         anoEscolhido={anoEscolhido}
         tipoRelatorio={tipoRelatorio}
+        onPeriodoChange={setPeriodoRelatorio}
+        onSemanaChange={setSemanaEscolhida}
         onMesChange={setMesEscolhido}
         onAnoChange={setAnoEscolhido}
         onTipoChange={setTipoRelatorio}
         onResetFilter={resetarFiltros}
       />
 
+      {/* Card de Resumo do Período */}
+      <Card className="card-tech mb-6">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2 text-sm md:text-base">
+            <FileText className="w-4 h-4 md:w-5 md:h-5 text-orange-500" />
+            Resumo: {formatPeriodo(periodoRelatorio, semanaEscolhida, mesEscolhido, anoEscolhido)}
+          </CardTitle>
+          <CardDescription className="text-xs md:text-sm text-muted-foreground">
+            Métricas consolidadas do período selecionado
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4">
+            <div className="p-3 bg-orange-500/10 border border-orange-500/30 rounded-lg">
+              <div className="flex items-center gap-2 mb-1">
+                <Scissors className="w-4 h-4 text-orange-500" />
+                <span className="text-xs text-muted-foreground">Instalações</span>
+              </div>
+              <div className="text-lg md:text-xl font-bold text-orange-500">{metricas.instalacoesConcluidas}</div>
+              <div className="text-xs text-muted-foreground">de {metricas.totalInstalacoes} total</div>
+            </div>
+            
+            <div className="p-3 bg-green-500/10 border border-green-500/30 rounded-lg">
+              <div className="flex items-center gap-2 mb-1">
+                <DollarSign className="w-4 h-4 text-green-500" />
+                <span className="text-xs text-muted-foreground">Receita</span>
+              </div>
+              <div className="text-lg md:text-xl font-bold text-green-500">R$ {metricas.receitaTotal.toFixed(0)}</div>
+              <div className="text-xs text-muted-foreground">total do período</div>
+            </div>
+            
+            <div className="p-3 bg-blue-500/10 border border-blue-500/30 rounded-lg">
+              <div className="flex items-center gap-2 mb-1">
+                <Ruler className="w-4 h-4 text-blue-500" />
+                <span className="text-xs text-muted-foreground">Metragem</span>
+              </div>
+              <div className="text-lg md:text-xl font-bold text-blue-500">{metricas.metragemTotal.toFixed(0)} M²</div>
+              <div className="text-xs text-muted-foreground">instalado</div>
+            </div>
+            
+            <div className="p-3 bg-red-500/10 border border-red-500/30 rounded-lg">
+              <div className="flex items-center gap-2 mb-1">
+                <CreditCard className="w-4 h-4 text-red-500" />
+                <span className="text-xs text-muted-foreground">Despesas</span>
+              </div>
+              <div className="text-lg md:text-xl font-bold text-red-500">R$ {metricas.totalDespesas.toFixed(0)}</div>
+              <div className="text-xs text-muted-foreground">{metricas.despesasPendentes > 0 ? `R$ ${metricas.despesasPendentes.toFixed(0)} pendente` : 'Tudo pago'}</div>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
       <Tabs defaultValue="visao-geral" className="space-y-4 md:space-y-6">
-        <TabsList className={`grid w-full ${isMobile ? 'grid-cols-1 h-auto' : 'grid-cols-4'}`}>
-          <TabsTrigger value="visao-geral" className={isMobile ? 'mb-1' : ''}>Visão Geral</TabsTrigger>
-          <TabsTrigger value="financeiro" className={isMobile ? 'mb-1' : ''}>Financeiro</TabsTrigger>
-          <TabsTrigger value="operacional" className={isMobile ? 'mb-1' : ''}>Operacional</TabsTrigger>
-          <TabsTrigger value="detalhado">Detalhado</TabsTrigger>
+        <TabsList className={`grid w-full ${isMobile ? 'grid-cols-2 h-auto gap-1' : 'grid-cols-4'} bg-background/50 border border-orange-500/30`}>
+          <TabsTrigger value="visao-geral" className="data-[state=active]:bg-orange-500 data-[state=active]:text-white">Visão Geral</TabsTrigger>
+          <TabsTrigger value="financeiro" className="data-[state=active]:bg-orange-500 data-[state=active]:text-white">Financeiro</TabsTrigger>
+          <TabsTrigger value="operacional" className="data-[state=active]:bg-orange-500 data-[state=active]:text-white">Operacional</TabsTrigger>
+          <TabsTrigger value="detalhado" className="data-[state=active]:bg-orange-500 data-[state=active]:text-white">Detalhado</TabsTrigger>
         </TabsList>
 
         <TabsContent value="visao-geral" className="space-y-4 md:space-y-6">
@@ -330,7 +472,8 @@ export const Relatorios = () => {
                 <Users className="h-3 w-3 md:h-4 md:w-4 text-orange-500" />
               </CardHeader>
               <CardContent>
-                <div className="text-lg md:text-2xl font-bold text-orange-500">{dadosFiltrados.clientes.length}</div>
+                <div className="text-lg md:text-2xl font-bold text-orange-500">{metricas.totalClientesGeral}</div>
+                <p className="text-xs text-muted-foreground">+{metricas.clientesNovos} no período</p>
               </CardContent>
             </Card>
 
@@ -340,7 +483,8 @@ export const Relatorios = () => {
                 <Globe className="h-3 w-3 md:h-4 md:w-4 text-orange-500" />
               </CardHeader>
               <CardContent>
-                <div className="text-lg md:text-2xl font-bold text-orange-500">{sitesPorStatus['Ativo'] || 0}</div>
+                <div className="text-lg md:text-2xl font-bold text-orange-500">{metricas.sitesPorStatus['Ativo'] || 0}</div>
+                <p className="text-xs text-muted-foreground">no período</p>
               </CardContent>
             </Card>
 
@@ -350,7 +494,7 @@ export const Relatorios = () => {
                 <DollarSign className="h-3 w-3 md:h-4 md:w-4 text-green-500" />
               </CardHeader>
               <CardContent>
-                <div className="text-sm md:text-2xl font-bold text-green-500">R$ {(receitaMensalSites + receitaInstalacoes).toFixed(2)}</div>
+                <div className="text-sm md:text-2xl font-bold text-green-500">R$ {metricas.receitaTotal.toFixed(2)}</div>
               </CardContent>
             </Card>
 
@@ -360,7 +504,8 @@ export const Relatorios = () => {
                 <Scissors className="h-3 w-3 md:h-4 md:w-4 text-orange-500" />
               </CardHeader>
               <CardContent>
-                <div className="text-lg md:text-2xl font-bold text-orange-500">{dadosFiltrados.instalacoes.length}</div>
+                <div className="text-lg md:text-2xl font-bold text-orange-500">{metricas.instalacoesConcluidas}</div>
+                <p className="text-xs text-muted-foreground">{metricas.metragemTotal.toFixed(0)} M²</p>
               </CardContent>
             </Card>
           </div>
@@ -372,9 +517,9 @@ export const Relatorios = () => {
                 <CreditCard className="h-3 w-3 md:h-4 md:w-4 text-red-500" />
               </CardHeader>
               <CardContent>
-                <div className="text-sm md:text-2xl font-bold text-red-500">R$ {totalDespesas.toFixed(2)}</div>
+                <div className="text-sm md:text-2xl font-bold text-red-500">R$ {metricas.totalDespesas.toFixed(2)}</div>
                 <p className="text-xs text-muted-foreground">
-                  {despesasPendentes > 0 ? `R$ ${despesasPendentes.toFixed(2)} pendente` : 'Tudo pago'}
+                  {metricas.despesasPendentes > 0 ? `R$ ${metricas.despesasPendentes.toFixed(2)} pendente` : 'Tudo pago'}
                 </p>
               </CardContent>
             </Card>
@@ -385,7 +530,8 @@ export const Relatorios = () => {
                 <Banknote className="h-3 w-3 md:h-4 md:w-4 text-yellow-500" />
               </CardHeader>
               <CardContent>
-                <div className="text-sm md:text-2xl font-bold text-yellow-500">R$ {totalEmprestimos.toFixed(2)}</div>
+                <div className="text-sm md:text-2xl font-bold text-yellow-500">R$ {metricas.totalEmprestimos.toFixed(2)}</div>
+                <p className="text-xs text-muted-foreground">R$ {metricas.totalPagoNoPeriodo.toFixed(0)} pago</p>
               </CardContent>
             </Card>
 
@@ -395,7 +541,8 @@ export const Relatorios = () => {
                 <AlertTriangle className="h-3 w-3 md:h-4 md:w-4 text-red-500" />
               </CardHeader>
               <CardContent>
-                <div className="text-sm md:text-2xl font-bold text-red-500">R$ {totalDividas.toFixed(2)}</div>
+                <div className="text-sm md:text-2xl font-bold text-red-500">R$ {metricas.totalDividas.toFixed(2)}</div>
+                <p className="text-xs text-muted-foreground">R$ {metricas.valorDividasPagasNoPeriodo.toFixed(0)} quitado</p>
               </CardContent>
             </Card>
 
@@ -405,8 +552,8 @@ export const Relatorios = () => {
                 <TrendingUp className="h-3 w-3 md:h-4 md:w-4 text-orange-500" />
               </CardHeader>
               <CardContent>
-                <div className={`text-sm md:text-2xl font-bold ${(receitaMensalSites + receitaInstalacoes - despesasPendentes - totalEmprestimos - totalDividas) >= 0 ? 'text-green-500' : 'text-red-500'}`}>
-                  R$ {(receitaMensalSites + receitaInstalacoes - despesasPendentes - totalEmprestimos - totalDividas).toFixed(2)}
+                <div className={`text-sm md:text-2xl font-bold ${metricas.saldoLiquido >= 0 ? 'text-green-500' : 'text-red-500'}`}>
+                  R$ {metricas.saldoLiquido.toFixed(2)}
                 </div>
               </CardContent>
             </Card>
@@ -415,29 +562,29 @@ export const Relatorios = () => {
 
         <TabsContent value="financeiro" className="space-y-4 md:space-y-6">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
-            <Card>
+            <Card className="card-tech">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2 text-sm md:text-base">
-                  <TrendingUp className="w-4 h-4 md:w-5 md:h-5 text-green-600" />
-                  Receitas ({nomesMeses[mesEscolhido]} {anoEscolhido})
+                  <TrendingUp className="w-4 h-4 md:w-5 md:h-5 text-green-500" />
+                  Receitas - {formatPeriodo(periodoRelatorio, semanaEscolhida, mesEscolhido, anoEscolhido)}
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-3 md:space-y-4">
-                <div className="flex justify-between items-center p-2 md:p-3 bg-blue-50 rounded-lg">
-                  <span className="font-medium text-xs md:text-sm">Sites Recorrentes</span>
-                  <span className="text-sm md:text-lg font-bold text-blue-600">R$ {receitaMensalSites.toFixed(2)}</span>
+                <div className="flex justify-between items-center p-2 md:p-3 bg-blue-500/10 border border-blue-500/30 rounded-lg">
+                  <span className="font-medium text-xs md:text-sm text-foreground">Sites Recorrentes</span>
+                  <span className="text-sm md:text-lg font-bold text-blue-500">R$ {metricas.receitaMensalSites.toFixed(2)}</span>
                 </div>
-                <div className="flex justify-between items-center p-2 md:p-3 bg-orange-50 rounded-lg">
-                  <span className="font-medium text-xs md:text-sm">Instalações</span>
-                  <span className="text-sm md:text-lg font-bold text-orange-600">R$ {receitaInstalacoes.toFixed(2)}</span>
+                <div className="flex justify-between items-center p-2 md:p-3 bg-orange-500/10 border border-orange-500/30 rounded-lg">
+                  <span className="font-medium text-xs md:text-sm text-foreground">Instalações</span>
+                  <span className="text-sm md:text-lg font-bold text-orange-500">R$ {metricas.receitaInstalacoes.toFixed(2)}</span>
                 </div>
-                <div className="flex justify-between items-center p-2 md:p-3 bg-green-50 rounded-lg border-2 border-green-200">
-                  <span className="font-bold text-xs md:text-sm">Total</span>
-                  <span className="text-lg md:text-xl font-bold text-green-600">R$ {(receitaMensalSites + receitaInstalacoes).toFixed(2)}</span>
+                <div className="flex justify-between items-center p-2 md:p-3 bg-green-500/10 border-2 border-green-500/50 rounded-lg">
+                  <span className="font-bold text-xs md:text-sm text-foreground">Total</span>
+                  <span className="text-lg md:text-xl font-bold text-green-500">R$ {metricas.receitaTotal.toFixed(2)}</span>
                 </div>
                 <button 
                   onClick={() => exportarRelatorio('receita')}
-                  className="w-full mt-4 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center justify-center gap-2 transition-colors text-sm"
+                  className="w-full mt-4 btn-tech px-4 py-2 rounded-lg flex items-center justify-center gap-2 transition-colors text-sm"
                 >
                   <Download className="w-4 h-4" />
                   Exportar Receitas
@@ -445,25 +592,25 @@ export const Relatorios = () => {
               </CardContent>
             </Card>
 
-            <Card>
+            <Card className="card-tech">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2 text-sm md:text-base">
-                  <CreditCard className="w-4 h-4 md:w-5 md:h-5 text-red-600" />
-                  Despesas ({nomesMeses[mesEscolhido]} {anoEscolhido})
+                  <CreditCard className="w-4 h-4 md:w-5 md:h-5 text-red-500" />
+                  Despesas - {formatPeriodo(periodoRelatorio, semanaEscolhida, mesEscolhido, anoEscolhido)}
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-3">
-                <div className="flex justify-between items-center p-2 border rounded text-xs md:text-sm bg-red-50">
-                  <span>Total do Período</span>
-                  <span className="font-semibold text-red-600">R$ {totalDespesas.toFixed(2)}</span>
+                <div className="flex justify-between items-center p-2 border border-red-500/30 rounded text-xs md:text-sm bg-red-500/10">
+                  <span className="text-foreground">Total do Período</span>
+                  <span className="font-semibold text-red-500">R$ {metricas.totalDespesas.toFixed(2)}</span>
                 </div>
-                <div className="flex justify-between items-center p-2 border rounded text-xs md:text-sm bg-green-50">
-                  <span>Pagas</span>
-                  <span className="font-semibold text-green-600">R$ {despesasPagas.toFixed(2)}</span>
+                <div className="flex justify-between items-center p-2 border border-green-500/30 rounded text-xs md:text-sm bg-green-500/10">
+                  <span className="text-foreground">Pagas</span>
+                  <span className="font-semibold text-green-500">R$ {metricas.despesasPagas.toFixed(2)}</span>
                 </div>
-                <div className="flex justify-between items-center p-2 border rounded text-xs md:text-sm bg-yellow-50">
-                  <span>Pendentes</span>
-                  <span className="font-semibold text-yellow-600">R$ {despesasPendentes.toFixed(2)}</span>
+                <div className="flex justify-between items-center p-2 border border-yellow-500/30 rounded text-xs md:text-sm bg-yellow-500/10">
+                  <span className="text-foreground">Pendentes</span>
+                  <span className="font-semibold text-yellow-500">R$ {metricas.despesasPendentes.toFixed(2)}</span>
                 </div>
                 <button 
                   onClick={() => exportarRelatorio('despesas')}
@@ -478,67 +625,65 @@ export const Relatorios = () => {
         </TabsContent>
 
         <TabsContent value="operacional" className="space-y-4 md:space-y-6">
-          <Card>
+          <Card className="card-tech">
             <CardHeader>
               <CardTitle className="flex items-center gap-2 text-sm md:text-base">
-                <Scissors className="w-4 h-4 md:w-5 md:h-5 text-orange-600" />
-                Instalações por Quinzena - {nomesMeses[mesEscolhido]} {anoEscolhido}
-                {tipoRelatorio !== 'todos' && (
-                  <span className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded-full ml-2">
-                    Filtrado: {tipoRelatorio}
-                  </span>
-                )}
+                <Scissors className="w-4 h-4 md:w-5 md:h-5 text-orange-500" />
+                Instalações - {formatPeriodo(periodoRelatorio, semanaEscolhida, mesEscolhido, anoEscolhido)}
               </CardTitle>
-              <CardDescription className="text-xs md:text-sm">
+              <CardDescription className="text-xs md:text-sm text-muted-foreground">
                 Controle de instalações do período selecionado
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               {(() => {
-                // Calcular instalações por quinzena
-                const primeiraQuinzena = dadosFiltrados.instalacoes.filter(inst => {
-                  const dia = new Date(inst.data_instalacao).getDate();
-                  return dia >= 1 && dia <= 15 && inst.status === 'Concluído';
-                });
+                const instalacoesConcluidas = dadosFiltrados.instalacoes.filter(inst => inst.status === 'Concluído');
+                const instalacoesAgendadas = dadosFiltrados.instalacoes.filter(inst => inst.status === 'Agendado');
+                const instalacoesCanceladas = dadosFiltrados.instalacoes.filter(inst => inst.status === 'Cancelado');
                 
-                const segundaQuinzena = dadosFiltrados.instalacoes.filter(inst => {
-                  const dia = new Date(inst.data_instalacao).getDate();
-                  return dia >= 16 && inst.status === 'Concluído';
-                });
-
-                const receitaPrimeiraQuinzena = primeiraQuinzena.reduce((sum, inst) => sum + Number(inst.valor_total), 0);
-                const receitaSegundaQuinzena = segundaQuinzena.reduce((sum, inst) => sum + Number(inst.valor_total), 0);
-                const totalInstalacoesConcluidas = dadosFiltrados.instalacoes.filter(i => i.status === 'Concluído').length;
-                const receitaTotalMes = receitaPrimeiraQuinzena + receitaSegundaQuinzena;
+                const receitaConcluidas = instalacoesConcluidas.reduce((sum, inst) => sum + Number(inst.valor_total), 0);
+                const metragemConcluidas = receitaConcluidas / 20;
 
                 return (
                   <>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <div className="p-3 md:p-4 bg-blue-50 rounded-lg">
-                        <h4 className="font-medium text-blue-900 mb-2 text-sm">Primeira Quinzena (1-15)</h4>
-                        <div className="text-xl md:text-2xl font-bold text-blue-600">{primeiraQuinzena.length}</div>
-                        <p className="text-xs md:text-sm text-blue-700">instalações</p>
-                        <div className="mt-2 text-xs md:text-sm">
-                          Receita: R$ {receitaPrimeiraQuinzena.toFixed(2)}
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                      <div className="p-3 md:p-4 bg-green-500/10 border border-green-500/30 rounded-lg">
+                        <h4 className="font-medium text-green-400 mb-2 text-sm">Concluídas</h4>
+                        <div className="text-xl md:text-2xl font-bold text-green-500">{instalacoesConcluidas.length}</div>
+                        <p className="text-xs md:text-sm text-muted-foreground">instalações</p>
+                        <div className="mt-2 text-xs md:text-sm text-green-400">
+                          R$ {receitaConcluidas.toFixed(2)} | {metragemConcluidas.toFixed(0)} M²
                         </div>
                       </div>
                       
-                      <div className="p-3 md:p-4 bg-orange-50 rounded-lg">
-                        <h4 className="font-medium text-orange-900 mb-2 text-sm">Segunda Quinzena (16-31)</h4>
-                        <div className="text-xl md:text-2xl font-bold text-orange-600">{segundaQuinzena.length}</div>
-                        <p className="text-xs md:text-sm text-orange-700">instalações</p>
-                        <div className="mt-2 text-xs md:text-sm">
-                          Receita: R$ {receitaSegundaQuinzena.toFixed(2)}
-                        </div>
+                      <div className="p-3 md:p-4 bg-orange-500/10 border border-orange-500/30 rounded-lg">
+                        <h4 className="font-medium text-orange-400 mb-2 text-sm">Agendadas</h4>
+                        <div className="text-xl md:text-2xl font-bold text-orange-500">{instalacoesAgendadas.length}</div>
+                        <p className="text-xs md:text-sm text-muted-foreground">instalações</p>
+                      </div>
+
+                      <div className="p-3 md:p-4 bg-red-500/10 border border-red-500/30 rounded-lg">
+                        <h4 className="font-medium text-red-400 mb-2 text-sm">Canceladas</h4>
+                        <div className="text-xl md:text-2xl font-bold text-red-500">{instalacoesCanceladas.length}</div>
+                        <p className="text-xs md:text-sm text-muted-foreground">instalações</p>
                       </div>
                     </div>
 
-                    <div className="p-3 md:p-4 bg-green-50 rounded-lg">
-                      <h4 className="font-medium text-green-900 mb-2 text-sm">Total do Mês</h4>
-                      <div className="text-xl md:text-2xl font-bold text-green-600">{totalInstalacoesConcluidas}</div>
-                      <p className="text-xs md:text-sm text-green-700">instalações concluídas</p>
-                      <div className="mt-2 text-xs md:text-sm">
-                        Receita Total: R$ {receitaTotalMes.toFixed(2)}
+                    <div className="p-3 md:p-4 bg-blue-500/10 border border-blue-500/30 rounded-lg">
+                      <h4 className="font-medium text-blue-400 mb-2 text-sm">Total do Período</h4>
+                      <div className="grid grid-cols-3 gap-4">
+                        <div>
+                          <div className="text-xl md:text-2xl font-bold text-blue-500">{dadosFiltrados.instalacoes.length}</div>
+                          <p className="text-xs text-muted-foreground">instalações</p>
+                        </div>
+                        <div>
+                          <div className="text-xl md:text-2xl font-bold text-green-500">R$ {metricas.receitaInstalacoes.toFixed(0)}</div>
+                          <p className="text-xs text-muted-foreground">receita</p>
+                        </div>
+                        <div>
+                          <div className="text-xl md:text-2xl font-bold text-orange-500">{metricas.metragemTotal.toFixed(0)} M²</div>
+                          <p className="text-xs text-muted-foreground">metragem</p>
+                        </div>
                       </div>
                     </div>
                   </>
@@ -547,7 +692,7 @@ export const Relatorios = () => {
               
               <button 
                 onClick={() => exportarRelatorio('instalacoes')}
-                className="w-full bg-orange-600 hover:bg-orange-700 text-white px-4 py-2 rounded-lg flex items-center justify-center gap-2 transition-colors text-sm"
+                className="w-full btn-tech px-4 py-2 rounded-lg flex items-center justify-center gap-2 transition-colors text-sm"
               >
                 <Download className="w-4 h-4" />
                 Exportar Relatório de Instalações
@@ -556,10 +701,10 @@ export const Relatorios = () => {
           </Card>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
-            <Card>
+            <Card className="card-tech">
               <CardHeader>
-                <CardTitle className="text-sm md:text-base">Próximos Vencimentos</CardTitle>
-                <CardDescription className="text-xs md:text-sm">Contratos que vencem nos próximos 30 dias</CardDescription>
+                <CardTitle className="text-sm md:text-base text-foreground">Próximos Vencimentos</CardTitle>
+                <CardDescription className="text-xs md:text-sm text-muted-foreground">Contratos que vencem nos próximos 30 dias</CardDescription>
               </CardHeader>
               <CardContent>
                 <div className="space-y-2">
@@ -572,27 +717,32 @@ export const Relatorios = () => {
                     })
                     .slice(0, 5)
                     .map((site) => (
-                      <div key={site.id} className="flex justify-between items-center p-2 border rounded">
+                      <div key={site.id} className="flex justify-between items-center p-2 border border-orange-500/30 rounded bg-background/50">
                         <div>
-                          <div className="font-medium text-xs md:text-sm">{site.cliente_nome}</div>
+                          <div className="font-medium text-xs md:text-sm text-foreground">{site.cliente_nome}</div>
                           <div className="text-xs text-muted-foreground">
                             {new Date(site.data_vencimento).toLocaleDateString('pt-BR')}
                           </div>
                         </div>
-                        <div className="text-xs md:text-sm font-medium">R$ {site.valor_mensal.toFixed(2)}</div>
+                        <div className="text-xs md:text-sm font-medium text-orange-500">R$ {site.valor_mensal.toFixed(2)}</div>
                       </div>
                     ))}
-                  {0 === 0 && (
+                  {sites.filter(site => {
+                    const vencimento = new Date(site.data_vencimento);
+                    const em30Dias = new Date();
+                    em30Dias.setDate(hoje.getDate() + 30);
+                    return site.status === 'Ativo' && vencimento <= em30Dias && vencimento >= hoje;
+                  }).length === 0 && (
                     <p className="text-xs md:text-sm text-muted-foreground">Nenhum vencimento próximo</p>
                   )}
                 </div>
               </CardContent>
             </Card>
 
-            <Card>
+            <Card className="card-tech">
               <CardHeader>
-                <CardTitle className="text-sm md:text-base">Instalações Agendadas</CardTitle>
-                <CardDescription className="text-xs md:text-sm">Próximas instalações a serem realizadas</CardDescription>
+                <CardTitle className="text-sm md:text-base text-foreground">Instalações Agendadas</CardTitle>
+                <CardDescription className="text-xs md:text-sm text-muted-foreground">Próximas instalações a serem realizadas</CardDescription>
               </CardHeader>
               <CardContent>
                 <div className="space-y-2">
@@ -600,14 +750,14 @@ export const Relatorios = () => {
                     .filter(inst => inst.status === 'Agendado')
                     .slice(0, 5)
                     .map((instalacao) => (
-                      <div key={instalacao.id} className="flex justify-between items-center p-2 border rounded">
+                      <div key={instalacao.id} className="flex justify-between items-center p-2 border border-orange-500/30 rounded bg-background/50">
                         <div>
-                          <div className="font-medium text-xs md:text-sm">{instalacao.arquiteto_nome}</div>
+                          <div className="font-medium text-xs md:text-sm text-foreground">{instalacao.arquiteto_nome}</div>
                           <div className="text-xs text-muted-foreground">
                             {new Date(instalacao.data_instalacao).toLocaleDateString('pt-BR')}
                           </div>
                         </div>
-                        <div className="text-xs md:text-sm font-medium">R$ {instalacao.valor_total.toFixed(2)}</div>
+                        <div className="text-xs md:text-sm font-medium text-orange-500">R$ {instalacao.valor_total.toFixed(2)}</div>
                       </div>
                     ))}
                   {instalacoes.filter(inst => inst.status === 'Agendado').length === 0 && (
@@ -620,52 +770,141 @@ export const Relatorios = () => {
         </TabsContent>
 
         <TabsContent value="detalhado" className="space-y-4 md:space-y-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
-            <Card>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
+            <Card className="card-tech">
               <CardHeader>
-                <CardTitle className="text-sm md:text-base">Status dos Sites</CardTitle>
+                <CardTitle className="flex items-center gap-2 text-sm md:text-base text-foreground">
+                  <Globe className="w-4 h-4 text-orange-500" />
+                  Sites
+                </CardTitle>
               </CardHeader>
-              <CardContent>
-                <div className="space-y-2">
-                  {Object.entries(sitesPorStatus).map(([status, quantidade]) => (
-                    <div key={status} className="flex justify-between items-center p-2 border rounded text-xs md:text-sm">
-                      <span>{status}</span>
-                      <span className="font-semibold">{quantidade}</span>
-                    </div>
-                  ))}
-                </div>
+              <CardContent className="space-y-2">
+                {Object.entries(metricas.sitesPorStatus).map(([status, quantidade]) => (
+                  <div key={status} className="flex justify-between items-center p-2 border border-orange-500/20 rounded text-xs md:text-sm bg-background/50">
+                    <span className="text-foreground">{status}</span>
+                    <span className="font-semibold text-orange-500">{quantidade}</span>
+                  </div>
+                ))}
+                <button 
+                  onClick={() => exportarRelatorio('sites')}
+                  className="w-full mt-3 btn-tech px-3 py-2 rounded-lg flex items-center justify-center gap-2 transition-colors text-xs"
+                >
+                  <Download className="w-3 h-3" />
+                  Exportar
+                </button>
               </CardContent>
             </Card>
 
-            <Card>
+            <Card className="card-tech">
               <CardHeader>
-                <CardTitle className="text-sm md:text-base">Resumo Geral</CardTitle>
+                <CardTitle className="flex items-center gap-2 text-sm md:text-base text-foreground">
+                  <Users className="w-4 h-4 text-orange-500" />
+                  Clientes
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-2">
+                <div className="flex justify-between items-center p-2 border border-orange-500/20 rounded text-xs md:text-sm bg-background/50">
+                  <span className="text-foreground">Total</span>
+                  <span className="font-semibold text-orange-500">{metricas.totalClientesGeral}</span>
+                </div>
+                <div className="flex justify-between items-center p-2 border border-green-500/20 rounded text-xs md:text-sm bg-green-500/5">
+                  <span className="text-foreground">Novos no período</span>
+                  <span className="font-semibold text-green-500">+{metricas.clientesNovos}</span>
+                </div>
+                <button 
+                  onClick={() => exportarRelatorio('clientes')}
+                  className="w-full mt-3 btn-tech px-3 py-2 rounded-lg flex items-center justify-center gap-2 transition-colors text-xs"
+                >
+                  <Download className="w-3 h-3" />
+                  Exportar
+                </button>
+              </CardContent>
+            </Card>
+
+            <Card className="card-tech">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2 text-sm md:text-base text-foreground">
+                  <Banknote className="w-4 h-4 text-yellow-500" />
+                  Empréstimos
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-2">
+                <div className="flex justify-between items-center p-2 border border-yellow-500/20 rounded text-xs md:text-sm bg-yellow-500/5">
+                  <span className="text-foreground">Saldo Devedor</span>
+                  <span className="font-semibold text-yellow-500">R$ {metricas.totalEmprestimos.toFixed(2)}</span>
+                </div>
+                <div className="flex justify-between items-center p-2 border border-green-500/20 rounded text-xs md:text-sm bg-green-500/5">
+                  <span className="text-foreground">Pago no período</span>
+                  <span className="font-semibold text-green-500">R$ {metricas.totalPagoNoPeriodo.toFixed(2)}</span>
+                </div>
+                <button 
+                  onClick={() => exportarRelatorio('emprestimos')}
+                  className="w-full mt-3 btn-tech px-3 py-2 rounded-lg flex items-center justify-center gap-2 transition-colors text-xs"
+                >
+                  <Download className="w-3 h-3" />
+                  Exportar
+                </button>
+              </CardContent>
+            </Card>
+
+            <Card className="card-tech">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2 text-sm md:text-base text-foreground">
+                  <AlertTriangle className="w-4 h-4 text-red-500" />
+                  Dívidas
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-2">
+                <div className="flex justify-between items-center p-2 border border-red-500/20 rounded text-xs md:text-sm bg-red-500/5">
+                  <span className="text-foreground">Pendente</span>
+                  <span className="font-semibold text-red-500">R$ {metricas.totalDividas.toFixed(2)}</span>
+                </div>
+                <div className="flex justify-between items-center p-2 border border-green-500/20 rounded text-xs md:text-sm bg-green-500/5">
+                  <span className="text-foreground">Quitado no período</span>
+                  <span className="font-semibold text-green-500">R$ {metricas.valorDividasPagasNoPeriodo.toFixed(2)}</span>
+                </div>
+                <button 
+                  onClick={() => exportarRelatorio('dividas')}
+                  className="w-full mt-3 btn-tech px-3 py-2 rounded-lg flex items-center justify-center gap-2 transition-colors text-xs"
+                >
+                  <Download className="w-3 h-3" />
+                  Exportar
+                </button>
+              </CardContent>
+            </Card>
+
+            <Card className="card-tech md:col-span-2">
+              <CardHeader>
+                <CardTitle className="text-sm md:text-base text-foreground">Resumo Consolidado</CardTitle>
+                <CardDescription className="text-xs text-muted-foreground">
+                  {formatPeriodo(periodoRelatorio, semanaEscolhida, mesEscolhido, anoEscolhido)}
+                </CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="space-y-2 text-xs md:text-sm">
-                  <div className="flex justify-between">
-                    <span>Clientes cadastrados:</span>
-                    <span className="font-semibold">{dadosFiltrados.clientes.length}</span>
+                <div className="grid grid-cols-2 md:grid-cols-3 gap-3 text-xs md:text-sm">
+                  <div className="flex justify-between p-2 bg-background/50 rounded border border-orange-500/20">
+                    <span className="text-muted-foreground">Clientes:</span>
+                    <span className="font-semibold text-foreground">{metricas.totalClientesGeral}</span>
                   </div>
-                  <div className="flex justify-between">
-                    <span>Sites totais:</span>
-                    <span className="font-semibold">{dadosFiltrados.sites.length}</span>
+                  <div className="flex justify-between p-2 bg-background/50 rounded border border-orange-500/20">
+                    <span className="text-muted-foreground">Sites período:</span>
+                    <span className="font-semibold text-foreground">{dadosFiltrados.sites.length}</span>
                   </div>
-                  <div className="flex justify-between">
-                    <span>Instalações período:</span>
-                    <span className="font-semibold">{dadosFiltrados.instalacoes.length}</span>
+                  <div className="flex justify-between p-2 bg-background/50 rounded border border-orange-500/20">
+                    <span className="text-muted-foreground">Instalações:</span>
+                    <span className="font-semibold text-foreground">{metricas.totalInstalacoes}</span>
                   </div>
-                  <div className="flex justify-between">
-                    <span>Despesas período:</span>
-                    <span className="font-semibold">{dadosFiltrados.despesas.length}</span>
+                  <div className="flex justify-between p-2 bg-background/50 rounded border border-orange-500/20">
+                    <span className="text-muted-foreground">Metragem:</span>
+                    <span className="font-semibold text-foreground">{metricas.metragemTotal.toFixed(0)} M²</span>
                   </div>
-                  <div className="flex justify-between">
-                    <span>Empréstimos ativos:</span>
-                    <span className="font-semibold">{dadosFiltrados.emprestimos.length}</span>
+                  <div className="flex justify-between p-2 bg-background/50 rounded border border-orange-500/20">
+                    <span className="text-muted-foreground">Despesas:</span>
+                    <span className="font-semibold text-foreground">{dadosFiltrados.despesas.length}</span>
                   </div>
-                  <div className="flex justify-between">
-                    <span>Dívidas ativas:</span>
-                    <span className="font-semibold">{dadosFiltrados.dividasNegativadas.filter(d => !d.pago).length}</span>
+                  <div className="flex justify-between p-2 bg-background/50 rounded border border-orange-500/20">
+                    <span className="text-muted-foreground">Empréstimos:</span>
+                    <span className="font-semibold text-foreground">{dadosFiltrados.emprestimos.length}</span>
                   </div>
                 </div>
               </CardContent>

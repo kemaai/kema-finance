@@ -1,14 +1,20 @@
 
 import React from 'react';
-import { Calendar, Filter } from 'lucide-react';
+import { Calendar, Filter, CalendarDays, CalendarRange, CalendarClock } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Button } from '@/components/ui/button';
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { getTotalWeeksInYear, formatPeriodo, getStartOfWeek, getEndOfWeek } from '@/lib/dateUtils';
 
 interface RelatorioFilterProps {
+  periodoRelatorio: 'semanal' | 'mensal' | 'anual';
+  semanaEscolhida: number;
   mesEscolhido: number;
   anoEscolhido: number;
   tipoRelatorio: string;
+  onPeriodoChange: (periodo: 'semanal' | 'mensal' | 'anual') => void;
+  onSemanaChange: (semana: number) => void;
   onMesChange: (mes: number) => void;
   onAnoChange: (ano: number) => void;
   onTipoChange: (tipo: string) => void;
@@ -16,9 +22,13 @@ interface RelatorioFilterProps {
 }
 
 export const RelatorioFilter: React.FC<RelatorioFilterProps> = ({
+  periodoRelatorio,
+  semanaEscolhida,
   mesEscolhido,
   anoEscolhido,
   tipoRelatorio,
+  onPeriodoChange,
+  onSemanaChange,
   onMesChange,
   onAnoChange,
   onTipoChange,
@@ -45,6 +55,16 @@ export const RelatorioFilter: React.FC<RelatorioFilterProps> = ({
     (_, i) => new Date().getFullYear() - 5 + i
   );
 
+  const totalSemanas = getTotalWeeksInYear(anoEscolhido);
+  const semanasDisponiveis = Array.from({ length: totalSemanas }, (_, i) => i + 1);
+
+  // Gerar labels das semanas com datas
+  const getSemanaLabel = (semana: number) => {
+    const inicio = getStartOfWeek(anoEscolhido, semana);
+    const fim = getEndOfWeek(anoEscolhido, semana);
+    return `Semana ${semana} (${inicio.getDate()}/${inicio.getMonth() + 1} - ${fim.getDate()}/${fim.getMonth() + 1})`;
+  };
+
   return (
     <Card className="card-tech mb-6">
       <CardHeader>
@@ -53,13 +73,43 @@ export const RelatorioFilter: React.FC<RelatorioFilterProps> = ({
           Filtros de Relatório
         </CardTitle>
       </CardHeader>
-      <CardContent>
+      <CardContent className="space-y-4">
+        {/* Seletor de Período (Semanal, Mensal, Anual) */}
+        <div className="space-y-2">
+          <label className="text-sm font-medium text-foreground">Período:</label>
+          <Tabs value={periodoRelatorio} onValueChange={(value) => onPeriodoChange(value as 'semanal' | 'mensal' | 'anual')} className="w-full">
+            <TabsList className="grid w-full grid-cols-3 bg-background/50 border border-orange-500/30">
+              <TabsTrigger 
+                value="semanal" 
+                className="flex items-center gap-2 data-[state=active]:bg-orange-500 data-[state=active]:text-white"
+              >
+                <CalendarDays className="w-4 h-4" />
+                <span className="hidden sm:inline">Semanal</span>
+              </TabsTrigger>
+              <TabsTrigger 
+                value="mensal"
+                className="flex items-center gap-2 data-[state=active]:bg-orange-500 data-[state=active]:text-white"
+              >
+                <CalendarRange className="w-4 h-4" />
+                <span className="hidden sm:inline">Mensal</span>
+              </TabsTrigger>
+              <TabsTrigger 
+                value="anual"
+                className="flex items-center gap-2 data-[state=active]:bg-orange-500 data-[state=active]:text-white"
+              >
+                <CalendarClock className="w-4 h-4" />
+                <span className="hidden sm:inline">Anual</span>
+              </TabsTrigger>
+            </TabsList>
+          </Tabs>
+        </div>
+
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
           {/* Seletor de Tipo */}
           <div className="space-y-2">
             <label className="text-sm font-medium text-foreground">Categoria:</label>
             <Select value={tipoRelatorio} onValueChange={onTipoChange}>
-              <SelectTrigger className="w-full">
+              <SelectTrigger className="w-full input-tech">
                 <SelectValue placeholder="Selecione a categoria" />
               </SelectTrigger>
               <SelectContent>
@@ -72,28 +122,49 @@ export const RelatorioFilter: React.FC<RelatorioFilterProps> = ({
             </Select>
           </div>
 
-          {/* Seletor de Mês */}
-          <div className="space-y-2">
-            <label className="text-sm font-medium text-foreground">Mês:</label>
-            <Select value={mesEscolhido.toString()} onValueChange={(value) => onMesChange(parseInt(value))}>
-              <SelectTrigger className="w-full">
-                <SelectValue placeholder="Selecione o mês" />
-              </SelectTrigger>
-              <SelectContent>
-                {nomesMeses.map((nome, index) => (
-                  <SelectItem key={index} value={index.toString()}>
-                    {nome}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
+          {/* Seletor de Semana (apenas para período semanal) */}
+          {periodoRelatorio === 'semanal' && (
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-foreground">Semana:</label>
+              <Select value={semanaEscolhida.toString()} onValueChange={(value) => onSemanaChange(parseInt(value))}>
+                <SelectTrigger className="w-full input-tech">
+                  <SelectValue placeholder="Selecione a semana" />
+                </SelectTrigger>
+                <SelectContent className="max-h-60">
+                  {semanasDisponiveis.map((semana) => (
+                    <SelectItem key={semana} value={semana.toString()}>
+                      {getSemanaLabel(semana)}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          )}
+
+          {/* Seletor de Mês (apenas para período mensal) */}
+          {periodoRelatorio === 'mensal' && (
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-foreground">Mês:</label>
+              <Select value={mesEscolhido.toString()} onValueChange={(value) => onMesChange(parseInt(value))}>
+                <SelectTrigger className="w-full input-tech">
+                  <SelectValue placeholder="Selecione o mês" />
+                </SelectTrigger>
+                <SelectContent>
+                  {nomesMeses.map((nome, index) => (
+                    <SelectItem key={index} value={index.toString()}>
+                      {nome}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          )}
 
           {/* Seletor de Ano */}
           <div className="space-y-2">
             <label className="text-sm font-medium text-foreground">Ano:</label>
             <Select value={anoEscolhido.toString()} onValueChange={(value) => onAnoChange(parseInt(value))}>
-              <SelectTrigger className="w-full">
+              <SelectTrigger className="w-full input-tech">
                 <SelectValue placeholder="Selecione o ano" />
               </SelectTrigger>
               <SelectContent>
@@ -111,7 +182,7 @@ export const RelatorioFilter: React.FC<RelatorioFilterProps> = ({
             <Button 
               variant="outline" 
               onClick={onResetFilter}
-              className="w-full border-orange-500/30 hover:bg-orange-500/10"
+              className="w-full border-orange-500/30 hover:bg-orange-500/10 text-foreground"
             >
               <Calendar className="w-4 h-4 mr-2" />
               Limpar
@@ -122,7 +193,7 @@ export const RelatorioFilter: React.FC<RelatorioFilterProps> = ({
         {/* Indicador do período selecionado */}
         <div className="mt-4 p-3 bg-orange-500/10 border border-orange-500/30 rounded-lg">
           <p className="text-sm text-orange-400">
-            <strong>Período:</strong> {nomesMeses[mesEscolhido]} de {anoEscolhido}
+            <strong>Período:</strong> {formatPeriodo(periodoRelatorio, semanaEscolhida, mesEscolhido, anoEscolhido)}
             {tipoRelatorio !== 'todos' && (
               <span className="ml-2">
                 | <strong>Categoria:</strong> {tiposRelatorio.find(t => t.value === tipoRelatorio)?.label}
