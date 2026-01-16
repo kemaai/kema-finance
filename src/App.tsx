@@ -15,6 +15,7 @@ import { Instalacoes } from "./pages/Instalacoes";
 import Despesas from "./pages/Despesas";
 import { Dividas } from "./pages/Dividas";
 import { Relatorios } from "./pages/Relatorios";
+import { Agente } from "./pages/Agente";
 import { Login } from "./pages/Login";
 import NotFound from "./pages/NotFound";
 
@@ -106,6 +107,16 @@ function App() {
                   <ProtectedRoute>
                     <Layout>
                       <Relatorios />
+                    </Layout>
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/agente"
+                element={
+                  <ProtectedRoute>
+                    <Layout>
+                      <Agente />
                     </Layout>
                   </ProtectedRoute>
                 }
