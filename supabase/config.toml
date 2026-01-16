@@ -1,1 +1,4 @@
 project_id = "asxxotyratempbuxetma"
+
+[functions.kema-finance-ai]
+verify_jwt = false

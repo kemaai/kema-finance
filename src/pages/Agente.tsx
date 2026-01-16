@@ -1,0 +1,100 @@
+import React from 'react';
+import { DiagnosticoCard } from '@/components/DiagnosticoCard';
+import { AlertasWidget } from '@/components/AlertasWidget';
+import { AgenteChatPanel } from '@/components/AgenteChatPanel';
+import { useKemaFinanceAI } from '@/hooks/useKemaFinanceAI';
+import { Brain, Sparkles } from 'lucide-react';
+
+export function Agente() {
+  const {
+    diagnostico,
+    alertas,
+    messages,
+    isLoading,
+    sendMessage,
+    clearMessages,
+    suggestedQuestions,
+  } = useKemaFinanceAI();
+
+  return (
+    <div className="min-h-screen bg-background">
+      {/* Hero Section */}
+      <div className="relative overflow-hidden">
+        <div className="absolute inset-0 bg-tech-particles"></div>
+        <div className="absolute inset-0 bg-grid-pattern opacity-50"></div>
+        
+        {/* Glowing orbs */}
+        <div className="absolute top-10 right-20 w-32 h-32 bg-primary/10 rounded-full blur-3xl animate-pulse"></div>
+        <div className="absolute bottom-10 left-20 w-24 h-24 bg-accent/10 rounded-full blur-2xl animate-pulse delay-1000"></div>
+        
+        <div className="relative p-6 md:p-12 pb-8 md:pb-16">
+          <div className="max-w-7xl mx-auto">
+            <div className="flex items-center gap-4">
+              <div className="w-14 h-14 bg-gradient-to-br from-primary to-accent rounded-2xl flex items-center justify-center glow-orange-sm">
+                <Brain className="w-8 h-8 text-white" />
+              </div>
+              <div>
+                <h1 className="text-2xl md:text-3xl font-bold text-gradient-orange flex items-center gap-2">
+                  KemaFinance AI
+                  <Sparkles className="w-6 h-6 text-primary" />
+                </h1>
+                <p className="text-muted-foreground">
+                  Seu consultor financeiro pessoal inteligente
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div className="max-w-7xl mx-auto p-4 md:p-8 space-y-6 -mt-4 md:-mt-8 relative z-10">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          {/* Left Column - Diagnostic and Alerts */}
+          <div className="space-y-6">
+            <DiagnosticoCard diagnostico={diagnostico} />
+            <AlertasWidget alertas={alertas} maxAlertas={4} />
+          </div>
+
+          {/* Right Column - Chat Panel (takes 2 columns on large screens) */}
+          <div className="lg:col-span-2">
+            <AgenteChatPanel
+              messages={messages}
+              isLoading={isLoading}
+              onSendMessage={sendMessage}
+              onClearMessages={clearMessages}
+              suggestedQuestions={suggestedQuestions}
+            />
+          </div>
+        </div>
+
+        {/* Financial Education Section */}
+        <div className="card-tech p-6">
+          <h3 className="text-lg font-semibold text-foreground mb-4 flex items-center gap-2">
+            <Sparkles className="w-5 h-5 text-primary" />
+            Dicas de Educação Financeira
+          </h3>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="p-4 bg-muted/30 rounded-lg border border-border">
+              <h4 className="font-medium text-foreground mb-2">💡 Regra 50-30-20</h4>
+              <p className="text-sm text-muted-foreground">
+                Destine 50% para necessidades, 30% para desejos e 20% para poupança e dívidas.
+              </p>
+            </div>
+            <div className="p-4 bg-muted/30 rounded-lg border border-border">
+              <h4 className="font-medium text-foreground mb-2">🎯 Reserva de Emergência</h4>
+              <p className="text-sm text-muted-foreground">
+                Tenha de 3 a 6 meses de despesas guardados antes de pensar em investimentos.
+              </p>
+            </div>
+            <div className="p-4 bg-muted/30 rounded-lg border border-border">
+              <h4 className="font-medium text-foreground mb-2">📊 Método Avalanche</h4>
+              <p className="text-sm text-muted-foreground">
+                Pague primeiro as dívidas com juros mais altos para economizar mais a longo prazo.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
