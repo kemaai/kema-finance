@@ -112,3 +112,62 @@ export const getPeriodoDatas = (
 
   return { dataInicio, dataFim };
 };
+
+/**
+ * Gera um array de períodos históricos para gráficos
+ */
+export const getHistoricoPeriodos = (
+  periodo: 'semanal' | 'mensal' | 'anual',
+  quantidade: number
+): { inicio: Date; fim: Date; label: string }[] => {
+  const periodos: { inicio: Date; fim: Date; label: string }[] = [];
+  const hoje = new Date();
+  const nomesMeses = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'];
+
+  for (let i = quantidade - 1; i >= 0; i--) {
+    let inicio: Date;
+    let fim: Date;
+    let label: string;
+
+    switch (periodo) {
+      case 'semanal':
+        const semanaAtual = getWeekNumber(hoje);
+        const anoAtual = hoje.getFullYear();
+        let semanaAlvo = semanaAtual - i;
+        let anoAlvo = anoAtual;
+        
+        if (semanaAlvo < 1) {
+          anoAlvo = anoAtual - 1;
+          semanaAlvo = getTotalWeeksInYear(anoAlvo) + semanaAlvo;
+        }
+        
+        inicio = getStartOfWeek(anoAlvo, semanaAlvo);
+        fim = getEndOfWeek(anoAlvo, semanaAlvo);
+        label = `S${semanaAlvo}`;
+        break;
+        
+      case 'mensal':
+        const mesDate = new Date(hoje.getFullYear(), hoje.getMonth() - i, 1);
+        inicio = new Date(mesDate.getFullYear(), mesDate.getMonth(), 1);
+        fim = new Date(mesDate.getFullYear(), mesDate.getMonth() + 1, 0);
+        label = `${nomesMeses[mesDate.getMonth()]}/${mesDate.getFullYear().toString().slice(-2)}`;
+        break;
+        
+      case 'anual':
+        const anoAlvoAnual = hoje.getFullYear() - i;
+        inicio = new Date(anoAlvoAnual, 0, 1);
+        fim = new Date(anoAlvoAnual, 11, 31);
+        label = anoAlvoAnual.toString();
+        break;
+        
+      default:
+        inicio = new Date();
+        fim = new Date();
+        label = '';
+    }
+
+    periodos.push({ inicio, fim, label });
+  }
+
+  return periodos;
+};
