@@ -209,6 +209,69 @@ export type Database = {
         }
         Relationships: []
       }
+      metas_financeiras: {
+        Row: {
+          ativa: boolean | null
+          created_at: string | null
+          criada_por_ai: boolean | null
+          data_fim: string | null
+          data_inicio: string | null
+          descricao: string | null
+          id: string
+          metadata: Json | null
+          nome: string
+          prazo_meses: number | null
+          prioridade: number | null
+          progresso: number | null
+          tipo_meta: string
+          updated_at: string | null
+          user_id: string
+          valor_atual: number | null
+          valor_mensal_sugerido: number | null
+          valor_meta: number | null
+        }
+        Insert: {
+          ativa?: boolean | null
+          created_at?: string | null
+          criada_por_ai?: boolean | null
+          data_fim?: string | null
+          data_inicio?: string | null
+          descricao?: string | null
+          id?: string
+          metadata?: Json | null
+          nome: string
+          prazo_meses?: number | null
+          prioridade?: number | null
+          progresso?: number | null
+          tipo_meta: string
+          updated_at?: string | null
+          user_id: string
+          valor_atual?: number | null
+          valor_mensal_sugerido?: number | null
+          valor_meta?: number | null
+        }
+        Update: {
+          ativa?: boolean | null
+          created_at?: string | null
+          criada_por_ai?: boolean | null
+          data_fim?: string | null
+          data_inicio?: string | null
+          descricao?: string | null
+          id?: string
+          metadata?: Json | null
+          nome?: string
+          prazo_meses?: number | null
+          prioridade?: number | null
+          progresso?: number | null
+          tipo_meta?: string
+          updated_at?: string | null
+          user_id?: string
+          valor_atual?: number | null
+          valor_mensal_sugerido?: number | null
+          valor_meta?: number | null
+        }
+        Relationships: []
+      }
       pagamentos_emprestimo: {
         Row: {
           created_at: string
