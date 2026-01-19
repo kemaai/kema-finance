@@ -1,22 +1,17 @@
 
 import React from 'react';
-import { useNavigate } from 'react-router-dom';
 import { DashboardCard } from '../components/DashboardCard';
 import { RevenueChart } from '../components/RevenueChart';
 import { useSites, useClientes, useInstalacoes, useDespesas } from '../hooks/useSupabaseData';
 import { useAuth } from '../hooks/useAuth';
-import { useKemaFinanceAI } from '../hooks/useKemaFinanceAI';
-import { DollarSign, Globe, Scissors, Users, TrendingUp, Calendar, Bell, CheckCircle, Sparkles, CreditCard, AlertTriangle, Brain, ArrowRight } from 'lucide-react';
-import { Button } from '@/components/ui/button';
+import { DollarSign, Globe, Scissors, Users, TrendingUp, Calendar, Bell, CheckCircle, Sparkles, CreditCard, AlertTriangle } from 'lucide-react';
 
 export const Dashboard = () => {
-  const navigate = useNavigate();
   const { profile } = useAuth();
   const { data: sites = [], isLoading: sitesLoading } = useSites();
   const { data: clientes = [], isLoading: clientesLoading } = useClientes();
   const { data: instalacoes = [], isLoading: instalacoesLoading } = useInstalacoes();
   const { data: despesas = [], isLoading: despesasLoading } = useDespesas();
-  const { diagnostico, alertas } = useKemaFinanceAI();
 
   const hoje = new Date();
   const inicioMesAtual = new Date(hoje.getFullYear(), hoje.getMonth(), 1);
@@ -143,80 +138,6 @@ export const Dashboard = () => {
       </div>
 
       <div className="max-w-7xl mx-auto p-4 md:p-8 space-y-8 -mt-4 md:-mt-8 relative z-10">
-        {/* KemaFinance AI Mini-Widget */}
-        <div className="card-tech p-4 md:p-6 border-primary/40 hover:border-primary/60 transition-all duration-300 bg-gradient-to-r from-primary/5 to-accent/5">
-          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-            <div className="flex items-center gap-4">
-              <div className="relative">
-                <div className="w-14 h-14 md:w-16 md:h-16 rounded-2xl bg-gradient-to-br from-primary to-accent flex items-center justify-center shadow-lg shadow-primary/30">
-                  <Brain className="w-7 h-7 md:w-8 md:h-8 text-white" />
-                </div>
-                <div className="absolute -top-1 -right-1 w-5 h-5 rounded-full bg-background border-2 border-primary flex items-center justify-center">
-                  <Sparkles className="w-3 h-3 text-primary" />
-                </div>
-              </div>
-              <div>
-                <h3 className="text-lg md:text-xl font-bold text-foreground flex items-center gap-2">
-                  KemaFinance AI
-                  <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${
-                    diagnostico.classificacao === 'saudavel' 
-                      ? 'bg-green-900/50 text-green-400 border border-green-700/50' 
-                      : diagnostico.classificacao === 'atencao' 
-                        ? 'bg-amber-900/50 text-amber-400 border border-amber-700/50' 
-                        : 'bg-red-900/50 text-red-400 border border-red-700/50'
-                  }`}>
-                    {diagnostico.classificacao === 'saudavel' ? '🟢 Saudável' : 
-                     diagnostico.classificacao === 'atencao' ? '🟡 Atenção' : '🔴 Crítica'}
-                  </span>
-                </h3>
-                <p className="text-muted-foreground text-sm">Seu consultor financeiro pessoal</p>
-              </div>
-            </div>
-            
-            <div className="flex flex-col md:flex-row items-start md:items-center gap-4 md:gap-6">
-              {/* Score */}
-              <div className="flex items-center gap-3 bg-background/50 rounded-xl px-4 py-2 border border-border/50">
-                <div className="text-center">
-                  <div className={`text-2xl md:text-3xl font-bold ${
-                    diagnostico.scoreFinanceiro >= 70 ? 'text-green-400' : 
-                    diagnostico.scoreFinanceiro >= 40 ? 'text-amber-400' : 'text-red-400'
-                  }`}>
-                    {diagnostico.scoreFinanceiro}
-                  </div>
-                  <div className="text-xs text-muted-foreground">Score</div>
-                </div>
-                <div className="h-10 w-px bg-border/50"></div>
-                <div className="text-center">
-                  <div className="text-lg md:text-xl font-semibold text-foreground">
-                    {diagnostico.percentualComprometido.toFixed(0)}%
-                  </div>
-                  <div className="text-xs text-muted-foreground">Comprometido</div>
-                </div>
-              </div>
-
-              {/* Alerta Principal */}
-              {alertas.length > 0 && (
-                <div className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm max-w-xs md:max-w-sm ${
-                  alertas[0].tipo === 'critico' ? 'bg-red-900/30 text-red-400 border border-red-700/40' :
-                  alertas[0].tipo === 'atencao' ? 'bg-amber-900/30 text-amber-400 border border-amber-700/40' :
-                  'bg-blue-900/30 text-blue-400 border border-blue-700/40'
-                }`}>
-                  <AlertTriangle className="w-4 h-4 flex-shrink-0" />
-                  <span className="truncate">{alertas[0].mensagem}</span>
-                </div>
-              )}
-              
-              <Button 
-                onClick={() => navigate('/agente')} 
-                className="btn-tech gap-2 whitespace-nowrap"
-              >
-                Ver Análise Completa
-                <ArrowRight className="w-4 h-4" />
-              </Button>
-            </div>
-          </div>
-        </div>
-
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 md:gap-6">
           <DashboardCard 
             title="Receita Total" 
