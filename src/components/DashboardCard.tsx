@@ -30,10 +30,10 @@ export const DashboardCard: React.FC<DashboardCardProps> = ({
     )}>
       <div className="flex items-start justify-between">
         <div className="flex-1 min-w-0">
-          <p className="text-muted-foreground text-xs md:text-sm font-medium mb-1 md:mb-2 truncate">{title}</p>
-          <h3 className="text-xl md:text-3xl font-bold text-foreground mb-1 truncate">{value}</h3>
+          <p className="text-muted-foreground text-xs md:text-sm font-medium mb-1 md:mb-2 truncate md:whitespace-normal md:overflow-visible">{title}</p>
+          <h3 className="text-xl md:text-3xl font-bold text-foreground mb-1 truncate md:whitespace-normal md:overflow-visible">{value}</h3>
           {subValue && (
-            <p className="text-muted-foreground text-xs md:text-sm truncate">{subValue}</p>
+            <p className="text-muted-foreground text-xs md:text-sm truncate md:whitespace-normal md:overflow-visible">{subValue}</p>
           )}
           {trend && (
             <p className={`text-xs md:text-sm font-medium mt-1 md:mt-2 ${trendColor}`}>{trend}</p>
