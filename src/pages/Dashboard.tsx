@@ -2,6 +2,7 @@
 import React from 'react';
 import { DashboardCard } from '../components/DashboardCard';
 import { RevenueChart } from '../components/RevenueChart';
+import { KemaAIWidget } from '../components/KemaAIWidget';
 import { useSites, useClientes, useInstalacoes, useDespesas } from '../hooks/useSupabaseData';
 import { useAuth } from '../hooks/useAuth';
 import { DollarSign, Globe, Scissors, Users, TrendingUp, Calendar, Bell, CheckCircle, Sparkles, CreditCard, AlertTriangle } from 'lucide-react';
@@ -185,6 +186,9 @@ export const Dashboard = () => {
             className="hover:border-red-500/50" 
           />
         </div>
+
+        {/* KemaFinance AI Widget */}
+        <KemaAIWidget />
 
         <div className="card-tech p-6 hover:border-primary/50 transition-all duration-300">
           <div className="flex items-center justify-between mb-6">
