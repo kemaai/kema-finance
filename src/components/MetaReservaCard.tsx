@@ -116,9 +116,9 @@ export function MetaReservaCard({ diagnostico, metaReserva, onUpdate }: MetaRese
       <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-emerald-500/10 to-transparent rounded-full blur-2xl" />
       
       <div className="relative">
-        <div className="flex items-center justify-between mb-6">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
           <div className="flex items-center gap-3">
-            <div className="w-12 h-12 bg-gradient-to-br from-emerald-500 to-green-400 rounded-xl flex items-center justify-center shadow-lg shadow-emerald-500/25">
+            <div className="w-12 h-12 bg-gradient-to-br from-emerald-500 to-green-400 rounded-xl flex items-center justify-center shadow-lg shadow-emerald-500/25 shrink-0">
               <Shield className="w-6 h-6 text-white" />
             </div>
             <div>
@@ -127,16 +127,16 @@ export function MetaReservaCard({ diagnostico, metaReserva, onUpdate }: MetaRese
             </div>
           </div>
           
-          {/* Edit button */}
+          {/* Edit button - visible on all screen sizes */}
           {!isEditing && metaReserva && (
             <Button
-              variant="ghost"
+              variant="outline"
               size="sm"
               onClick={handleStartEdit}
-              className="text-muted-foreground hover:text-primary"
+              className="text-emerald-600 border-emerald-500/50 hover:bg-emerald-500/10 hover:text-emerald-700 w-full sm:w-auto"
             >
-              <Edit3 className="w-4 h-4 mr-1" />
-              Atualizar
+              <Edit3 className="w-4 h-4 mr-2" />
+              Atualizar Valor
             </Button>
           )}
         </div>
