@@ -5,6 +5,7 @@ import { RevenueChart } from '../components/RevenueChart';
 import { KemaAIWidget } from '../components/KemaAIWidget';
 import { useSites, useClientes, useInstalacoes, useDespesas } from '../hooks/useSupabaseData';
 import { useAuth } from '../hooks/useAuth';
+import { parseLocalDate } from '../lib/utils';
 import { DollarSign, Globe, Scissors, Users, TrendingUp, Calendar, Bell, CheckCircle, Sparkles, CreditCard, AlertTriangle } from 'lucide-react';
 
 export const Dashboard = () => {
@@ -45,7 +46,7 @@ export const Dashboard = () => {
   const fimQuinzena = hoje.getDate() <= 15 ? 15 : new Date(hoje.getFullYear(), hoje.getMonth() + 1, 0).getDate();
   
   const instalacoesDaQuinzena = instalacoes.filter(instalacao => {
-    const dataInstalacao = new Date(instalacao.data_instalacao);
+    const dataInstalacao = parseLocalDate(instalacao.data_instalacao);
     const diaInstalacao = dataInstalacao.getDate();
     return dataInstalacao.getMonth() === hoje.getMonth() && 
            dataInstalacao.getFullYear() === hoje.getFullYear() && 
@@ -54,8 +55,8 @@ export const Dashboard = () => {
            instalacao.status === 'Concluído';
   });
 
-  const receitaQuinzenaInstalacoes = instalacoesDaQuinzena.reduce((total, instalacao) => total + instalacao.valor_total, 0);
-  const totalM2Quinzena = instalacoesDaQuinzena.reduce((total, instalacao) => total + instalacao.valor_total / 20, 0);
+  const receitaQuinzenaInstalacoes = instalacoesDaQuinzena.reduce((total, instalacao) => total + Number(instalacao.valor_total), 0);
+  const totalM2Quinzena = instalacoesDaQuinzena.reduce((total, instalacao) => total + Number(instalacao.valor_total) / 20, 0);
   const receitaTotal = receitaMensalSites + receitaQuinzenaInstalacoes;
 
   // Estatísticas gerais
@@ -72,14 +73,14 @@ export const Dashboard = () => {
 
   // Próximas instalações (próximos 60 dias)
   const proximasInstalacoes = instalacoes.filter(instalacao => {
-    const dataInstalacao = new Date(instalacao.data_instalacao);
+    const dataInstalacao = parseLocalDate(instalacao.data_instalacao);
     return instalacao.status === 'Agendado' && dataInstalacao >= hoje && dataInstalacao <= proximosDois;
-  }).sort((a, b) => new Date(a.data_instalacao).getTime() - new Date(b.data_instalacao).getTime()).slice(0, 3);
+  }).sort((a, b) => parseLocalDate(a.data_instalacao).getTime() - parseLocalDate(b.data_instalacao).getTime()).slice(0, 3);
 
   const instalacoesConcluidasMes = instalacoes.filter(instalacao => {
-    const dataInstalacao = new Date(instalacao.data_instalacao);
+    const dataInstalacao = parseLocalDate(instalacao.data_instalacao);
     return instalacao.status === 'Concluído' && dataInstalacao >= inicioMesAtual && dataInstalacao <= fimMesAtual;
-  }).sort((a, b) => new Date(b.data_instalacao).getTime() - new Date(a.data_instalacao).getTime()).slice(0, 3);
+  }).sort((a, b) => parseLocalDate(b.data_instalacao).getTime() - parseLocalDate(a.data_instalacao).getTime()).slice(0, 3);
 
   const todasInstalacoes = [...proximasInstalacoes, ...instalacoesConcluidasMes];
 
@@ -345,7 +346,7 @@ export const Dashboard = () => {
                         R$ {instalacao.valor_total.toFixed(2)}
                       </div>
                       <div className="text-xs text-muted-foreground">
-                        {new Date(instalacao.data_instalacao).toLocaleDateString('pt-BR')}
+                        {parseLocalDate(instalacao.data_instalacao).toLocaleDateString('pt-BR')}
                       </div>
                     </div>
                   </div>
