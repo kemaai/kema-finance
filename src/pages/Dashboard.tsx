@@ -208,11 +208,30 @@ export const Dashboard = () => {
       </div>
 
       <div className="max-w-7xl mx-auto p-4 md:p-8 space-y-8 -mt-4 md:-mt-8 relative z-10">
+        {/* Filtro de período */}
+        <div className="flex items-center gap-2 flex-wrap">
+          <CalendarDays className="w-4 h-4 text-muted-foreground" />
+          <span className="text-sm text-muted-foreground mr-1">Período instalações:</span>
+          {(['semanal', 'quinzenal', 'mensal'] as PeriodoFiltro[]).map((p) => (
+            <button
+              key={p}
+              onClick={() => setPeriodoInstalacoes(p)}
+              className={`px-3 py-1 rounded-full text-xs font-medium transition-all ${
+                periodoInstalacoes === p
+                  ? 'bg-primary text-primary-foreground shadow-sm'
+                  : 'bg-muted/60 text-muted-foreground hover:bg-muted hover:text-foreground border border-border/50'
+              }`}
+            >
+              {p === 'semanal' ? 'Semanal' : p === 'quinzenal' ? 'Quinzenal' : 'Mensal'}
+            </button>
+          ))}
+        </div>
+
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 md:gap-6">
           <DashboardCard 
             title="Receita Total" 
             value={`R$ ${receitaTotal.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`} 
-            subValue={`Sites: R$ ${receitaMensalSites.toFixed(2)} • Instalações: R$ ${receitaQuinzenaInstalacoes.toFixed(2)}`} 
+            subValue={`Sites: R$ ${receitaMensalSites.toFixed(2)} • Inst: R$ ${receitaPeriodoInstalacoes.toFixed(2)}`} 
             icon={DollarSign} 
             iconColor="bg-gradient-to-br from-green-500 to-green-600" 
             className="hover:border-green-500/50" 
@@ -230,8 +249,8 @@ export const Dashboard = () => {
           
           <DashboardCard 
             title="Instalações" 
-            value={instalacoesDaQuinzena.length.toString()} 
-            subValue={`${totalM2Quinzena.toFixed(1)} m² esta quinzena`} 
+            value={instalacoesDoPeriodo.length.toString()} 
+            subValue={`${totalM2Periodo.toFixed(1)} m² ${labelPeriodo}`} 
             icon={Scissors} 
             iconColor="bg-gradient-to-br from-primary to-accent" 
             className="hover:border-primary/50" 
