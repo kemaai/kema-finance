@@ -7,7 +7,9 @@ import { useSites, useClientes, useInstalacoes, useDespesas } from '../hooks/use
 import { useAuth } from '../hooks/useAuth';
 import { parseLocalDate } from '../lib/utils';
 import { useQueryClient } from '@tanstack/react-query';
-import { DollarSign, Globe, Scissors, Users, TrendingUp, Calendar, Bell, CheckCircle, Sparkles, CreditCard, AlertTriangle, RefreshCw, Clock } from 'lucide-react';
+import { DollarSign, Globe, Scissors, Users, TrendingUp, Calendar, Bell, CheckCircle, Sparkles, CreditCard, AlertTriangle, RefreshCw, Clock, CalendarDays } from 'lucide-react';
+
+type PeriodoFiltro = 'semanal' | 'quinzenal' | 'mensal';
 
 export const Dashboard = () => {
   const { profile, user } = useAuth();
@@ -19,6 +21,7 @@ export const Dashboard = () => {
 
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [, setTick] = useState(0);
+  const [periodoInstalacoes, setPeriodoInstalacoes] = useState<PeriodoFiltro>('quinzenal');
 
   // Get the most recent update timestamp
   const lastSyncTimestamp = Math.max(sitesUpdatedAt || 0, clientesUpdatedAt || 0, instalacoesUpdatedAt || 0, despesasUpdatedAt || 0);
@@ -74,23 +77,46 @@ export const Dashboard = () => {
       return total;
     }, 0);
 
-  // Calcular receita das instalações da quinzena atual
-  const inicioQuinzena = hoje.getDate() <= 15 ? 1 : 16;
-  const fimQuinzena = hoje.getDate() <= 15 ? 15 : new Date(hoje.getFullYear(), hoje.getMonth() + 1, 0).getDate();
-  
-  const instalacoesDaQuinzena = instalacoes.filter(instalacao => {
+  // Calcular período de filtro das instalações
+  const getInstalacoesPeriodo = () => {
+    const now = new Date();
+    let inicio: Date;
+    let fim: Date;
+    let label: string;
+
+    if (periodoInstalacoes === 'semanal') {
+      const dayOfWeek = now.getDay();
+      const diffToMonday = dayOfWeek === 0 ? 6 : dayOfWeek - 1;
+      inicio = new Date(now.getFullYear(), now.getMonth(), now.getDate() - diffToMonday);
+      fim = new Date(inicio.getFullYear(), inicio.getMonth(), inicio.getDate() + 6);
+      label = 'esta semana';
+    } else if (periodoInstalacoes === 'quinzenal') {
+      const inicioQ = now.getDate() <= 15 ? 1 : 16;
+      const fimQ = now.getDate() <= 15 ? 15 : new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
+      inicio = new Date(now.getFullYear(), now.getMonth(), inicioQ);
+      fim = new Date(now.getFullYear(), now.getMonth(), fimQ);
+      label = 'esta quinzena';
+    } else {
+      inicio = new Date(now.getFullYear(), now.getMonth(), 1);
+      fim = new Date(now.getFullYear(), now.getMonth() + 1, 0);
+      label = 'este mês';
+    }
+
+    return { inicio, fim, label };
+  };
+
+  const { inicio: inicioPeriodo, fim: fimPeriodo, label: labelPeriodo } = getInstalacoesPeriodo();
+
+  const instalacoesDoPeriodo = instalacoes.filter(instalacao => {
     const dataInstalacao = parseLocalDate(instalacao.data_instalacao);
-    const diaInstalacao = dataInstalacao.getDate();
-    return dataInstalacao.getMonth() === hoje.getMonth() && 
-           dataInstalacao.getFullYear() === hoje.getFullYear() && 
-           diaInstalacao >= inicioQuinzena && 
-           diaInstalacao <= fimQuinzena && 
+    return dataInstalacao >= inicioPeriodo && 
+           dataInstalacao <= fimPeriodo && 
            instalacao.status === 'Concluído';
   });
 
-  const receitaQuinzenaInstalacoes = instalacoesDaQuinzena.reduce((total, instalacao) => total + Number(instalacao.valor_total), 0);
-  const totalM2Quinzena = instalacoesDaQuinzena.reduce((total, instalacao) => total + Number(instalacao.valor_total) / 20, 0);
-  const receitaTotal = receitaMensalSites + receitaQuinzenaInstalacoes;
+  const receitaPeriodoInstalacoes = instalacoesDoPeriodo.reduce((total, instalacao) => total + Number(instalacao.valor_total), 0);
+  const totalM2Periodo = instalacoesDoPeriodo.reduce((total, instalacao) => total + Number(instalacao.valor_total) / 20, 0);
+  const receitaTotal = receitaMensalSites + receitaPeriodoInstalacoes;
 
   // Estatísticas gerais
   const clientesAtivos = clientes.length;
@@ -182,11 +208,30 @@ export const Dashboard = () => {
       </div>
 
       <div className="max-w-7xl mx-auto p-4 md:p-8 space-y-8 -mt-4 md:-mt-8 relative z-10">
+        {/* Filtro de período */}
+        <div className="flex items-center gap-2 flex-wrap">
+          <CalendarDays className="w-4 h-4 text-muted-foreground" />
+          <span className="text-sm text-muted-foreground mr-1">Período instalações:</span>
+          {(['semanal', 'quinzenal', 'mensal'] as PeriodoFiltro[]).map((p) => (
+            <button
+              key={p}
+              onClick={() => setPeriodoInstalacoes(p)}
+              className={`px-3 py-1 rounded-full text-xs font-medium transition-all ${
+                periodoInstalacoes === p
+                  ? 'bg-primary text-primary-foreground shadow-sm'
+                  : 'bg-muted/60 text-muted-foreground hover:bg-muted hover:text-foreground border border-border/50'
+              }`}
+            >
+              {p === 'semanal' ? 'Semanal' : p === 'quinzenal' ? 'Quinzenal' : 'Mensal'}
+            </button>
+          ))}
+        </div>
+
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 md:gap-6">
           <DashboardCard 
             title="Receita Total" 
             value={`R$ ${receitaTotal.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`} 
-            subValue={`Sites: R$ ${receitaMensalSites.toFixed(2)} • Instalações: R$ ${receitaQuinzenaInstalacoes.toFixed(2)}`} 
+            subValue={`Sites: R$ ${receitaMensalSites.toFixed(2)} • Inst: R$ ${receitaPeriodoInstalacoes.toFixed(2)}`} 
             icon={DollarSign} 
             iconColor="bg-gradient-to-br from-green-500 to-green-600" 
             className="hover:border-green-500/50" 
@@ -204,8 +249,8 @@ export const Dashboard = () => {
           
           <DashboardCard 
             title="Instalações" 
-            value={instalacoesDaQuinzena.length.toString()} 
-            subValue={`${totalM2Quinzena.toFixed(1)} m² esta quinzena`} 
+            value={instalacoesDoPeriodo.length.toString()} 
+            subValue={`${totalM2Periodo.toFixed(1)} m² ${labelPeriodo}`} 
             icon={Scissors} 
             iconColor="bg-gradient-to-br from-primary to-accent" 
             className="hover:border-primary/50" 
