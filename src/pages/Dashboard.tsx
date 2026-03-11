@@ -7,7 +7,9 @@ import { useSites, useClientes, useInstalacoes, useDespesas } from '../hooks/use
 import { useAuth } from '../hooks/useAuth';
 import { parseLocalDate } from '../lib/utils';
 import { useQueryClient } from '@tanstack/react-query';
-import { DollarSign, Globe, Scissors, Users, TrendingUp, Calendar, Bell, CheckCircle, Sparkles, CreditCard, AlertTriangle, RefreshCw, Clock } from 'lucide-react';
+import { DollarSign, Globe, Scissors, Users, TrendingUp, Calendar, Bell, CheckCircle, Sparkles, CreditCard, AlertTriangle, RefreshCw, Clock, CalendarDays } from 'lucide-react';
+
+type PeriodoFiltro = 'semanal' | 'quinzenal' | 'mensal';
 
 export const Dashboard = () => {
   const { profile, user } = useAuth();
