@@ -291,13 +291,19 @@ export function useKemaFinanceAI() {
     setIsLoading(true);
 
     try {
+      const { data: { session } } = await (await import('@/integrations/supabase/client')).supabase.auth.getSession();
+      const accessToken = session?.access_token;
+      if (!accessToken) {
+        throw new Error('Você precisa estar logado para usar o agente de IA.');
+      }
+
       const response = await fetch(
         `https://asxxotyratempbuxetma.supabase.co/functions/v1/kema-finance-ai`,
         {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
-            'Authorization': `Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFzeHhvdHlyYXRlbXBidXhldG1hIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTM0OTM5MDcsImV4cCI6MjA2OTA2OTkwN30.E1Ouzgr22uzPhF2QsiXqKbv9vVhqhC8bDM7BK2RyFfc`,
+            'Authorization': `Bearer ${accessToken}`,
           },
           body: JSON.stringify({
             messages: [...messages.map(m => ({ role: m.role, content: m.content })), { role: 'user', content: userMessage }],
