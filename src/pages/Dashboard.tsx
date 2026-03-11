@@ -21,6 +21,7 @@ export const Dashboard = () => {
 
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [, setTick] = useState(0);
+  const [periodoInstalacoes, setPeriodoInstalacoes] = useState<PeriodoFiltro>('quinzenal');
 
   // Get the most recent update timestamp
   const lastSyncTimestamp = Math.max(sitesUpdatedAt || 0, clientesUpdatedAt || 0, instalacoesUpdatedAt || 0, despesasUpdatedAt || 0);
