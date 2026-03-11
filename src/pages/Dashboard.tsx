@@ -77,23 +77,46 @@ export const Dashboard = () => {
       return total;
     }, 0);
 
-  // Calcular receita das instalações da quinzena atual
-  const inicioQuinzena = hoje.getDate() <= 15 ? 1 : 16;
-  const fimQuinzena = hoje.getDate() <= 15 ? 15 : new Date(hoje.getFullYear(), hoje.getMonth() + 1, 0).getDate();
-  
-  const instalacoesDaQuinzena = instalacoes.filter(instalacao => {
+  // Calcular período de filtro das instalações
+  const getInstalacoesPeriodo = () => {
+    const now = new Date();
+    let inicio: Date;
+    let fim: Date;
+    let label: string;
+
+    if (periodoInstalacoes === 'semanal') {
+      const dayOfWeek = now.getDay();
+      const diffToMonday = dayOfWeek === 0 ? 6 : dayOfWeek - 1;
+      inicio = new Date(now.getFullYear(), now.getMonth(), now.getDate() - diffToMonday);
+      fim = new Date(inicio.getFullYear(), inicio.getMonth(), inicio.getDate() + 6);
+      label = 'esta semana';
+    } else if (periodoInstalacoes === 'quinzenal') {
+      const inicioQ = now.getDate() <= 15 ? 1 : 16;
+      const fimQ = now.getDate() <= 15 ? 15 : new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
+      inicio = new Date(now.getFullYear(), now.getMonth(), inicioQ);
+      fim = new Date(now.getFullYear(), now.getMonth(), fimQ);
+      label = 'esta quinzena';
+    } else {
+      inicio = new Date(now.getFullYear(), now.getMonth(), 1);
+      fim = new Date(now.getFullYear(), now.getMonth() + 1, 0);
+      label = 'este mês';
+    }
+
+    return { inicio, fim, label };
+  };
+
+  const { inicio: inicioPeriodo, fim: fimPeriodo, label: labelPeriodo } = getInstalacoesPeriodo();
+
+  const instalacoesDoPeriodo = instalacoes.filter(instalacao => {
     const dataInstalacao = parseLocalDate(instalacao.data_instalacao);
-    const diaInstalacao = dataInstalacao.getDate();
-    return dataInstalacao.getMonth() === hoje.getMonth() && 
-           dataInstalacao.getFullYear() === hoje.getFullYear() && 
-           diaInstalacao >= inicioQuinzena && 
-           diaInstalacao <= fimQuinzena && 
+    return dataInstalacao >= inicioPeriodo && 
+           dataInstalacao <= fimPeriodo && 
            instalacao.status === 'Concluído';
   });
 
-  const receitaQuinzenaInstalacoes = instalacoesDaQuinzena.reduce((total, instalacao) => total + Number(instalacao.valor_total), 0);
-  const totalM2Quinzena = instalacoesDaQuinzena.reduce((total, instalacao) => total + Number(instalacao.valor_total) / 20, 0);
-  const receitaTotal = receitaMensalSites + receitaQuinzenaInstalacoes;
+  const receitaPeriodoInstalacoes = instalacoesDoPeriodo.reduce((total, instalacao) => total + Number(instalacao.valor_total), 0);
+  const totalM2Periodo = instalacoesDoPeriodo.reduce((total, instalacao) => total + Number(instalacao.valor_total) / 20, 0);
+  const receitaTotal = receitaMensalSites + receitaPeriodoInstalacoes;
 
   // Estatísticas gerais
   const clientesAtivos = clientes.length;
