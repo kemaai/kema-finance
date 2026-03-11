@@ -163,10 +163,19 @@ export const Dashboard = () => {
         
         <div className="relative p-6 md:p-12 pb-8 md:pb-16">
           <div className="max-w-7xl mx-auto">
-            <div className="space-y-3">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
               <p className="text-xl md:text-2xl font-medium text-foreground leading-relaxed">
                 Bem-vindo de volta {profile?.first_name || 'Usuário'}! 👋
               </p>
+              <button
+                onClick={handleRefresh}
+                disabled={isRefreshing}
+                className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-muted/60 hover:bg-muted border border-border/50 text-xs text-muted-foreground hover:text-foreground transition-all self-start sm:self-auto"
+              >
+                <RefreshCw className={`w-3.5 h-3.5 ${isRefreshing ? 'animate-spin' : ''}`} />
+                <Clock className="w-3 h-3" />
+                <span>{isRefreshing ? 'Atualizando...' : formatRelativeTime(lastSyncTimestamp)}</span>
+              </button>
             </div>
           </div>
         </div>
