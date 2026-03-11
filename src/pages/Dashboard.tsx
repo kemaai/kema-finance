@@ -1,19 +1,52 @@
 
-import React from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { DashboardCard } from '../components/DashboardCard';
 import { RevenueChart } from '../components/RevenueChart';
 import { KemaAIWidget } from '../components/KemaAIWidget';
 import { useSites, useClientes, useInstalacoes, useDespesas } from '../hooks/useSupabaseData';
 import { useAuth } from '../hooks/useAuth';
 import { parseLocalDate } from '../lib/utils';
-import { DollarSign, Globe, Scissors, Users, TrendingUp, Calendar, Bell, CheckCircle, Sparkles, CreditCard, AlertTriangle } from 'lucide-react';
+import { useQueryClient } from '@tanstack/react-query';
+import { DollarSign, Globe, Scissors, Users, TrendingUp, Calendar, Bell, CheckCircle, Sparkles, CreditCard, AlertTriangle, RefreshCw, Clock } from 'lucide-react';
 
 export const Dashboard = () => {
-  const { profile } = useAuth();
-  const { data: sites = [], isLoading: sitesLoading } = useSites();
-  const { data: clientes = [], isLoading: clientesLoading } = useClientes();
-  const { data: instalacoes = [], isLoading: instalacoesLoading } = useInstalacoes();
-  const { data: despesas = [], isLoading: despesasLoading } = useDespesas();
+  const { profile, user } = useAuth();
+  const queryClient = useQueryClient();
+  const { data: sites = [], isLoading: sitesLoading, dataUpdatedAt: sitesUpdatedAt } = useSites();
+  const { data: clientes = [], isLoading: clientesLoading, dataUpdatedAt: clientesUpdatedAt } = useClientes();
+  const { data: instalacoes = [], isLoading: instalacoesLoading, dataUpdatedAt: instalacoesUpdatedAt } = useInstalacoes();
+  const { data: despesas = [], isLoading: despesasLoading, dataUpdatedAt: despesasUpdatedAt } = useDespesas();
+
+  const [isRefreshing, setIsRefreshing] = useState(false);
+  const [, setTick] = useState(0);
+
+  // Get the most recent update timestamp
+  const lastSyncTimestamp = Math.max(sitesUpdatedAt || 0, clientesUpdatedAt || 0, instalacoesUpdatedAt || 0, despesasUpdatedAt || 0);
+
+  // Update relative time every 30s
+  useEffect(() => {
+    const interval = setInterval(() => setTick(t => t + 1), 30000);
+    return () => clearInterval(interval);
+  }, []);
+
+  const handleRefresh = useCallback(async () => {
+    setIsRefreshing(true);
+    await queryClient.invalidateQueries({ queryKey: ['sites'] });
+    await queryClient.invalidateQueries({ queryKey: ['clientes'] });
+    await queryClient.invalidateQueries({ queryKey: ['instalacoes'] });
+    await queryClient.invalidateQueries({ queryKey: ['despesas'] });
+    setTimeout(() => setIsRefreshing(false), 800);
+  }, [queryClient]);
+
+  const formatRelativeTime = (timestamp: number) => {
+    if (!timestamp) return 'Nunca';
+    const diff = Math.floor((Date.now() - timestamp) / 1000);
+    if (diff < 10) return 'Agora mesmo';
+    if (diff < 60) return `${diff}s atrás`;
+    if (diff < 3600) return `${Math.floor(diff / 60)}min atrás`;
+    if (diff < 86400) return `${Math.floor(diff / 3600)}h atrás`;
+    return new Date(timestamp).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' });
+  };
 
   const hoje = new Date();
   const inicioMesAtual = new Date(hoje.getFullYear(), hoje.getMonth(), 1);
@@ -130,10 +163,19 @@ export const Dashboard = () => {
         
         <div className="relative p-6 md:p-12 pb-8 md:pb-16">
           <div className="max-w-7xl mx-auto">
-            <div className="space-y-3">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
               <p className="text-xl md:text-2xl font-medium text-foreground leading-relaxed">
                 Bem-vindo de volta {profile?.first_name || 'Usuário'}! 👋
               </p>
+              <button
+                onClick={handleRefresh}
+                disabled={isRefreshing}
+                className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-muted/60 hover:bg-muted border border-border/50 text-xs text-muted-foreground hover:text-foreground transition-all self-start sm:self-auto"
+              >
+                <RefreshCw className={`w-3.5 h-3.5 ${isRefreshing ? 'animate-spin' : ''}`} />
+                <Clock className="w-3 h-3" />
+                <span>{isRefreshing ? 'Atualizando...' : formatRelativeTime(lastSyncTimestamp)}</span>
+              </button>
             </div>
           </div>
         </div>
