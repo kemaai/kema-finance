@@ -41,23 +41,23 @@ export const DespesaCard: React.FC<DespesaCardProps> = ({
 
   const getStatusBadge = () => {
     if (despesa.paga) {
-      return <Badge className="bg-green-900/50 text-green-400 border border-green-700/50">Paga</Badge>;
+      return <Badge className="bg-green-100 text-green-700 border border-green-200 dark:bg-green-900/50 dark:text-green-400 dark:border-green-700/50">Paga</Badge>;
     }
     if (isVencida) {
-      return <Badge className="bg-red-900/50 text-red-400 border border-red-700/50">Vencida</Badge>;
+      return <Badge className="bg-red-100 text-red-700 border border-red-200 dark:bg-red-900/50 dark:text-red-400 dark:border-red-700/50">Vencida</Badge>;
     }
     if (isVenceHoje) {
-      return <Badge className="bg-amber-900/50 text-amber-400 border border-amber-700/50">Vence Hoje</Badge>;
+      return <Badge className="bg-amber-100 text-amber-700 border border-amber-200 dark:bg-amber-900/50 dark:text-amber-400 dark:border-amber-700/50">Vence Hoje</Badge>;
     }
     return <Badge className="bg-muted text-muted-foreground border border-border">Pendente</Badge>;
   };
 
   const getCardStyle = () => {
     if (isVencida && !despesa.paga) {
-      return 'border-red-700/50 bg-red-900/10';
+      return 'border-red-300 bg-red-50/50 dark:border-red-700/50 dark:bg-red-900/10';
     }
     if (isVenceHoje && !despesa.paga) {
-      return 'border-amber-700/50 bg-amber-900/10';
+      return 'border-amber-300 bg-amber-50/50 dark:border-amber-700/50 dark:bg-amber-900/10';
     }
     return 'border-border';
   };
@@ -131,7 +131,7 @@ export const DespesaCard: React.FC<DespesaCardProps> = ({
             variant="outline"
             size="sm"
             onClick={() => onDelete(despesa.id)}
-            className="flex items-center gap-1 border-red-700/50 text-red-400 hover:bg-red-900/30 hover:text-red-300"
+            className="flex items-center gap-1 border-red-300 text-red-600 hover:bg-red-50 hover:text-red-700 dark:border-red-700/50 dark:text-red-400 dark:hover:bg-red-900/30 dark:hover:text-red-300"
           >
             <Trash2 className="h-4 w-4" />
             Excluir

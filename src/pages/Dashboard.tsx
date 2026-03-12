@@ -408,28 +408,28 @@ export const Dashboard = () => {
               ) : (
                 todasInstalacoes.map(instalacao => (
                   <div key={instalacao.id} className={`flex items-center justify-between p-4 rounded-xl border transition-colors ${
-                    instalacao.status === 'Concluído' 
-                      ? 'bg-green-900/20 border-green-700/30 hover:border-green-600/50' 
-                      : 'bg-blue-900/20 border-blue-700/30 hover:border-blue-600/50'
-                  }`}>
-                    <div className="flex items-center gap-3 flex-1 min-w-0">
-                      {instalacao.status === 'Concluído' && (
-                        <CheckCircle className="w-5 h-5 text-green-400 flex-shrink-0" />
-                      )}
-                      <div className="min-w-0 flex-1">
-                        <div className="font-medium text-foreground truncate">{instalacao.arquiteto_nome}</div>
-                        <div className="text-sm text-muted-foreground truncate">{instalacao.ambiente}</div>
-                        <div className={`text-xs px-2 py-1 rounded-full inline-block mt-1 ${
-                          instalacao.status === 'Concluído' 
-                            ? 'bg-green-900/50 text-green-400' 
-                            : 'bg-blue-900/50 text-blue-400'
-                        }`}>
-                          {instalacao.status}
-                        </div>
-                      </div>
-                    </div>
-                    <div className="text-right ml-4">
-                      <div className={`font-bold ${instalacao.status === 'Concluído' ? 'text-green-400' : 'text-blue-400'}`}>
+                     instalacao.status === 'Concluído' 
+                       ? 'bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-700/30 hover:border-green-300 dark:hover:border-green-600/50' 
+                       : 'bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-700/30 hover:border-blue-300 dark:hover:border-blue-600/50'
+                   }`}>
+                     <div className="flex items-center gap-3 flex-1 min-w-0">
+                       {instalacao.status === 'Concluído' && (
+                         <CheckCircle className="w-5 h-5 text-green-600 dark:text-green-400 flex-shrink-0" />
+                       )}
+                       <div className="min-w-0 flex-1">
+                         <div className="font-medium text-foreground truncate">{instalacao.arquiteto_nome}</div>
+                         <div className="text-sm text-muted-foreground truncate">{instalacao.ambiente}</div>
+                         <div className={`text-xs px-2 py-1 rounded-full inline-block mt-1 ${
+                           instalacao.status === 'Concluído' 
+                             ? 'bg-green-100 text-green-700 dark:bg-green-900/50 dark:text-green-400' 
+                             : 'bg-blue-100 text-blue-700 dark:bg-blue-900/50 dark:text-blue-400'
+                         }`}>
+                           {instalacao.status}
+                         </div>
+                       </div>
+                     </div>
+                     <div className="text-right ml-4">
+                       <div className={`font-bold ${instalacao.status === 'Concluído' ? 'text-green-600 dark:text-green-400' : 'text-blue-600 dark:text-blue-400'}`}>
                         R$ {instalacao.valor_total.toFixed(2)}
                       </div>
                       <div className="text-xs text-muted-foreground">

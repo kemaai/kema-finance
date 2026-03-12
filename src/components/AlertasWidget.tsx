@@ -12,26 +12,26 @@ export function AlertasWidget({ alertas, maxAlertas = 5 }: AlertasWidgetProps) {
   const getAlertIcon = (tipo: Alerta['tipo']) => {
     switch (tipo) {
       case 'critico':
-        return <AlertTriangle className="w-5 h-5 text-red-400" />;
+        return <AlertTriangle className="w-5 h-5 text-red-600 dark:text-red-400" />;
       case 'atencao':
-        return <AlertCircle className="w-5 h-5 text-amber-400" />;
+        return <AlertCircle className="w-5 h-5 text-amber-600 dark:text-amber-400" />;
       case 'sucesso':
-        return <CheckCircle className="w-5 h-5 text-green-400" />;
+        return <CheckCircle className="w-5 h-5 text-green-600 dark:text-green-400" />;
       default:
-        return <Info className="w-5 h-5 text-blue-400" />;
+        return <Info className="w-5 h-5 text-blue-600 dark:text-blue-400" />;
     }
   };
 
   const getAlertStyles = (tipo: Alerta['tipo']) => {
     switch (tipo) {
       case 'critico':
-        return 'bg-red-900/20 border-red-700/30 hover:border-red-600/50';
+        return 'bg-red-50 border-red-200 hover:border-red-300 dark:bg-red-900/20 dark:border-red-700/30 dark:hover:border-red-600/50';
       case 'atencao':
-        return 'bg-amber-900/20 border-amber-700/30 hover:border-amber-600/50';
+        return 'bg-amber-50 border-amber-200 hover:border-amber-300 dark:bg-amber-900/20 dark:border-amber-700/30 dark:hover:border-amber-600/50';
       case 'sucesso':
-        return 'bg-green-900/20 border-green-700/30 hover:border-green-600/50';
+        return 'bg-green-50 border-green-200 hover:border-green-300 dark:bg-green-900/20 dark:border-green-700/30 dark:hover:border-green-600/50';
       default:
-        return 'bg-blue-900/20 border-blue-700/30 hover:border-blue-600/50';
+        return 'bg-blue-50 border-blue-200 hover:border-blue-300 dark:bg-blue-900/20 dark:border-blue-700/30 dark:hover:border-blue-600/50';
     }
   };
 
@@ -55,7 +55,7 @@ export function AlertasWidget({ alertas, maxAlertas = 5 }: AlertasWidgetProps) {
       <CardContent>
         {displayAlertas.length === 0 ? (
           <div className="text-center py-8">
-            <CheckCircle className="w-12 h-12 mx-auto mb-3 text-green-400/50" />
+            <CheckCircle className="w-12 h-12 mx-auto mb-3 text-green-600/50 dark:text-green-400/50" />
             <p className="text-muted-foreground">Nenhum alerta no momento</p>
             <p className="text-sm text-muted-foreground/70 mt-1">
               Sua situação financeira parece estável

@@ -27,10 +27,10 @@ interface InstalacaoCardProps {
 
 const getStatusColor = (status: string) => {
   switch (status) {
-    case 'Agendado': return 'bg-blue-900/50 text-blue-400 border border-blue-700/50';
-    case 'Em Andamento': return 'bg-amber-900/50 text-amber-400 border border-amber-700/50';
-    case 'Concluído': return 'bg-green-900/50 text-green-400 border border-green-700/50';
-    case 'Cancelado': return 'bg-red-900/50 text-red-400 border border-red-700/50';
+    case 'Agendado': return 'bg-blue-100 text-blue-700 border border-blue-200 dark:bg-blue-900/50 dark:text-blue-400 dark:border-blue-700/50';
+    case 'Em Andamento': return 'bg-amber-100 text-amber-700 border border-amber-200 dark:bg-amber-900/50 dark:text-amber-400 dark:border-amber-700/50';
+    case 'Concluído': return 'bg-green-100 text-green-700 border border-green-200 dark:bg-green-900/50 dark:text-green-400 dark:border-green-700/50';
+    case 'Cancelado': return 'bg-red-100 text-red-700 border border-red-200 dark:bg-red-900/50 dark:text-red-400 dark:border-red-700/50';
     default: return 'bg-muted text-muted-foreground';
   }
 };
@@ -54,7 +54,7 @@ export const InstalacaoCard: React.FC<InstalacaoCardProps> = ({ instalacao, onEd
         
         <div className={`flex items-center gap-2 mb-3 p-2 rounded-lg transition-colors border ${
           instalacao.pedido_recebido 
-            ? 'bg-green-900/20 border-green-700/50' 
+            ? 'bg-green-50 border-green-200 dark:bg-green-900/20 dark:border-green-700/50' 
             : 'bg-muted/30 border-border'
         }`}>
           <Checkbox 
@@ -66,7 +66,7 @@ export const InstalacaoCard: React.FC<InstalacaoCardProps> = ({ instalacao, onEd
           <label 
             htmlFor={`pedido-${instalacao.id}`}
             className={`text-sm font-medium cursor-pointer select-none ${
-              instalacao.pedido_recebido ? 'text-green-400' : 'text-foreground'
+              instalacao.pedido_recebido ? 'text-green-700 dark:text-green-400' : 'text-foreground'
             }`}
           >
             Pedido Recebido
@@ -98,7 +98,7 @@ export const InstalacaoCard: React.FC<InstalacaoCardProps> = ({ instalacao, onEd
             </button>
             <button
               onClick={() => onDelete(instalacao.id)}
-              className="p-2 text-red-400 hover:bg-red-900/30 rounded-lg transition-colors"
+              className="p-2 text-red-600 dark:text-red-400 hover:bg-red-100 dark:hover:bg-red-900/30 rounded-lg transition-colors"
             >
               <Trash2 className="w-4 h-4" />
             </button>
