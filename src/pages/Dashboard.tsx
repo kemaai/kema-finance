@@ -319,14 +319,14 @@ export const Dashboard = () => {
                 </div>
               ) : (
                 proximosVencimentos.map(site => (
-                  <div key={site.id} className="flex items-center justify-between p-4 bg-amber-900/20 rounded-xl border border-amber-700/30 hover:border-amber-600/50 transition-colors">
-                    <div className="flex-1 min-w-0">
-                      <div className="font-medium text-foreground truncate">{site.cliente_nome}</div>
-                      <div className="text-sm text-muted-foreground truncate">{site.descricao_projeto}</div>
-                    </div>
-                    <div className="text-right ml-4">
-                      <div className="font-bold text-amber-400">R$ {site.valor_mensal.toFixed(2)}</div>
-                      <div className="text-xs text-amber-500">
+                  <div key={site.id} className="flex items-center justify-between p-4 bg-amber-50 dark:bg-amber-900/20 rounded-xl border border-amber-200 dark:border-amber-700/30 hover:border-amber-300 dark:hover:border-amber-600/50 transition-colors">
+                     <div className="flex-1 min-w-0">
+                       <div className="font-medium text-foreground truncate">{site.cliente_nome}</div>
+                       <div className="text-sm text-muted-foreground truncate">{site.descricao_projeto}</div>
+                     </div>
+                     <div className="text-right ml-4">
+                       <div className="font-bold text-amber-600 dark:text-amber-400">R$ {site.valor_mensal.toFixed(2)}</div>
+                       <div className="text-xs text-amber-600 dark:text-amber-500">
                         {new Date(site.data_vencimento).toLocaleDateString('pt-BR')}
                       </div>
                     </div>
