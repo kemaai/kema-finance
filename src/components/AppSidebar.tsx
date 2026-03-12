@@ -76,13 +76,13 @@ export function AppSidebar() {
   const toggleDarkMode = () => {
     const newDarkMode = !isDarkMode;
     setIsDarkMode(newDarkMode);
-    
+
     if (newDarkMode) {
       document.documentElement.classList.add('dark');
     } else {
       document.documentElement.classList.remove('dark');
     }
-    
+
     toast({
       title: "Tema alterado",
       description: `Tema ${newDarkMode ? 'escuro' : 'claro'} ativado`
@@ -106,7 +106,7 @@ export function AppSidebar() {
           </div>
           <div>
             <h1 className="text-lg font-bold text-gradient-orange">KemaAI</h1>
-            <p className="text-xs text-muted-foreground">CRM System</p>
+            
           </div>
         </div>
       </SidebarHeader>
@@ -118,29 +118,29 @@ export function AppSidebar() {
           </SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
-              {navigation.map(item => {
+              {navigation.map((item) => {
                 const isActive = location.pathname === item.url;
                 return (
                   <SidebarMenuItem key={item.title}>
-                    <SidebarMenuButton 
-                      asChild 
+                    <SidebarMenuButton
+                      asChild
                       isActive={isActive}
                       onClick={() => navigate(item.url)}
                       className={`
                         flex items-center gap-3 w-full px-3 py-2.5 rounded-lg transition-all duration-200
-                        ${isActive 
-                          ? 'bg-primary/20 text-primary border border-primary/30' 
-                          : 'text-muted-foreground hover:text-foreground hover:bg-muted/50'
-                        }
-                      `}
-                    >
+                        ${isActive ?
+                      'bg-primary/20 text-primary border border-primary/30' :
+                      'text-muted-foreground hover:text-foreground hover:bg-muted/50'}
+                      `
+                      }>
+                      
                       <button className="flex items-center gap-3 w-full">
                         <item.icon className={`w-4 h-4 ${isActive ? 'text-primary' : ''}`} />
                         <span className="font-medium">{item.title}</span>
                       </button>
                     </SidebarMenuButton>
-                  </SidebarMenuItem>
-                );
+                  </SidebarMenuItem>);
+
               })}
             </SidebarMenu>
           </SidebarGroupContent>
@@ -152,20 +152,20 @@ export function AppSidebar() {
           </SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
-              {quickActions.map(item => (
-                <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton 
-                    asChild 
-                    onClick={() => navigate(item.url)}
-                    className="flex items-center gap-3 w-full px-3 py-2 rounded-lg text-muted-foreground hover:text-primary hover:bg-primary/10 transition-all duration-200"
-                  >
+              {quickActions.map((item) =>
+              <SidebarMenuItem key={item.title}>
+                  <SidebarMenuButton
+                  asChild
+                  onClick={() => navigate(item.url)}
+                  className="flex items-center gap-3 w-full px-3 py-2 rounded-lg text-muted-foreground hover:text-primary hover:bg-primary/10 transition-all duration-200">
+                  
                     <button className="flex items-center gap-3 w-full">
                       <item.icon className="w-4 h-4" />
                       <span>{item.title}</span>
                     </button>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
-              ))}
+              )}
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
@@ -189,24 +189,24 @@ export function AppSidebar() {
               {isDarkMode ? <Moon className="w-4 h-4 text-primary" /> : <Sun className="w-4 h-4 text-amber-500" />}
               <span className="text-sm text-foreground">Tema Escuro</span>
             </div>
-            <Switch 
-              checked={isDarkMode} 
+            <Switch
+              checked={isDarkMode}
               onCheckedChange={toggleDarkMode}
-              className="data-[state=checked]:bg-primary"
-            />
+              className="data-[state=checked]:bg-primary" />
+            
           </div>
 
-          <Button 
-            onClick={handleSignOut} 
-            variant="ghost" 
-            size="sm" 
-            className="w-full justify-start gap-2 text-muted-foreground hover:text-destructive hover:bg-destructive/10"
-          >
+          <Button
+            onClick={handleSignOut}
+            variant="ghost"
+            size="sm"
+            className="w-full justify-start gap-2 text-muted-foreground hover:text-destructive hover:bg-destructive/10">
+            
             <LogOut className="w-4 h-4" />
             Sair
           </Button>
         </div>
       </SidebarFooter>
-    </Sidebar>
-  );
+    </Sidebar>);
+
 }
