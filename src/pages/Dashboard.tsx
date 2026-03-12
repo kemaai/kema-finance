@@ -384,8 +384,8 @@ export const Dashboard = () => {
           <div className="card-tech p-6 hover:border-primary/50 transition-all duration-300">
             <div className="flex items-center justify-between mb-6">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-blue-900/50 rounded-xl flex items-center justify-center">
-                  <Scissors className="w-5 h-5 text-blue-400" />
+                <div className="w-10 h-10 bg-blue-100 dark:bg-blue-900/50 rounded-xl flex items-center justify-center">
+                   <Scissors className="w-5 h-5 text-blue-600 dark:text-blue-400" />
                 </div>
                 <div>
                   <h3 className="text-lg font-semibold text-foreground">Instalações</h3>
