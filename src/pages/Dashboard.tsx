@@ -296,8 +296,8 @@ export const Dashboard = () => {
           <div className="card-tech p-6 hover:border-primary/50 transition-all duration-300">
             <div className="flex items-center justify-between mb-6">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-amber-900/50 rounded-xl flex items-center justify-center">
-                  <Calendar className="w-5 h-5 text-amber-400" />
+                <div className="w-10 h-10 bg-amber-100 dark:bg-amber-900/50 rounded-xl flex items-center justify-center">
+                   <Calendar className="w-5 h-5 text-amber-600 dark:text-amber-400" />
                 </div>
                 <div>
                   <h3 className="text-lg font-semibold text-foreground">Próximos Vencimentos</h3>
