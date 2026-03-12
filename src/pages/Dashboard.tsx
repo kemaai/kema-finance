@@ -339,8 +339,8 @@ export const Dashboard = () => {
           <div className="card-tech p-6 hover:border-primary/50 transition-all duration-300">
             <div className="flex items-center justify-between mb-6">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-red-900/50 rounded-xl flex items-center justify-center">
-                  <AlertTriangle className="w-5 h-5 text-red-400" />
+                <div className="w-10 h-10 bg-red-100 dark:bg-red-900/50 rounded-xl flex items-center justify-center">
+                   <AlertTriangle className="w-5 h-5 text-red-600 dark:text-red-400" />
                 </div>
                 <div>
                   <h3 className="text-lg font-semibold text-foreground">Despesas Próximas</h3>
