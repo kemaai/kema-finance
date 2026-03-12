@@ -179,7 +179,7 @@ export function AppSidebar() {
             </div>
             <div className="flex-1 min-w-0">
               <p className="text-sm font-medium text-foreground truncate">
-                {user?.user_metadata?.full_name || user?.email}
+                Adriano Silva
               </p>
             </div>
           </div>
