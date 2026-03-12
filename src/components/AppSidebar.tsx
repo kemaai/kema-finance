@@ -105,7 +105,7 @@ export function AppSidebar() {
             <img src={logo} alt="KemaAI" className="w-8 h-8 object-contain" />
           </div>
           <div>
-            <h1 className="text-lg font-bold text-gradient-orange">KemaAI</h1>
+            <h1 className="text-lg font-bold text-gradient-orange">​Kema AI </h1>
             
           </div>
         </div>
