@@ -362,16 +362,16 @@ export const Dashboard = () => {
                 </div>
               ) : (
                 despesasProximasVencimento.map(despesa => (
-                  <div key={despesa.id} className="flex items-center justify-between p-4 bg-red-900/20 rounded-xl border border-red-700/30 hover:border-red-600/50 transition-colors">
-                    <div className="flex-1 min-w-0">
-                      <div className="font-medium text-foreground truncate">{despesa.nome}</div>
-                      {despesa.anotacao && (
-                        <div className="text-sm text-muted-foreground truncate">{despesa.anotacao}</div>
-                      )}
-                    </div>
-                    <div className="text-right ml-4">
-                      <div className="font-bold text-red-400">R$ {Number(despesa.valor).toFixed(2)}</div>
-                      <div className="text-xs text-red-500">
+                  <div key={despesa.id} className="flex items-center justify-between p-4 bg-red-50 dark:bg-red-900/20 rounded-xl border border-red-200 dark:border-red-700/30 hover:border-red-300 dark:hover:border-red-600/50 transition-colors">
+                     <div className="flex-1 min-w-0">
+                       <div className="font-medium text-foreground truncate">{despesa.nome}</div>
+                       {despesa.anotacao && (
+                         <div className="text-sm text-muted-foreground truncate">{despesa.anotacao}</div>
+                       )}
+                     </div>
+                     <div className="text-right ml-4">
+                       <div className="font-bold text-red-600 dark:text-red-400">R$ {Number(despesa.valor).toFixed(2)}</div>
+                       <div className="text-xs text-red-600 dark:text-red-500">
                         {new Date(despesa.data_vencimento).toLocaleDateString('pt-BR')}
                       </div>
                     </div>
