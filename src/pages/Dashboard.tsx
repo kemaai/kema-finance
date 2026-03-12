@@ -284,7 +284,7 @@ export const Dashboard = () => {
               <h3 className="text-xl font-semibold text-foreground">Performance de Receita</h3>
               <p className="text-muted-foreground">Visão geral dos últimos meses</p>
             </div>
-            <div className="flex items-center gap-2 text-green-400">
+            <div className="flex items-center gap-2 text-green-600 dark:text-green-400">
               <TrendingUp className="w-5 h-5" />
               <span className="font-medium">+8.2%</span>
             </div>
