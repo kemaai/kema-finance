@@ -9,9 +9,9 @@ export const KemaAIWidget = () => {
   const { diagnostico, alertas } = useKemaFinanceAI();
 
   const getScoreColor = () => {
-    if (diagnostico.scoreFinanceiro <= 39) return 'text-red-400';
-    if (diagnostico.scoreFinanceiro <= 69) return 'text-amber-400';
-    return 'text-green-400';
+    if (diagnostico.scoreFinanceiro <= 39) return 'text-red-600 dark:text-red-400';
+    if (diagnostico.scoreFinanceiro <= 69) return 'text-amber-600 dark:text-amber-400';
+    return 'text-green-600 dark:text-green-400';
   };
 
   const getScoreGradient = () => {
@@ -31,22 +31,22 @@ export const KemaAIWidget = () => {
   const getAlertIcon = (tipo: string) => {
     switch (tipo) {
       case 'critico':
-        return <AlertTriangle className="w-4 h-4 text-red-400" />;
+        return <AlertTriangle className="w-4 h-4 text-red-600 dark:text-red-400" />;
       case 'atencao':
-        return <AlertTriangle className="w-4 h-4 text-amber-400" />;
+        return <AlertTriangle className="w-4 h-4 text-amber-600 dark:text-amber-400" />;
       default:
-        return <TrendingUp className="w-4 h-4 text-green-400" />;
+        return <TrendingUp className="w-4 h-4 text-green-600 dark:text-green-400" />;
     }
   };
 
   const getAlertBg = (tipo: string) => {
     switch (tipo) {
       case 'critico':
-        return 'bg-red-900/30 border-red-700/40';
+        return 'bg-red-100 border-red-200 dark:bg-red-900/30 dark:border-red-700/40';
       case 'atencao':
-        return 'bg-amber-900/30 border-amber-700/40';
+        return 'bg-amber-100 border-amber-200 dark:bg-amber-900/30 dark:border-amber-700/40';
       default:
-        return 'bg-green-900/30 border-green-700/40';
+        return 'bg-green-100 border-green-200 dark:bg-green-900/30 dark:border-green-700/40';
     }
   };
 
@@ -98,12 +98,12 @@ export const KemaAIWidget = () => {
           </div>
           <span className="text-xs text-muted-foreground">
             {diagnostico.saldoReal >= 0 ? (
-              <span className="flex items-center gap-1 text-green-400">
+              <span className="flex items-center gap-1 text-green-600 dark:text-green-400">
                 <TrendingUp className="w-3 h-3" />
                 +R$ {diagnostico.saldoReal.toFixed(0)}
               </span>
             ) : (
-              <span className="flex items-center gap-1 text-red-400">
+              <span className="flex items-center gap-1 text-red-600 dark:text-red-400">
                 <TrendingDown className="w-3 h-3" />
                 -R$ {Math.abs(diagnostico.saldoReal).toFixed(0)}
               </span>
@@ -133,19 +133,19 @@ export const KemaAIWidget = () => {
       <div className="hidden sm:grid grid-cols-3 gap-2 mt-4 pt-4 border-t border-border/50">
         <div className="text-center">
           <p className="text-xs text-muted-foreground">Receita</p>
-          <p className="text-sm font-semibold text-green-400">
+          <p className="text-sm font-semibold text-green-600 dark:text-green-400">
             R$ {diagnostico.receitaTotal.toFixed(0)}
           </p>
         </div>
         <div className="text-center">
           <p className="text-xs text-muted-foreground">Despesas</p>
-          <p className="text-sm font-semibold text-red-400">
+          <p className="text-sm font-semibold text-red-600 dark:text-red-400">
             R$ {diagnostico.despesaTotal.toFixed(0)}
           </p>
         </div>
         <div className="text-center">
           <p className="text-xs text-muted-foreground">Dívidas</p>
-          <p className="text-sm font-semibold text-amber-400">
+          <p className="text-sm font-semibold text-amber-600 dark:text-amber-400">
             R$ {diagnostico.totalDividas.toFixed(0)}
           </p>
         </div>

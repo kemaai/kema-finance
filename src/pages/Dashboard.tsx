@@ -284,7 +284,7 @@ export const Dashboard = () => {
               <h3 className="text-xl font-semibold text-foreground">Performance de Receita</h3>
               <p className="text-muted-foreground">Visão geral dos últimos meses</p>
             </div>
-            <div className="flex items-center gap-2 text-green-400">
+            <div className="flex items-center gap-2 text-green-600 dark:text-green-400">
               <TrendingUp className="w-5 h-5" />
               <span className="font-medium">+8.2%</span>
             </div>
@@ -296,8 +296,8 @@ export const Dashboard = () => {
           <div className="card-tech p-6 hover:border-primary/50 transition-all duration-300">
             <div className="flex items-center justify-between mb-6">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-amber-900/50 rounded-xl flex items-center justify-center">
-                  <Calendar className="w-5 h-5 text-amber-400" />
+                <div className="w-10 h-10 bg-amber-100 dark:bg-amber-900/50 rounded-xl flex items-center justify-center">
+                   <Calendar className="w-5 h-5 text-amber-600 dark:text-amber-400" />
                 </div>
                 <div>
                   <h3 className="text-lg font-semibold text-foreground">Próximos Vencimentos</h3>
@@ -319,14 +319,14 @@ export const Dashboard = () => {
                 </div>
               ) : (
                 proximosVencimentos.map(site => (
-                  <div key={site.id} className="flex items-center justify-between p-4 bg-amber-900/20 rounded-xl border border-amber-700/30 hover:border-amber-600/50 transition-colors">
-                    <div className="flex-1 min-w-0">
-                      <div className="font-medium text-foreground truncate">{site.cliente_nome}</div>
-                      <div className="text-sm text-muted-foreground truncate">{site.descricao_projeto}</div>
-                    </div>
-                    <div className="text-right ml-4">
-                      <div className="font-bold text-amber-400">R$ {site.valor_mensal.toFixed(2)}</div>
-                      <div className="text-xs text-amber-500">
+                  <div key={site.id} className="flex items-center justify-between p-4 bg-amber-50 dark:bg-amber-900/20 rounded-xl border border-amber-200 dark:border-amber-700/30 hover:border-amber-300 dark:hover:border-amber-600/50 transition-colors">
+                     <div className="flex-1 min-w-0">
+                       <div className="font-medium text-foreground truncate">{site.cliente_nome}</div>
+                       <div className="text-sm text-muted-foreground truncate">{site.descricao_projeto}</div>
+                     </div>
+                     <div className="text-right ml-4">
+                       <div className="font-bold text-amber-600 dark:text-amber-400">R$ {site.valor_mensal.toFixed(2)}</div>
+                       <div className="text-xs text-amber-600 dark:text-amber-500">
                         {new Date(site.data_vencimento).toLocaleDateString('pt-BR')}
                       </div>
                     </div>
@@ -339,8 +339,8 @@ export const Dashboard = () => {
           <div className="card-tech p-6 hover:border-primary/50 transition-all duration-300">
             <div className="flex items-center justify-between mb-6">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-red-900/50 rounded-xl flex items-center justify-center">
-                  <AlertTriangle className="w-5 h-5 text-red-400" />
+                <div className="w-10 h-10 bg-red-100 dark:bg-red-900/50 rounded-xl flex items-center justify-center">
+                   <AlertTriangle className="w-5 h-5 text-red-600 dark:text-red-400" />
                 </div>
                 <div>
                   <h3 className="text-lg font-semibold text-foreground">Despesas Próximas</h3>
@@ -362,16 +362,16 @@ export const Dashboard = () => {
                 </div>
               ) : (
                 despesasProximasVencimento.map(despesa => (
-                  <div key={despesa.id} className="flex items-center justify-between p-4 bg-red-900/20 rounded-xl border border-red-700/30 hover:border-red-600/50 transition-colors">
-                    <div className="flex-1 min-w-0">
-                      <div className="font-medium text-foreground truncate">{despesa.nome}</div>
-                      {despesa.anotacao && (
-                        <div className="text-sm text-muted-foreground truncate">{despesa.anotacao}</div>
-                      )}
-                    </div>
-                    <div className="text-right ml-4">
-                      <div className="font-bold text-red-400">R$ {Number(despesa.valor).toFixed(2)}</div>
-                      <div className="text-xs text-red-500">
+                  <div key={despesa.id} className="flex items-center justify-between p-4 bg-red-50 dark:bg-red-900/20 rounded-xl border border-red-200 dark:border-red-700/30 hover:border-red-300 dark:hover:border-red-600/50 transition-colors">
+                     <div className="flex-1 min-w-0">
+                       <div className="font-medium text-foreground truncate">{despesa.nome}</div>
+                       {despesa.anotacao && (
+                         <div className="text-sm text-muted-foreground truncate">{despesa.anotacao}</div>
+                       )}
+                     </div>
+                     <div className="text-right ml-4">
+                       <div className="font-bold text-red-600 dark:text-red-400">R$ {Number(despesa.valor).toFixed(2)}</div>
+                       <div className="text-xs text-red-600 dark:text-red-500">
                         {new Date(despesa.data_vencimento).toLocaleDateString('pt-BR')}
                       </div>
                     </div>
@@ -384,8 +384,8 @@ export const Dashboard = () => {
           <div className="card-tech p-6 hover:border-primary/50 transition-all duration-300">
             <div className="flex items-center justify-between mb-6">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-blue-900/50 rounded-xl flex items-center justify-center">
-                  <Scissors className="w-5 h-5 text-blue-400" />
+                <div className="w-10 h-10 bg-blue-100 dark:bg-blue-900/50 rounded-xl flex items-center justify-center">
+                   <Scissors className="w-5 h-5 text-blue-600 dark:text-blue-400" />
                 </div>
                 <div>
                   <h3 className="text-lg font-semibold text-foreground">Instalações</h3>
@@ -408,28 +408,28 @@ export const Dashboard = () => {
               ) : (
                 todasInstalacoes.map(instalacao => (
                   <div key={instalacao.id} className={`flex items-center justify-between p-4 rounded-xl border transition-colors ${
-                    instalacao.status === 'Concluído' 
-                      ? 'bg-green-900/20 border-green-700/30 hover:border-green-600/50' 
-                      : 'bg-blue-900/20 border-blue-700/30 hover:border-blue-600/50'
-                  }`}>
-                    <div className="flex items-center gap-3 flex-1 min-w-0">
-                      {instalacao.status === 'Concluído' && (
-                        <CheckCircle className="w-5 h-5 text-green-400 flex-shrink-0" />
-                      )}
-                      <div className="min-w-0 flex-1">
-                        <div className="font-medium text-foreground truncate">{instalacao.arquiteto_nome}</div>
-                        <div className="text-sm text-muted-foreground truncate">{instalacao.ambiente}</div>
-                        <div className={`text-xs px-2 py-1 rounded-full inline-block mt-1 ${
-                          instalacao.status === 'Concluído' 
-                            ? 'bg-green-900/50 text-green-400' 
-                            : 'bg-blue-900/50 text-blue-400'
-                        }`}>
-                          {instalacao.status}
-                        </div>
-                      </div>
-                    </div>
-                    <div className="text-right ml-4">
-                      <div className={`font-bold ${instalacao.status === 'Concluído' ? 'text-green-400' : 'text-blue-400'}`}>
+                     instalacao.status === 'Concluído' 
+                       ? 'bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-700/30 hover:border-green-300 dark:hover:border-green-600/50' 
+                       : 'bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-700/30 hover:border-blue-300 dark:hover:border-blue-600/50'
+                   }`}>
+                     <div className="flex items-center gap-3 flex-1 min-w-0">
+                       {instalacao.status === 'Concluído' && (
+                         <CheckCircle className="w-5 h-5 text-green-600 dark:text-green-400 flex-shrink-0" />
+                       )}
+                       <div className="min-w-0 flex-1">
+                         <div className="font-medium text-foreground truncate">{instalacao.arquiteto_nome}</div>
+                         <div className="text-sm text-muted-foreground truncate">{instalacao.ambiente}</div>
+                         <div className={`text-xs px-2 py-1 rounded-full inline-block mt-1 ${
+                           instalacao.status === 'Concluído' 
+                             ? 'bg-green-100 text-green-700 dark:bg-green-900/50 dark:text-green-400' 
+                             : 'bg-blue-100 text-blue-700 dark:bg-blue-900/50 dark:text-blue-400'
+                         }`}>
+                           {instalacao.status}
+                         </div>
+                       </div>
+                     </div>
+                     <div className="text-right ml-4">
+                       <div className={`font-bold ${instalacao.status === 'Concluído' ? 'text-green-600 dark:text-green-400' : 'text-blue-600 dark:text-blue-400'}`}>
                         R$ {instalacao.valor_total.toFixed(2)}
                       </div>
                       <div className="text-xs text-muted-foreground">
