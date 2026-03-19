@@ -93,7 +93,7 @@ export const InstalacaoForm: React.FC<InstalacaoFormProps> = ({
     }));
   };
 
-  const metragem = formData.valor_total / 20;
+  const metragem = formData.valor_total / 24;
 
   return (
     <Card className="card-tech w-full max-w-2xl mx-auto">
