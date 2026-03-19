@@ -10,6 +10,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { EmprestimoEditForm } from './EmprestimoEditForm';
+import { useAuth } from '@/hooks/useAuth';
 
 interface EmprestimoCardProps {
   emprestimo: {
