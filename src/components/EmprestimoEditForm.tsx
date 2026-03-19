@@ -25,6 +25,7 @@ export const EmprestimoEditForm: React.FC<EmprestimoEditFormProps> = ({
   onSuccess,
   emprestimo
 }) => {
+  const { user } = useAuth();
   const [formData, setFormData] = useState({
     nome: emprestimo.nome,
     valor_original: emprestimo.valor_original.toString()
