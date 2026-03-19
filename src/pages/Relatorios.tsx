@@ -118,8 +118,8 @@ export const Relatorios = () => {
     const instalacoesConcluidas = dadosFiltrados.instalacoes.filter(inst => inst.status === 'Concluído');
     const receitaInstalacoes = instalacoesConcluidas.reduce((total, instalacao) => total + instalacao.valor_total, 0);
     
-    // Metragem total (valor / 20 = M²)
-    const metragemTotal = instalacoesConcluidas.reduce((total, instalacao) => total + (instalacao.valor_total / 20), 0);
+    // Metragem total (valor / 24 = M²)
+    const metragemTotal = instalacoesConcluidas.reduce((total, instalacao) => total + (instalacao.valor_total / 24), 0);
 
     // Despesas
     const totalDespesas = dadosFiltrados.despesas.reduce((total, despesa) => total + despesa.valor, 0);
@@ -198,7 +198,7 @@ export const Relatorios = () => {
       });
       
       const receitaInstalacoes = instPeriodo.reduce((sum, inst) => sum + Number(inst.valor_total), 0);
-      const metragem = receitaInstalacoes / 20;
+      const metragem = receitaInstalacoes / 24;
       
       // Filtrar sites ativos com vencimento no período
       const sitesAtivos = sites.filter(site => {
@@ -332,7 +332,7 @@ export const Relatorios = () => {
         dados += `Média M² por Instalação: ${metricas.instalacoesConcluidas > 0 ? (metricas.metragemTotal / metricas.instalacoesConcluidas).toFixed(2) : '0.00'} M²\n\n`;
         dados += `=== DETALHAMENTO ===\n`;
         dadosFiltrados.instalacoes.forEach(inst => {
-          const metragem = inst.valor_total / 20;
+          const metragem = inst.valor_total / 24;
           dados += `\nPedido: ${inst.numero_pedido}\n`;
           dados += `Arquiteto: ${inst.arquiteto_nome}\n`;
           dados += `Data: ${new Date(inst.data_instalacao).toLocaleDateString('pt-BR')}\n`;
@@ -797,7 +797,7 @@ export const Relatorios = () => {
                 const instalacoesCanceladas = dadosFiltrados.instalacoes.filter(inst => inst.status === 'Cancelado');
                 
                 const receitaConcluidas = instalacoesConcluidas.reduce((sum, inst) => sum + Number(inst.valor_total), 0);
-                const metragemConcluidas = receitaConcluidas / 20;
+                const metragemConcluidas = receitaConcluidas / 24;
 
                 return (
                   <>
