@@ -27,6 +27,7 @@ export const DividaNegativadaCard: React.FC<DividaNegativadaCardProps> = ({
   divida, 
   onUpdate 
 }) => {
+  const { user } = useAuth();
   const [isPaymentDialogOpen, setIsPaymentDialogOpen] = useState(false);
   const [paymentDate, setPaymentDate] = useState(new Date().toISOString().split('T')[0]);
 
