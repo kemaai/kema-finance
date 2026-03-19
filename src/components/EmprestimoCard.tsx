@@ -81,7 +81,8 @@ export const EmprestimoCard: React.FC<EmprestimoCardProps> = ({
       const { error: updateError } = await supabase
         .from('emprestimos')
         .update({ valor_atual: novoValorAtual })
-        .eq('id', emprestimo.id);
+        .eq('id', emprestimo.id)
+        .eq('user_id', user!.id);
 
       if (updateError) throw updateError;
 
