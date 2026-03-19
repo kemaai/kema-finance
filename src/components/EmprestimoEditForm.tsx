@@ -46,6 +46,7 @@ export const EmprestimoEditForm: React.FC<EmprestimoEditFormProps> = ({
     }
 
     try {
+      if (!user) throw new Error('Usuário não autenticado');
       const { error } = await supabase
         .from('emprestimos')
         .update({
@@ -53,7 +54,8 @@ export const EmprestimoEditForm: React.FC<EmprestimoEditFormProps> = ({
           valor_original: valorOriginal,
           updated_at: new Date().toISOString()
         })
-        .eq('id', emprestimo.id);
+        .eq('id', emprestimo.id)
+        .eq('user_id', user.id);
 
       if (error) throw error;
 

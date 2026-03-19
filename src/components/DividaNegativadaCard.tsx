@@ -57,12 +57,14 @@ export const DividaNegativadaCard: React.FC<DividaNegativadaCardProps> = ({
 
   const handleDelete = async () => {
     if (!confirm('Tem certeza que deseja excluir esta dívida?')) return;
+    if (!user) return;
 
     try {
       const { error } = await supabase
         .from('dividas_negativadas')
         .delete()
-        .eq('id', divida.id);
+        .eq('id', divida.id)
+        .eq('user_id', user.id);
 
       if (error) throw error;
 

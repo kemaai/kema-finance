@@ -194,7 +194,8 @@ export const EmprestimoCard: React.FC<EmprestimoCardProps> = ({
       const { error } = await supabase
         .from('emprestimos')
         .delete()
-        .eq('id', emprestimo.id);
+        .eq('id', emprestimo.id)
+        .eq('user_id', user!.id);
 
       if (error) throw error;
 
