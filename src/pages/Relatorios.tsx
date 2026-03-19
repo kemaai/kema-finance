@@ -332,7 +332,7 @@ export const Relatorios = () => {
         dados += `Média M² por Instalação: ${metricas.instalacoesConcluidas > 0 ? (metricas.metragemTotal / metricas.instalacoesConcluidas).toFixed(2) : '0.00'} M²\n\n`;
         dados += `=== DETALHAMENTO ===\n`;
         dadosFiltrados.instalacoes.forEach(inst => {
-          const metragem = inst.valor_total / 20;
+          const metragem = inst.valor_total / 24;
           dados += `\nPedido: ${inst.numero_pedido}\n`;
           dados += `Arquiteto: ${inst.arquiteto_nome}\n`;
           dados += `Data: ${new Date(inst.data_instalacao).toLocaleDateString('pt-BR')}\n`;
