@@ -32,6 +32,7 @@ export const DividaNegativadaCard: React.FC<DividaNegativadaCardProps> = ({
   const [paymentDate, setPaymentDate] = useState(new Date().toISOString().split('T')[0]);
 
   const handleMarkAsPaid = async () => {
+    if (!user) return;
     try {
       const { error } = await supabase
         .from('dividas_negativadas')
@@ -40,7 +41,8 @@ export const DividaNegativadaCard: React.FC<DividaNegativadaCardProps> = ({
           data_pagamento: paymentDate,
           valor_atual: 0
         })
-        .eq('id', divida.id);
+        .eq('id', divida.id)
+        .eq('user_id', user.id);
 
       if (error) throw error;
 
