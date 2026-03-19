@@ -96,7 +96,8 @@ export default function Despesas() {
             anotacao: data.anotacao,
             paga: data.paga,
           })
-          .eq('id', editingDespesa.id);
+          .eq('id', editingDespesa.id)
+          .eq('user_id', user.id);
 
         if (error) throw error;
         toast({ title: 'Despesa atualizada com sucesso!' });
