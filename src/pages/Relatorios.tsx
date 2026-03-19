@@ -198,7 +198,7 @@ export const Relatorios = () => {
       });
       
       const receitaInstalacoes = instPeriodo.reduce((sum, inst) => sum + Number(inst.valor_total), 0);
-      const metragem = receitaInstalacoes / 20;
+      const metragem = receitaInstalacoes / 24;
       
       // Filtrar sites ativos com vencimento no período
       const sitesAtivos = sites.filter(site => {
