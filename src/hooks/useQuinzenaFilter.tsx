@@ -55,7 +55,7 @@ export const useQuinzenaFilter = (instalacoes: Instalacao[]) => {
 
   const totalMetrosQuadrados = useMemo(() => {
     return filteredInstalacoes.reduce((total, instalacao) => {
-      return total + (Number(instalacao.valor_total || 0) / 20);
+      return total + (Number(instalacao.valor_total || 0) / 24);
     }, 0);
   }, [filteredInstalacoes]);
 
