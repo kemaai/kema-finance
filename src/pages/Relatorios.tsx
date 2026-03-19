@@ -118,8 +118,8 @@ export const Relatorios = () => {
     const instalacoesConcluidas = dadosFiltrados.instalacoes.filter(inst => inst.status === 'Concluído');
     const receitaInstalacoes = instalacoesConcluidas.reduce((total, instalacao) => total + instalacao.valor_total, 0);
     
-    // Metragem total (valor / 20 = M²)
-    const metragemTotal = instalacoesConcluidas.reduce((total, instalacao) => total + (instalacao.valor_total / 20), 0);
+    // Metragem total (valor / 24 = M²)
+    const metragemTotal = instalacoesConcluidas.reduce((total, instalacao) => total + (instalacao.valor_total / 24), 0);
 
     // Despesas
     const totalDespesas = dadosFiltrados.despesas.reduce((total, despesa) => total + despesa.valor, 0);
