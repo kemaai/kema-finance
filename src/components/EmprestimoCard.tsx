@@ -34,6 +34,7 @@ export const EmprestimoCard: React.FC<EmprestimoCardProps> = ({
   pagamentos = [],
   onUpdate 
 }) => {
+  const { user } = useAuth();
   const queryClient = useQueryClient();
   const [isPaymentDialogOpen, setIsPaymentDialogOpen] = useState(false);
   const [isHistoryDialogOpen, setIsHistoryDialogOpen] = useState(false);
