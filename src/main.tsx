@@ -12,15 +12,26 @@ if (!import.meta.env.DEV) {
   });
 }
 
-// Register Service Worker
+// Register Service Worker with update handling
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
     navigator.serviceWorker.register('/sw.js')
       .then((registration) => {
-        console.log('SW registered: ', registration);
+        // Check for updates periodically (every 60 minutes)
+        setInterval(() => {
+          registration.update();
+        }, 60 * 60 * 1000);
+
+        // Handle controller change (new SW activated)
+        navigator.serviceWorker.addEventListener('controllerchange', () => {
+          // Only reload if there's an active controller (avoids first-install reload)
+          if (navigator.serviceWorker.controller) {
+            window.location.reload();
+          }
+        });
       })
-      .catch((registrationError) => {
-        console.log('SW registration failed: ', registrationError);
+      .catch(() => {
+        // SW registration failed silently
       });
   });
 }
