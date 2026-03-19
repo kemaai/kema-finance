@@ -80,11 +80,13 @@ export function useMetasFinanceiras() {
 
   const updateMeta = useMutation({
     mutationFn: async ({ id, ...updates }: Partial<MetaFinanceira> & { id: string }) => {
+      if (!user) throw new Error('Usuário não autenticado');
       const updateData = updates.metadata ? { ...updates, metadata: updates.metadata as any } : updates;
       const { data, error } = await supabase
         .from('metas_financeiras')
         .update(updateData)
         .eq('id', id)
+        .eq('user_id', user.id)
         .select()
         .single();
       if (error) throw error;
