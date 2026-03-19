@@ -96,7 +96,8 @@ export default function Despesas() {
             anotacao: data.anotacao,
             paga: data.paga,
           })
-          .eq('id', editingDespesa.id);
+          .eq('id', editingDespesa.id)
+          .eq('user_id', user.id);
 
         if (error) throw error;
         toast({ title: 'Despesa atualizada com sucesso!' });
@@ -132,7 +133,8 @@ export default function Despesas() {
       const { error } = await supabase
         .from('despesas')
         .delete()
-        .eq('id', id);
+        .eq('id', id)
+        .eq('user_id', user!.id);
 
       if (error) throw error;
       
@@ -168,7 +170,8 @@ export default function Despesas() {
       const { error } = await supabase
         .from('despesas')
         .update({ paga })
-        .eq('id', id);
+        .eq('id', id)
+        .eq('user_id', user!.id);
 
       if (error) throw error;
       

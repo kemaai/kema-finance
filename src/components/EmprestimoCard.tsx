@@ -10,6 +10,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { EmprestimoEditForm } from './EmprestimoEditForm';
+import { useAuth } from '@/hooks/useAuth';
 
 interface EmprestimoCardProps {
   emprestimo: {
@@ -33,6 +34,7 @@ export const EmprestimoCard: React.FC<EmprestimoCardProps> = ({
   pagamentos = [],
   onUpdate 
 }) => {
+  const { user } = useAuth();
   const queryClient = useQueryClient();
   const [isPaymentDialogOpen, setIsPaymentDialogOpen] = useState(false);
   const [isHistoryDialogOpen, setIsHistoryDialogOpen] = useState(false);
@@ -79,7 +81,8 @@ export const EmprestimoCard: React.FC<EmprestimoCardProps> = ({
       const { error: updateError } = await supabase
         .from('emprestimos')
         .update({ valor_atual: novoValorAtual })
-        .eq('id', emprestimo.id);
+        .eq('id', emprestimo.id)
+        .eq('user_id', user!.id);
 
       if (updateError) throw updateError;
 
@@ -134,7 +137,8 @@ export const EmprestimoCard: React.FC<EmprestimoCardProps> = ({
       const { error: updateError } = await supabase
         .from('emprestimos')
         .update({ valor_atual: novoValorAtual })
-        .eq('id', emprestimo.id);
+        .eq('id', emprestimo.id)
+        .eq('user_id', user!.id);
 
       if (updateError) throw updateError;
 
@@ -168,7 +172,8 @@ export const EmprestimoCard: React.FC<EmprestimoCardProps> = ({
       const { error: updateError } = await supabase
         .from('emprestimos')
         .update({ valor_atual: novoValorAtual })
-        .eq('id', emprestimo.id);
+        .eq('id', emprestimo.id)
+        .eq('user_id', user!.id);
 
       if (updateError) throw updateError;
 
@@ -189,7 +194,8 @@ export const EmprestimoCard: React.FC<EmprestimoCardProps> = ({
       const { error } = await supabase
         .from('emprestimos')
         .delete()
-        .eq('id', emprestimo.id);
+        .eq('id', emprestimo.id)
+        .eq('user_id', user!.id);
 
       if (error) throw error;
 

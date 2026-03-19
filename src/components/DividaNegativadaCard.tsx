@@ -8,6 +8,7 @@ import { toast } from 'sonner';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { useAuth } from '@/hooks/useAuth';
 
 interface DividaNegativadaCardProps {
   divida: {
@@ -26,10 +27,12 @@ export const DividaNegativadaCard: React.FC<DividaNegativadaCardProps> = ({
   divida, 
   onUpdate 
 }) => {
+  const { user } = useAuth();
   const [isPaymentDialogOpen, setIsPaymentDialogOpen] = useState(false);
   const [paymentDate, setPaymentDate] = useState(new Date().toISOString().split('T')[0]);
 
   const handleMarkAsPaid = async () => {
+    if (!user) return;
     try {
       const { error } = await supabase
         .from('dividas_negativadas')
@@ -38,7 +41,8 @@ export const DividaNegativadaCard: React.FC<DividaNegativadaCardProps> = ({
           data_pagamento: paymentDate,
           valor_atual: 0
         })
-        .eq('id', divida.id);
+        .eq('id', divida.id)
+        .eq('user_id', user.id);
 
       if (error) throw error;
 
@@ -53,12 +57,14 @@ export const DividaNegativadaCard: React.FC<DividaNegativadaCardProps> = ({
 
   const handleDelete = async () => {
     if (!confirm('Tem certeza que deseja excluir esta dívida?')) return;
+    if (!user) return;
 
     try {
       const { error } = await supabase
         .from('dividas_negativadas')
         .delete()
-        .eq('id', divida.id);
+        .eq('id', divida.id)
+        .eq('user_id', user.id);
 
       if (error) throw error;
 
