@@ -797,7 +797,7 @@ export const Relatorios = () => {
                 const instalacoesCanceladas = dadosFiltrados.instalacoes.filter(inst => inst.status === 'Cancelado');
                 
                 const receitaConcluidas = instalacoesConcluidas.reduce((sum, inst) => sum + Number(inst.valor_total), 0);
-                const metragemConcluidas = receitaConcluidas / 20;
+                const metragemConcluidas = receitaConcluidas / 24;
 
                 return (
                   <>

@@ -183,12 +183,12 @@ export const InstalacaoForm: React.FC<InstalacaoFormProps> = ({
               min="0"
               placeholder="0.0"
               value={metragem}
-              onChange={(e) => handleInputChange('valor_total', (parseFloat(e.target.value) || 0) * 20)}
+              onChange={(e) => handleInputChange('valor_total', (parseFloat(e.target.value) || 0) * 24)}
               required
               className="w-full"
             />
             <p className="text-xs text-muted-foreground">
-              Valor: R$ {formData.valor_total.toFixed(2)} (R$ 20,00 por m²)
+              Valor: R$ {formData.valor_total.toFixed(2)} (R$ 24,00 por m²)
             </p>
           </div>
 

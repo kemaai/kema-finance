@@ -115,7 +115,7 @@ export const Dashboard = () => {
   });
 
   const receitaPeriodoInstalacoes = instalacoesDoPeriodo.reduce((total, instalacao) => total + Number(instalacao.valor_total), 0);
-  const totalM2Periodo = instalacoesDoPeriodo.reduce((total, instalacao) => total + Number(instalacao.valor_total) / 20, 0);
+  const totalM2Periodo = instalacoesDoPeriodo.reduce((total, instalacao) => total + Number(instalacao.valor_total) / 24, 0);
   const receitaTotal = receitaMensalSites + receitaPeriodoInstalacoes;
 
   // Estatísticas gerais

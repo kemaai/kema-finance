@@ -70,7 +70,7 @@ export const useQuinzenaFilter = (instalacoes: Instalacao[]) => {
     });
     
     return instalacoesMes.reduce((total, instalacao) => {
-      return total + (Number(instalacao.valor_total || 0) / 20);
+      return total + (Number(instalacao.valor_total || 0) / 24);
     }, 0);
   }, [instalacoes, selectedMonth]);
 
