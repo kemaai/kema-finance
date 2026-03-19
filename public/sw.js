@@ -1,149 +1,83 @@
-const CACHE_NAME = 'assistente-facil-v1';
-const urlsToCache = [
-  '/',
-  '/manifest.json',
+const CACHE_NAME = 'kema-ai-v2';
+const STATIC_ASSETS = [
   '/icon-192.png',
   '/icon-512.png',
   '/pwa-offline.html'
 ];
 
-// Install Service Worker
+// Install Service Worker - only cache essential static assets
 self.addEventListener('install', (event) => {
-  console.log('Service Worker: Installed');
   event.waitUntil(
     caches.open(CACHE_NAME)
-      .then((cache) => {
-        console.log('Service Worker: Caching Files');
-        return cache.addAll(urlsToCache);
-      })
-      .catch((err) => console.log('Service Worker: Cache Failed', err))
+      .then((cache) => cache.addAll(STATIC_ASSETS))
   );
-  // Force the waiting service worker to become the active service worker
   self.skipWaiting();
 });
 
-// Activate Service Worker
+// Activate - clean old caches
 self.addEventListener('activate', (event) => {
-  console.log('Service Worker: Activated');
   event.waitUntil(
     caches.keys().then((cacheNames) => {
       return Promise.all(
-        cacheNames.map((cache) => {
-          if (cache !== CACHE_NAME) {
-            console.log('Service Worker: Clearing Old Cache');
-            return caches.delete(cache);
-          }
-        })
+        cacheNames
+          .filter((cache) => cache !== CACHE_NAME)
+          .map((cache) => caches.delete(cache))
       );
-    }).then(() => {
-      // Claim control of all pages
-      return self.clients.claim();
-    })
+    }).then(() => self.clients.claim())
   );
 });
 
-// Fetch Event - Network First, then Cache
+// Fetch - Network first for navigation, cache-first for static assets
 self.addEventListener('fetch', (event) => {
-  // Skip cross-origin requests
-  if (!event.request.url.startsWith(self.location.origin)) {
+  const { request } = event;
+
+  // Skip non-GET and cross-origin requests
+  if (request.method !== 'GET' || !request.url.startsWith(self.location.origin)) {
     return;
   }
 
+  // Skip OAuth routes - never cache these
+  if (request.url.includes('/~oauth')) {
+    return;
+  }
+
+  // Skip Supabase API requests
+  if (request.url.includes('supabase')) {
+    return;
+  }
+
+  // Navigation requests (HTML pages) - ALWAYS go to network
+  if (request.mode === 'navigate') {
+    event.respondWith(
+      fetch(request)
+        .catch(() => {
+          return caches.match('/pwa-offline.html') || new Response('Offline', { status: 503 });
+        })
+    );
+    return;
+  }
+
+  // Static assets (JS, CSS, images) - Network first, fallback to cache
   event.respondWith(
-    // Try network first
-    fetch(event.request)
+    fetch(request)
       .then((response) => {
-        // Clone the response before caching
-        const responseClone = response.clone();
-        
-        // Only cache successful responses
         if (response.status === 200) {
+          const responseClone = response.clone();
           caches.open(CACHE_NAME).then((cache) => {
-            cache.put(event.request, responseClone);
+            cache.put(request, responseClone);
           });
         }
-        
         return response;
       })
       .catch(() => {
-        // If network fails, try cache
-        return caches.match(event.request).then((response) => {
-          if (response) {
-            return response;
-          }
-          
-          // If no cache match, serve offline page for navigation requests
-          if (event.request.mode === 'navigate') {
-            return caches.match('/pwa-offline.html');
-          }
-          
-          // For other requests, return a basic response
-          return new Response('Offline', {
-            status: 503,
-            statusText: 'Service Unavailable'
-          });
+        return caches.match(request).then((cached) => {
+          return cached || new Response('Offline', { status: 503, statusText: 'Service Unavailable' });
         });
       })
   );
 });
 
-// Handle background sync for offline functionality
-self.addEventListener('sync', (event) => {
-  console.log('Service Worker: Background Sync', event.tag);
-  
-  if (event.tag === 'background-sync') {
-    event.waitUntil(
-      // Add your background sync logic here
-      console.log('Background sync completed')
-    );
-  }
-});
-
-// Handle push notifications (optional)
-self.addEventListener('push', (event) => {
-  console.log('Service Worker: Push Received');
-  
-  const options = {
-    body: event.data ? event.data.text() : 'Nova notificação do Assistente Fácil',
-    icon: '/icon-192.png',
-    badge: '/icon-192.png',
-    vibrate: [100, 50, 100],
-    data: {
-      dateOfArrival: Date.now(),
-      primaryKey: 1
-    },
-    actions: [
-      {
-        action: 'open',
-        title: 'Abrir App',
-        icon: '/icon-192.png'
-      },
-      {
-        action: 'close',
-        title: 'Fechar',
-        icon: '/icon-192.png'
-      }
-    ]
-  };
-  
-  event.waitUntil(
-    self.registration.showNotification('Assistente Fácil', options)
-  );
-});
-
-// Handle notification click
-self.addEventListener('notificationclick', (event) => {
-  console.log('Service Worker: Notification Click');
-  event.notification.close();
-  
-  if (event.action === 'open' || !event.action) {
-    event.waitUntil(
-      clients.openWindow('/')
-    );
-  }
-});
-
-// Handle app shortcuts
+// Handle skip waiting message
 self.addEventListener('message', (event) => {
   if (event.data && event.data.type === 'SKIP_WAITING') {
     self.skipWaiting();
