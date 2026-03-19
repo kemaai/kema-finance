@@ -88,6 +88,7 @@ export const Sites = () => {
           .from('sites')
           .update(siteData)
           .eq('id', editingSite.id)
+          .eq('user_id', user!.id)
           .select()
           .single();
         
