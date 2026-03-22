@@ -95,9 +95,6 @@ export const AuthForm = () => {
       
       <div className="w-full max-w-md relative z-10">
         <div className="text-center mb-8">
-          <div className="mx-auto w-24 h-24 rounded-2xl flex items-center justify-center mb-4 glow-orange">
-            <img src={logo} alt="KemaAI" className="w-20 h-20 object-contain" />
-          </div>
           <h1 className="text-3xl font-bold text-gradient-orange">KemaAI</h1>
           <p className="text-muted-foreground mt-2">Sistema de Gestão Inteligente</p>
         </div>
