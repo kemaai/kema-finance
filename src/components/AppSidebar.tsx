@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
 import { useLocalStorage } from '@/hooks/useLocalStorage';
 import { useToast } from '@/hooks/use-toast';
-import logo from '@/assets/logo.png';
+
 
 const navigation = [{
   title: "Dashboard",
@@ -101,9 +101,6 @@ export function AppSidebar() {
     <Sidebar className="border-r border-border bg-sidebar">
       <SidebarHeader className="p-4 border-b border-border">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl flex items-center justify-center glow-orange-sm">
-            <img src={logo} alt="KemaAI" className="w-8 h-8 object-contain" />
-          </div>
           <div>
             <h1 className="text-lg font-bold text-gradient-orange">​Kema AI </h1>
             

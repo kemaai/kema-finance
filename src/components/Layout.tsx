@@ -3,7 +3,7 @@ import { useLocation } from 'react-router-dom';
 import { SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar';
 import { AppSidebar } from './AppSidebar';
 import { MobileNavigation } from './MobileNavigation';
-import logo from '@/assets/logo.png';
+
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -38,7 +38,6 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
           {/* Mobile Header */}
           <header className="md:hidden bg-card border-b border-border p-4 flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <img src={logo} alt="KemaAI" className="w-8 h-8 object-contain" />
               <div>
                 <h1 className="text-lg font-bold text-foreground">{getPageTitle(location.pathname)}</h1>
               </div>
