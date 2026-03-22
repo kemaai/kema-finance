@@ -3,7 +3,7 @@ import { useLocation } from 'react-router-dom';
 import { SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar';
 import { AppSidebar } from './AppSidebar';
 import { MobileNavigation } from './MobileNavigation';
-import logo from '@/assets/logo.png';
+
 
 interface LayoutProps {
   children: React.ReactNode;
