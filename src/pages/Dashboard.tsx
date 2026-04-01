@@ -23,10 +23,8 @@ export const Dashboard = () => {
   const [, setTick] = useState(0);
   const [periodoInstalacoes, setPeriodoInstalacoes] = useState<PeriodoFiltro>('quinzenal');
 
-  // Get the most recent update timestamp
   const lastSyncTimestamp = Math.max(sitesUpdatedAt || 0, clientesUpdatedAt || 0, instalacoesUpdatedAt || 0, despesasUpdatedAt || 0);
 
-  // Update relative time every 30s
   useEffect(() => {
     const interval = setInterval(() => setTick(t => t + 1), 30000);
     return () => clearInterval(interval);
@@ -55,35 +53,24 @@ export const Dashboard = () => {
   const inicioMesAtual = new Date(hoje.getFullYear(), hoje.getMonth(), 1);
   const fimMesAtual = new Date(hoje.getFullYear(), hoje.getMonth() + 1, 0);
 
-  // Calcular sites ativos no mês atual (status "Ativo" E que tenham vencimento no mês atual)
   const sitesAtivosMes = sites.filter(site => {
     const dataVencimento = new Date(site.data_vencimento);
-    return site.status === 'Ativo' && 
-           dataVencimento >= inicioMesAtual && 
-           dataVencimento <= fimMesAtual;
+    return site.status === 'Ativo' && dataVencimento >= inicioMesAtual && dataVencimento <= fimMesAtual;
   });
 
   const sitesAtivos = sitesAtivosMes.length;
 
-  // Calcular receita mensal dos sites ativos no mês atual
   const receitaMensalSites = sitesAtivosMes
     .filter(site => site.tipo_plano.includes('assinatura') || site.hospedagem)
     .reduce((total, site) => {
-      if (site.tipo_plano.includes('assinatura')) {
-        return total + site.valor_mensal;
-      } else if (site.hospedagem) {
-        return total + 40; // Valor da hospedagem
-      }
+      if (site.tipo_plano.includes('assinatura')) return total + site.valor_mensal;
+      if (site.hospedagem) return total + 40;
       return total;
     }, 0);
 
-  // Calcular período de filtro das instalações
   const getInstalacoesPeriodo = () => {
     const now = new Date();
-    let inicio: Date;
-    let fim: Date;
-    let label: string;
-
+    let inicio: Date, fim: Date, label: string;
     if (periodoInstalacoes === 'semanal') {
       const dayOfWeek = now.getDay();
       const diffToMonday = dayOfWeek === 0 ? 6 : dayOfWeek - 1;
@@ -101,7 +88,6 @@ export const Dashboard = () => {
       fim = new Date(now.getFullYear(), now.getMonth() + 1, 0);
       label = 'este mês';
     }
-
     return { inicio, fim, label };
   };
 
@@ -109,20 +95,16 @@ export const Dashboard = () => {
 
   const instalacoesDoPeriodo = instalacoes.filter(instalacao => {
     const dataInstalacao = parseLocalDate(instalacao.data_instalacao);
-    return dataInstalacao >= inicioPeriodo && 
-           dataInstalacao <= fimPeriodo && 
-           instalacao.status === 'Concluído';
+    return dataInstalacao >= inicioPeriodo && dataInstalacao <= fimPeriodo && instalacao.status === 'Concluído';
   });
 
   const receitaPeriodoInstalacoes = instalacoesDoPeriodo.reduce((total, instalacao) => total + Number(instalacao.valor_total), 0);
   const totalM2Periodo = instalacoesDoPeriodo.reduce((total, instalacao) => total + Number(instalacao.valor_total) / 24, 0);
   const receitaTotal = receitaMensalSites + receitaPeriodoInstalacoes;
 
-  // Estatísticas gerais
   const clientesAtivos = clientes.length;
   const mediaSites = clientesAtivos > 0 ? (sitesAtivos / clientesAtivos).toFixed(1) : 'N/A';
 
-  // Próximos vencimentos (próximos 60 dias para melhor visualização)
   const proximosDois = new Date();
   proximosDois.setDate(proximosDois.getDate() + 60);
   const proximosVencimentos = sites.filter(site => {
@@ -130,7 +112,6 @@ export const Dashboard = () => {
     return site.status === 'Ativo' && vencimento <= proximosDois && vencimento >= hoje;
   }).sort((a, b) => new Date(a.data_vencimento).getTime() - new Date(b.data_vencimento).getTime()).slice(0, 5);
 
-  // Próximas instalações (próximos 60 dias)
   const proximasInstalacoes = instalacoes.filter(instalacao => {
     const dataInstalacao = parseLocalDate(instalacao.data_instalacao);
     return instalacao.status === 'Agendado' && dataInstalacao >= hoje && dataInstalacao <= proximosDois;
@@ -145,8 +126,7 @@ export const Dashboard = () => {
 
   const despesasDoMes = despesas.filter(despesa => {
     const dataVencimento = new Date(despesa.data_vencimento);
-    return dataVencimento.getMonth() === hoje.getMonth() && 
-           dataVencimento.getFullYear() === hoje.getFullYear();
+    return dataVencimento.getMonth() === hoje.getMonth() && dataVencimento.getFullYear() === hoje.getFullYear();
   });
 
   const totalDespesasMes = despesasDoMes.reduce((total, despesa) => total + Number(despesa.valor), 0);
@@ -162,10 +142,9 @@ export const Dashboard = () => {
     return !despesa.paga && vencimento <= proximasDespesas && vencimento >= hoje;
   }).sort((a, b) => new Date(a.data_vencimento).getTime() - new Date(b.data_vencimento).getTime()).slice(0, 5);
 
-  // Se ainda estiver carregando, mostrar loading
   if (sitesLoading || clientesLoading || instalacoesLoading || despesasLoading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted/20">
+      <div className="min-h-screen bg-background">
         <div className="max-w-7xl mx-auto p-4 md:p-8">
           <div className="text-center py-12">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
@@ -178,48 +157,42 @@ export const Dashboard = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Hero Section */}
-      <div className="relative overflow-hidden">
-        <div className="absolute inset-0 bg-tech-particles"></div>
-        <div className="absolute inset-0 bg-grid-pattern opacity-50"></div>
-        
-        {/* Glowing orbs */}
-        <div className="absolute top-10 right-20 w-32 h-32 bg-primary/10 rounded-full blur-3xl animate-pulse"></div>
-        <div className="absolute bottom-10 left-20 w-24 h-24 bg-accent/10 rounded-full blur-2xl animate-pulse delay-1000"></div>
-        
-        <div className="relative p-6 md:p-12 pb-8 md:pb-16">
-          <div className="max-w-7xl mx-auto">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-              <p className="text-xl md:text-2xl font-medium text-foreground leading-relaxed">
-                Bem-vindo de volta {profile?.first_name || 'Usuário'}! 👋
+      {/* Hero Section - Clean */}
+      <div className="p-4 md:p-8 pb-2 md:pb-4">
+        <div className="max-w-7xl mx-auto">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <div>
+              <p className="text-lg md:text-xl font-semibold text-foreground">
+                Olá, {profile?.first_name || 'Usuário'}! 👋
               </p>
-              <button
-                onClick={handleRefresh}
-                disabled={isRefreshing}
-                className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-muted/60 hover:bg-muted border border-border/50 text-xs text-muted-foreground hover:text-foreground transition-all self-start sm:self-auto"
-              >
-                <RefreshCw className={`w-3.5 h-3.5 ${isRefreshing ? 'animate-spin' : ''}`} />
-                <Clock className="w-3 h-3" />
-                <span>{isRefreshing ? 'Atualizando...' : formatRelativeTime(lastSyncTimestamp)}</span>
-              </button>
+              <p className="text-sm text-muted-foreground">Aqui está o resumo do seu negócio</p>
             </div>
+            <button
+              onClick={handleRefresh}
+              disabled={isRefreshing}
+              className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-muted/60 hover:bg-muted border border-border text-xs text-muted-foreground hover:text-foreground transition-all self-start sm:self-auto"
+            >
+              <RefreshCw className={`w-3.5 h-3.5 ${isRefreshing ? 'animate-spin' : ''}`} />
+              <Clock className="w-3 h-3" />
+              <span>{isRefreshing ? 'Atualizando...' : formatRelativeTime(lastSyncTimestamp)}</span>
+            </button>
           </div>
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto p-4 md:p-8 space-y-8 -mt-4 md:-mt-8 relative z-10">
-        {/* Filtro de período */}
+      <div className="max-w-7xl mx-auto px-4 md:px-8 pb-8 space-y-6">
+        {/* Period filter */}
         <div className="flex items-center gap-2 flex-wrap">
           <CalendarDays className="w-4 h-4 text-muted-foreground" />
-          <span className="text-sm text-muted-foreground mr-1">Período instalações:</span>
+          <span className="text-sm text-muted-foreground mr-1">Período:</span>
           {(['semanal', 'quinzenal', 'mensal'] as PeriodoFiltro[]).map((p) => (
             <button
               key={p}
               onClick={() => setPeriodoInstalacoes(p)}
               className={`px-3 py-1 rounded-full text-xs font-medium transition-all ${
                 periodoInstalacoes === p
-                  ? 'bg-primary text-primary-foreground shadow-sm'
-                  : 'bg-muted/60 text-muted-foreground hover:bg-muted hover:text-foreground border border-border/50'
+                  ? 'bg-primary text-primary-foreground'
+                  : 'bg-muted text-muted-foreground hover:text-foreground border border-border'
               }`}
             >
               {p === 'semanal' ? 'Semanal' : p === 'quinzenal' ? 'Quinzenal' : 'Mensal'}
@@ -227,108 +200,100 @@ export const Dashboard = () => {
           ))}
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 md:gap-6">
+        {/* Cards grid - 2x2 on mobile */}
+        <div className="grid grid-cols-2 lg:grid-cols-5 gap-3 md:gap-4">
           <DashboardCard 
             title="Receita Total" 
             value={`R$ ${receitaTotal.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`} 
-            subValue={`Sites: R$ ${receitaMensalSites.toFixed(2)} • Inst: R$ ${receitaPeriodoInstalacoes.toFixed(2)}`} 
+            subValue={`Sites: R$ ${receitaMensalSites.toFixed(0)} • Inst: R$ ${receitaPeriodoInstalacoes.toFixed(0)}`} 
             icon={DollarSign} 
             iconColor="bg-gradient-to-br from-green-500 to-green-600" 
-            className="hover:border-green-500/50" 
           />
-          
           <DashboardCard 
             title="Sites Ativos" 
             value={sitesAtivos.toString()} 
-            subValue={`${sitesAtivos} contratos ativos este mês`} 
+            subValue={`${sitesAtivos} contratos ativos`} 
             icon={Globe} 
             iconColor="bg-gradient-to-br from-blue-500 to-blue-600" 
-            trendColor="text-blue-400" 
-            className="hover:border-blue-500/50" 
           />
-          
           <DashboardCard 
             title="Instalações" 
             value={instalacoesDoPeriodo.length.toString()} 
             subValue={`${totalM2Periodo.toFixed(1)} m² ${labelPeriodo}`} 
             icon={Scissors} 
             iconColor="bg-gradient-to-br from-primary to-accent" 
-            className="hover:border-primary/50" 
           />
-          
           <DashboardCard 
             title="Clientes" 
             value={clientesAtivos.toString()} 
-            subValue={`${mediaSites} sites por cliente`} 
+            subValue={`${mediaSites} sites/cliente`} 
             icon={Users} 
             iconColor="bg-gradient-to-br from-purple-500 to-purple-600" 
-            className="hover:border-purple-500/50" 
           />
-
           <DashboardCard 
             title="Despesas" 
             value={`R$ ${totalDespesasMes.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`} 
-            subValue={`Pagas: R$ ${totalDespesasPagas.toFixed(2)} • Pendentes: R$ ${totalDespesasPendentes.toFixed(2)}`} 
+            subValue={`Pend: R$ ${totalDespesasPendentes.toFixed(0)}`} 
             icon={CreditCard} 
             iconColor="bg-gradient-to-br from-red-500 to-red-600" 
-            className="hover:border-red-500/50" 
+            className="col-span-2 lg:col-span-1"
           />
         </div>
 
         {/* KemaFinance AI Widget */}
         <KemaAIWidget />
 
-        <div className="card-tech p-6 hover:border-primary/50 transition-all duration-300">
-          <div className="flex items-center justify-between mb-6">
+        {/* Revenue Chart */}
+        <div className="card-tech p-4 md:p-6">
+          <div className="flex items-center justify-between mb-4">
             <div>
-              <h3 className="text-xl font-semibold text-foreground">Performance de Receita</h3>
-              <p className="text-muted-foreground">Visão geral dos últimos meses</p>
+              <h3 className="text-base md:text-lg font-semibold text-foreground">Performance de Receita</h3>
+              <p className="text-sm text-muted-foreground">Últimos meses</p>
             </div>
-            <div className="flex items-center gap-2 text-green-600 dark:text-green-400">
-              <TrendingUp className="w-5 h-5" />
-              <span className="font-medium">+8.2%</span>
+            <div className="flex items-center gap-2 text-green-500">
+              <TrendingUp className="w-4 h-4" />
+              <span className="text-sm font-medium">+8.2%</span>
             </div>
           </div>
           <RevenueChart sites={sites} instalacoes={instalacoes} />
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          <div className="card-tech p-6 hover:border-primary/50 transition-all duration-300">
-            <div className="flex items-center justify-between mb-6">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-amber-100 dark:bg-amber-900/50 rounded-xl flex items-center justify-center">
-                   <Calendar className="w-5 h-5 text-amber-600 dark:text-amber-400" />
+        {/* Three columns */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+          {/* Vencimentos */}
+          <div className="card-tech p-4 md:p-5">
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center gap-2.5">
+                <div className="w-9 h-9 bg-amber-500/15 rounded-xl flex items-center justify-center">
+                  <Calendar className="w-4 h-4 text-amber-500" />
                 </div>
                 <div>
-                  <h3 className="text-lg font-semibold text-foreground">Próximos Vencimentos</h3>
-                  <p className="text-sm text-muted-foreground">Contratos a vencer em 60 dias</p>
+                  <h3 className="text-sm font-semibold text-foreground">Vencimentos</h3>
+                  <p className="text-xs text-muted-foreground">Próximos 60 dias</p>
                 </div>
               </div>
               {proximosVencimentos.length > 0 && (
-                <div className="w-6 h-6 bg-amber-500 rounded-full flex items-center justify-center">
-                  <span className="text-xs font-bold text-white">{proximosVencimentos.length}</span>
+                <div className="w-5 h-5 bg-amber-500 rounded-full flex items-center justify-center">
+                  <span className="text-[10px] font-bold text-primary-foreground">{proximosVencimentos.length}</span>
                 </div>
               )}
             </div>
-            
-            <div className="space-y-3 max-h-80 overflow-y-auto">
+            <div className="space-y-2 max-h-72 overflow-y-auto">
               {proximosVencimentos.length === 0 ? (
-                <div className="text-center py-8">
-                  <Calendar className="w-12 h-12 mx-auto mb-3 text-muted-foreground/50" />
-                  <p className="text-muted-foreground">Nenhum contrato próximo ao vencimento</p>
+                <div className="text-center py-6">
+                  <Calendar className="w-10 h-10 mx-auto mb-2 text-muted-foreground/40" />
+                  <p className="text-sm text-muted-foreground">Nenhum vencimento próximo</p>
                 </div>
               ) : (
                 proximosVencimentos.map(site => (
-                  <div key={site.id} className="flex items-center justify-between p-4 bg-amber-50 dark:bg-amber-900/20 rounded-xl border border-amber-200 dark:border-amber-700/30 hover:border-amber-300 dark:hover:border-amber-600/50 transition-colors">
-                     <div className="flex-1 min-w-0">
-                       <div className="font-medium text-foreground truncate">{site.cliente_nome}</div>
-                       <div className="text-sm text-muted-foreground truncate">{site.descricao_projeto}</div>
-                     </div>
-                     <div className="text-right ml-4">
-                       <div className="font-bold text-amber-600 dark:text-amber-400">R$ {site.valor_mensal.toFixed(2)}</div>
-                       <div className="text-xs text-amber-600 dark:text-amber-500">
-                        {new Date(site.data_vencimento).toLocaleDateString('pt-BR')}
-                      </div>
+                  <div key={site.id} className="flex items-center justify-between p-3 bg-amber-500/10 rounded-lg border border-amber-500/20">
+                    <div className="flex-1 min-w-0">
+                      <div className="text-sm font-medium text-foreground truncate">{site.cliente_nome}</div>
+                      <div className="text-xs text-muted-foreground truncate">{site.descricao_projeto}</div>
+                    </div>
+                    <div className="text-right ml-3">
+                      <div className="text-sm font-bold text-amber-500">R$ {site.valor_mensal.toFixed(2)}</div>
+                      <div className="text-[10px] text-muted-foreground">{new Date(site.data_vencimento).toLocaleDateString('pt-BR')}</div>
                     </div>
                   </div>
                 ))
@@ -336,44 +301,40 @@ export const Dashboard = () => {
             </div>
           </div>
 
-          <div className="card-tech p-6 hover:border-primary/50 transition-all duration-300">
-            <div className="flex items-center justify-between mb-6">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-red-100 dark:bg-red-900/50 rounded-xl flex items-center justify-center">
-                   <AlertTriangle className="w-5 h-5 text-red-600 dark:text-red-400" />
+          {/* Despesas */}
+          <div className="card-tech p-4 md:p-5">
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center gap-2.5">
+                <div className="w-9 h-9 bg-red-500/15 rounded-xl flex items-center justify-center">
+                  <AlertTriangle className="w-4 h-4 text-red-500" />
                 </div>
                 <div>
-                  <h3 className="text-lg font-semibold text-foreground">Despesas Próximas</h3>
-                  <p className="text-sm text-muted-foreground">Contas a vencer em 15 dias</p>
+                  <h3 className="text-sm font-semibold text-foreground">Despesas Próximas</h3>
+                  <p className="text-xs text-muted-foreground">A vencer em 15 dias</p>
                 </div>
               </div>
               {despesasProximasVencimento.length > 0 && (
-                <div className="w-6 h-6 bg-red-500 rounded-full flex items-center justify-center">
-                  <span className="text-xs font-bold text-white">{despesasProximasVencimento.length}</span>
+                <div className="w-5 h-5 bg-red-500 rounded-full flex items-center justify-center">
+                  <span className="text-[10px] font-bold text-primary-foreground">{despesasProximasVencimento.length}</span>
                 </div>
               )}
             </div>
-            
-            <div className="space-y-3 max-h-80 overflow-y-auto">
+            <div className="space-y-2 max-h-72 overflow-y-auto">
               {despesasProximasVencimento.length === 0 ? (
-                <div className="text-center py-8">
-                  <CreditCard className="w-12 h-12 mx-auto mb-3 text-muted-foreground/50" />
-                  <p className="text-muted-foreground">Nenhuma despesa próxima ao vencimento</p>
+                <div className="text-center py-6">
+                  <CreditCard className="w-10 h-10 mx-auto mb-2 text-muted-foreground/40" />
+                  <p className="text-sm text-muted-foreground">Nenhuma despesa próxima</p>
                 </div>
               ) : (
                 despesasProximasVencimento.map(despesa => (
-                  <div key={despesa.id} className="flex items-center justify-between p-4 bg-red-50 dark:bg-red-900/20 rounded-xl border border-red-200 dark:border-red-700/30 hover:border-red-300 dark:hover:border-red-600/50 transition-colors">
-                     <div className="flex-1 min-w-0">
-                       <div className="font-medium text-foreground truncate">{despesa.nome}</div>
-                       {despesa.anotacao && (
-                         <div className="text-sm text-muted-foreground truncate">{despesa.anotacao}</div>
-                       )}
-                     </div>
-                     <div className="text-right ml-4">
-                       <div className="font-bold text-red-600 dark:text-red-400">R$ {Number(despesa.valor).toFixed(2)}</div>
-                       <div className="text-xs text-red-600 dark:text-red-500">
-                        {new Date(despesa.data_vencimento).toLocaleDateString('pt-BR')}
-                      </div>
+                  <div key={despesa.id} className="flex items-center justify-between p-3 bg-red-500/10 rounded-lg border border-red-500/20">
+                    <div className="flex-1 min-w-0">
+                      <div className="text-sm font-medium text-foreground truncate">{despesa.nome}</div>
+                      {despesa.anotacao && <div className="text-xs text-muted-foreground truncate">{despesa.anotacao}</div>}
+                    </div>
+                    <div className="text-right ml-3">
+                      <div className="text-sm font-bold text-red-500">R$ {Number(despesa.valor).toFixed(2)}</div>
+                      <div className="text-[10px] text-muted-foreground">{new Date(despesa.data_vencimento).toLocaleDateString('pt-BR')}</div>
                     </div>
                   </div>
                 ))
@@ -381,58 +342,51 @@ export const Dashboard = () => {
             </div>
           </div>
 
-          <div className="card-tech p-6 hover:border-primary/50 transition-all duration-300">
-            <div className="flex items-center justify-between mb-6">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-blue-100 dark:bg-blue-900/50 rounded-xl flex items-center justify-center">
-                   <Scissors className="w-5 h-5 text-blue-600 dark:text-blue-400" />
+          {/* Instalações */}
+          <div className="card-tech p-4 md:p-5">
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center gap-2.5">
+                <div className="w-9 h-9 bg-blue-500/15 rounded-xl flex items-center justify-center">
+                  <Scissors className="w-4 h-4 text-blue-500" />
                 </div>
                 <div>
-                  <h3 className="text-lg font-semibold text-foreground">Instalações</h3>
-                  <p className="text-sm text-muted-foreground">Agendadas e concluídas este mês</p>
+                  <h3 className="text-sm font-semibold text-foreground">Instalações</h3>
+                  <p className="text-xs text-muted-foreground">Agendadas e concluídas</p>
                 </div>
               </div>
               {todasInstalacoes.length > 0 && (
-                <div className="w-6 h-6 bg-blue-500 rounded-full flex items-center justify-center">
-                  <span className="text-xs font-bold text-white">{todasInstalacoes.length}</span>
+                <div className="w-5 h-5 bg-blue-500 rounded-full flex items-center justify-center">
+                  <span className="text-[10px] font-bold text-primary-foreground">{todasInstalacoes.length}</span>
                 </div>
               )}
             </div>
-            
-            <div className="space-y-3 max-h-80 overflow-y-auto">
+            <div className="space-y-2 max-h-72 overflow-y-auto">
               {todasInstalacoes.length === 0 ? (
-                <div className="text-center py-8">
-                  <Scissors className="w-12 h-12 mx-auto mb-3 text-muted-foreground/50" />
-                  <p className="text-muted-foreground">Nenhuma instalação encontrada</p>
+                <div className="text-center py-6">
+                  <Scissors className="w-10 h-10 mx-auto mb-2 text-muted-foreground/40" />
+                  <p className="text-sm text-muted-foreground">Nenhuma instalação</p>
                 </div>
               ) : (
                 todasInstalacoes.map(instalacao => (
-                  <div key={instalacao.id} className={`flex items-center justify-between p-4 rounded-xl border transition-colors ${
-                     instalacao.status === 'Concluído' 
-                       ? 'bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-700/30 hover:border-green-300 dark:hover:border-green-600/50' 
-                       : 'bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-700/30 hover:border-blue-300 dark:hover:border-blue-600/50'
-                   }`}>
-                     <div className="flex items-center gap-3 flex-1 min-w-0">
-                       {instalacao.status === 'Concluído' && (
-                         <CheckCircle className="w-5 h-5 text-green-600 dark:text-green-400 flex-shrink-0" />
-                       )}
-                       <div className="min-w-0 flex-1">
-                         <div className="font-medium text-foreground truncate">{instalacao.arquiteto_nome}</div>
-                         <div className="text-sm text-muted-foreground truncate">{instalacao.ambiente}</div>
-                         <div className={`text-xs px-2 py-1 rounded-full inline-block mt-1 ${
-                           instalacao.status === 'Concluído' 
-                             ? 'bg-green-100 text-green-700 dark:bg-green-900/50 dark:text-green-400' 
-                             : 'bg-blue-100 text-blue-700 dark:bg-blue-900/50 dark:text-blue-400'
-                         }`}>
-                           {instalacao.status}
-                         </div>
-                       </div>
-                     </div>
-                     <div className="text-right ml-4">
-                       <div className={`font-bold ${instalacao.status === 'Concluído' ? 'text-green-600 dark:text-green-400' : 'text-blue-600 dark:text-blue-400'}`}>
+                  <div key={instalacao.id} className={`flex items-center justify-between p-3 rounded-lg border ${
+                    instalacao.status === 'Concluído' 
+                      ? 'bg-green-500/10 border-green-500/20' 
+                      : 'bg-blue-500/10 border-blue-500/20'
+                  }`}>
+                    <div className="flex items-center gap-2 flex-1 min-w-0">
+                      {instalacao.status === 'Concluído' && (
+                        <CheckCircle className="w-4 h-4 text-green-500 flex-shrink-0" />
+                      )}
+                      <div className="min-w-0 flex-1">
+                        <div className="text-sm font-medium text-foreground truncate">{instalacao.arquiteto_nome}</div>
+                        <div className="text-xs text-muted-foreground truncate">{instalacao.ambiente}</div>
+                      </div>
+                    </div>
+                    <div className="text-right ml-3">
+                      <div className={`text-sm font-bold ${instalacao.status === 'Concluído' ? 'text-green-500' : 'text-blue-500'}`}>
                         R$ {instalacao.valor_total.toFixed(2)}
                       </div>
-                      <div className="text-xs text-muted-foreground">
+                      <div className="text-[10px] text-muted-foreground">
                         {parseLocalDate(instalacao.data_instalacao).toLocaleDateString('pt-BR')}
                       </div>
                     </div>

@@ -25,25 +25,25 @@ export const DashboardCard: React.FC<DashboardCardProps> = ({
 }) => {
   return (
     <div className={cn(
-      "card-tech p-4 md:p-6 transition-all duration-300 hover:border-primary/50",
+      "card-tech p-4 transition-all duration-300",
       className
     )}>
       <div className="flex items-start justify-between">
         <div className="flex-1 min-w-0">
-          <p className="text-muted-foreground text-xs md:text-sm font-medium mb-1 md:mb-2 truncate md:whitespace-normal md:overflow-visible">{title}</p>
-          <h3 className="text-xl md:text-3xl font-bold text-foreground mb-1 truncate md:whitespace-normal md:overflow-visible">{value}</h3>
+          <p className="text-muted-foreground text-xs font-medium mb-1.5 truncate">{title}</p>
+          <h3 className="text-lg md:text-2xl font-bold text-foreground mb-0.5 truncate">{value}</h3>
           {subValue && (
-            <p className="text-muted-foreground text-xs md:text-sm truncate md:whitespace-normal md:overflow-visible">{subValue}</p>
+            <p className="text-muted-foreground text-[11px] md:text-xs truncate">{subValue}</p>
           )}
           {trend && (
-            <p className={`text-xs md:text-sm font-medium mt-1 md:mt-2 ${trendColor}`}>{trend}</p>
+            <p className={`text-xs font-medium mt-1 ${trendColor}`}>{trend}</p>
           )}
         </div>
         <div className={cn(
-          "w-10 h-10 md:w-12 md:h-12 rounded-xl flex items-center justify-center flex-shrink-0 ml-2",
+          "w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 ml-2",
           iconColor
         )}>
-          <Icon className="w-5 h-5 md:w-6 md:h-6 text-white" />
+          <Icon className="w-5 h-5 text-primary-foreground" />
         </div>
       </div>
     </div>
