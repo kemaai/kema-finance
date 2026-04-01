@@ -47,14 +47,7 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
 
           {/* Main Content */}
           <main className="flex-1 pb-16 md:pb-0 bg-background">
-            <div className="relative">
-              {/* Subtle background effects */}
-              <div className="absolute inset-0 bg-tech-particles pointer-events-none"></div>
-              <div className="absolute inset-0 bg-grid-pattern pointer-events-none opacity-50"></div>
-              <div className="relative">
-                {children}
-              </div>
-            </div>
+            {children}
           </main>
         </div>
 

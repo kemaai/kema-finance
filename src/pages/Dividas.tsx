@@ -41,10 +41,10 @@ export const Dividas = () => {
   const totalDividasPendentes = dividasPendentes.reduce((sum, div) => sum + Number(div.valor_atual), 0);
 
   return (
-    <div className="p-6 max-w-7xl mx-auto">
-      <div className="flex justify-between items-center mb-6">
+    <div className="p-4 md:p-6 max-w-7xl mx-auto">
+      <div className="flex justify-between items-center mb-4 md:mb-6">
         <div>
-          <h1 className="text-3xl font-bold text-foreground">Dívidas</h1>
+          <h1 className="text-xl md:text-2xl font-bold text-foreground">Dívidas</h1>
           <p className="text-muted-foreground mt-1">
             Gerencie seus empréstimos e dívidas negativadas
           </p>
@@ -52,7 +52,7 @@ export const Dividas = () => {
       </div>
 
       {/* Cards de Resumo */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4 mb-6">
         <Card className="card-tech">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Total Empréstimos</CardTitle>
