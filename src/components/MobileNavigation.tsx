@@ -10,14 +10,9 @@ import {
   CreditCard,
   Brain
 } from 'lucide-react';
-import {
-  Carousel,
-  CarouselContent,
-  CarouselItem,
-} from "@/components/ui/carousel"
 
 const menuItems = [
-  { name: 'Dashboard', icon: BarChart3, path: '/' },
+  { name: 'Home', icon: BarChart3, path: '/' },
   { name: 'Clientes', icon: Users, path: '/clientes' },
   { name: 'Sites', icon: Globe, path: '/sites' },
   { name: 'Instalações', icon: Scissors, path: '/instalacoes' },
@@ -31,37 +26,29 @@ export const MobileNavigation = () => {
   const location = useLocation();
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 z-50 bg-card border-t border-border md:hidden">
-      <div className="h-16 px-4">
-        <Carousel
-          opts={{
-            align: "start",
-            dragFree: true,
-            containScroll: "trimSnaps",
-          }}
-          className="w-full h-full"
-        >
-          <CarouselContent className="h-full">
-            {menuItems.map((item) => {
-              const isActive = location.pathname === item.path;
-              return (
-                <CarouselItem key={item.name} className="basis-auto pl-2">
-                  <NavLink
-                    to={item.path}
-                    className={`flex flex-col items-center justify-center gap-1 px-4 py-2 h-full min-w-[80px] transition-all duration-200 rounded-lg ${
-                      isActive 
-                        ? 'text-primary bg-primary/10 border border-primary/30' 
-                        : 'text-muted-foreground hover:text-foreground hover:bg-muted/50'
-                    }`}
-                  >
-                    <item.icon className={`w-5 h-5 ${isActive ? 'text-primary' : ''}`} />
-                    <span className="text-xs font-medium whitespace-nowrap">{item.name}</span>
-                  </NavLink>
-                </CarouselItem>
-              );
-            })}
-          </CarouselContent>
-        </Carousel>
+    <div className="fixed bottom-0 left-0 right-0 z-50 bg-card/95 backdrop-blur-lg border-t border-border md:hidden">
+      <div className="h-16 px-2 flex items-center overflow-x-auto scrollbar-hide">
+        {menuItems.map((item) => {
+          const isActive = location.pathname === item.path;
+          return (
+            <NavLink
+              key={item.name}
+              to={item.path}
+              className="flex flex-col items-center justify-center gap-1 min-w-[64px] px-2 py-1.5"
+            >
+              <div className={`w-9 h-9 rounded-full flex items-center justify-center transition-all duration-200 ${
+                isActive 
+                  ? 'bg-primary text-primary-foreground shadow-lg shadow-primary/30' 
+                  : 'text-muted-foreground hover:text-foreground hover:bg-muted/50'
+              }`}>
+                <item.icon className="w-4 h-4" />
+              </div>
+              <span className={`text-[10px] font-medium whitespace-nowrap ${
+                isActive ? 'text-primary' : 'text-muted-foreground'
+              }`}>{item.name}</span>
+            </NavLink>
+          );
+        })}
       </div>
     </div>
   );
