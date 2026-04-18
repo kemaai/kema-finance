@@ -8,7 +8,8 @@ import {
   Receipt,
   FileText,
   CreditCard,
-  Brain
+  Brain,
+  User
 } from 'lucide-react';
 
 const menuItems = [
@@ -20,6 +21,7 @@ const menuItems = [
   { name: 'Dívidas', icon: CreditCard, path: '/dividas' },
   { name: 'Relatórios', icon: FileText, path: '/relatorios' },
   { name: 'KemaAI', icon: Brain, path: '/agente' },
+  { name: 'Perfil', icon: User, path: '/perfil' },
 ];
 
 export const MobileNavigation = () => {
@@ -34,7 +36,7 @@ export const MobileNavigation = () => {
             <NavLink
               key={item.name}
               to={item.path}
-              className="flex flex-col items-center justify-center gap-1 min-w-[64px] px-2 py-1.5"
+              className="flex flex-col items-center justify-center gap-1 flex-shrink-0 w-[20%] min-w-[20%] px-1 py-1.5"
             >
               <div className={`w-9 h-9 rounded-full flex items-center justify-center transition-all duration-200 ${
                 isActive 
