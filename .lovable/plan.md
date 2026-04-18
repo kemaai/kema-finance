@@ -1,125 +1,29 @@
 
 
-## Redesign Visual Premium Completo - Estilo Rico App
+## Fix Desktop Card Truncation
 
-Redesign completo de cores, tipografia, layout e componentes para visual premium dark com tons navy/indigo, inspirado no app Rico.
+The dashboard cards on desktop are truncating values like "R$ 631,..." and "R$ 8.11..." because `DashboardCard.tsx` uses `truncate` on the value/subValue, and the 5-card row at ~929px width gives each card too little space.
 
-### Paleta de Cores
+### Root Cause
 
-```text
-Background:     #080B1A  (navy profundo)
-Cards:          #111631  (indigo escuro)
-Cards hover:    #1A1F45  (indigo médio)
-Borders:        #1E2450  (indigo border)
-Primary (CTA):  #F97316  (laranja vibrante)
-Text primary:   #E2E8F0  (branco suave)
-Text secondary: #64748B  (slate)
-Success:        #22C55E
-Danger:         #EF4444
-Warning:        #F59E0B
-Info/Accent:    #6366F1  (indigo)
-Bottom nav bg:  #0A0E24
-Sidebar bg:     #0A0E24
-Input bg:       #111631
-```
+In `src/components/DashboardCard.tsx`:
+- `<h3>` value uses `truncate` always → cuts off "R$ 631,250.00"
+- `<p>` subValue uses `truncate` always → cuts off "Sites: R$ 0 • Inst: R$..."
+- Title also uses `truncate`
+- Font size `text-lg md:text-2xl` is too large for narrow desktop cards
 
-### Arquivos a Alterar (15 arquivos)
+The memory note `ui/dashboard-desktop-layout-optimization` mentions responsive classes `md:whitespace-normal md:overflow-visible` should already exist — but the current file does NOT have them.
 
-**1. `src/index.css`** -- Core design system
-- Reescrever todas CSS variables (dark como principal, light ajustado)
-- Atualizar `card-tech` para background indigo `#111631` com border `#1E2450`
-- `btn-tech` com gradiente laranja mais vibrante
-- `input-tech` com bg indigo e focus ring laranja
-- `bg-tech-particles` com gradientes navy/indigo sutis
-- Remover `bg-grid-pattern` (visual mais limpo como Rico)
-- Novos shadows com tonalidade navy ao inves de preto puro
-- Badges atualizados para tons mais vibrantes sobre fundo escuro
+### Fix (single file: `src/components/DashboardCard.tsx`)
 
-**2. `src/components/Layout.tsx`** -- Layout limpo
-- Remover `bg-tech-particles` e `bg-grid-pattern` overlays do main content
-- Header mobile: background navy solido `#0A0E24`, borda indigo sutil
-- Clean layout sem efeitos visuais sobrepostos
+1. Remove `truncate` on desktop for value, subValue, and title — allow wrapping with `md:whitespace-normal md:break-words`
+2. Slightly reduce desktop value font size to `md:text-xl lg:text-2xl` to better fit at narrow desktop widths
+3. Keep mobile behavior identical (`truncate` + `text-lg` on mobile preserved via base classes)
+4. Allow value `<h3>` to use `tabular-nums` for cleaner number alignment
 
-**3. `src/components/AppSidebar.tsx`** -- Sidebar premium
-- Background navy profundo
-- Items ativos com highlight indigo `bg-indigo-500/20` + borda esquerda laranja
-- Footer com avatar circular estilizado
-- Separadores indigo sutis
-- Logo "Kema AI" em branco com accent laranja
+### Result
+- Mobile: unchanged (truncated, compact)
+- Desktop: full values visible, wrapping naturally if needed, no horizontal overflow
 
-**4. `src/components/MobileNavigation.tsx`** -- Bottom nav estilo Rico
-- Background navy solido `#0A0E24`
-- Items ativos com icone em circulo laranja (como Rico)
-- Sem carousel - usar scroll horizontal simples com 5 items principais visíveis
-- Texto menor, mais compacto
-
-**5. `src/components/DashboardCard.tsx`** -- Cards premium
-- Background indigo com gradient sutil
-- Bordas indigo, hover com glow sutil
-- Ícones em círculos com fundo mais vibrante
-- Valores em branco bold, subtítulos em slate
-
-**6. `src/pages/Dashboard.tsx`** -- Layout dashboard redesenhado
-- Hero section: gradiente navy com saudação em branco, sem orbs animados
-- Cards em grid 2x2 no mobile (como Rico) ao invés de 1 coluna
-- Seção de gráfico com card indigo
-- Listas (vencimentos, despesas, instalações) com items em rows indigo
-- Filtro de período com pills indigo/laranja
-- Botão refresh mais discreto integrado ao header
-
-**7. `src/components/AuthForm.tsx`** -- Login premium
-- Background navy puro sem particles/grid
-- Card central em indigo com bordas sutis
-- Tabs com estilo pill (bg indigo, active laranja)
-- Inputs com bg navy escuro e focus laranja
-
-**8. `src/pages/Clientes.tsx`** -- Layout clientes modernizado
-- Header com título e botão em linha, estilo compacto
-- Grid de cards com espaçamento uniforme
-- Botão "Novo Cliente" com estilo pill laranja
-
-**9. `src/pages/Sites.tsx`** -- Layout sites modernizado
-- Receita mensal em destaque como badge grande no topo
-- Barra de busca com bg indigo e ícone integrado
-- Filtros com estilo pill
-
-**10. `src/pages/Despesas.tsx`** -- Layout despesas modernizado
-- Cards de estatísticas compactos com ícones coloridos
-- Navegação de mês com setas estilizadas
-- Tabs de vencimento com estilo moderno
-
-**11. `src/pages/Instalacoes.tsx`** -- Layout instalações modernizado
-- Resumo da quinzena em card highlight com borda laranja
-- Grid responsivo otimizado
-
-**12. `src/pages/Dividas.tsx`** -- Layout dívidas modernizado
-- Cards de resumo com gradientes sutis
-- Tabs de empréstimos/dívidas com estilo moderno
-
-**13. `src/pages/Relatorios.tsx`** -- Layout relatórios modernizado
-- Filtros compactos no topo
-- Cards de métricas com visual premium
-
-**14. `src/components/KemaAIWidget.tsx`** -- Widget AI premium
-- Card com borda gradiente indigo->laranja
-- Score em destaque grande
-- Alerta principal com bg indigo
-
-**15. `src/components/RevenueChart.tsx`** -- Cores do gráfico
-- Atualizar paleta de cores para tons que combinem com fundo navy/indigo
-- Grid lines em indigo sutil
-
-### Princípios de Design
-- Mobile-first: cards 2x2 no mobile, como app Rico
-- Tipografia: Inter/system font, hierarquia clara (branco bold para valores, slate para labels)
-- Espaçamento: padding consistente `p-4` mobile, `p-6` desktop
-- Transições suaves em hover/focus
-- Sem efeitos "tech" excessivos (particles, grid overlay) -- visual limpo premium
-- Dark mode como experiência principal (light mode mantido funcional)
-
-### Nota Tecnica
-- Alterações são 100% visuais via CSS variables e classes Tailwind
-- Nenhuma funcionalidade ou lógica de negócio será alterada
-- Componentes shadcn/ui herdam automaticamente das CSS variables
-- O `tailwind.config.ts` não precisa ser alterado (usa CSS vars)
+Only `src/components/DashboardCard.tsx` is modified. No layout/grid changes to `Dashboard.tsx`.
 
