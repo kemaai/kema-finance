@@ -157,9 +157,6 @@ export function AppSidebar() {
                   <p className="text-sm font-medium text-foreground truncate">
                     {displayName}
                   </p>
-                  <p className="text-xs text-muted-foreground truncate">
-                    {user?.email || 'Ver meu perfil'}
-                  </p>
                 </div>
               </button>
             );
