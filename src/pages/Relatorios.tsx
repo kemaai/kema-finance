@@ -42,7 +42,7 @@ export const Relatorios = () => {
     const { dataInicio, dataFim } = getPeriodoDatas(periodoRelatorio, semanaEscolhida, mesEscolhido, anoEscolhido);
 
     let resultado = {
-      sites: sites,
+      servicos: servicos,
       clientes: clientes,
       instalacoes: instalacoes,
       despesas: despesas,
@@ -58,12 +58,11 @@ export const Relatorios = () => {
       });
     }
 
-    // Filtrar sites ativos com vencimento no período
-    if (tipoRelatorio === 'sites' || tipoRelatorio === 'todos') {
-      resultado.sites = sites.filter(site => {
-        if (site.status !== 'Ativo') return false;
-        const dataVencimento = new Date(site.data_vencimento);
-        return isDateInPeriod(dataVencimento, dataInicio, dataFim);
+    // Filtrar serviços com data no período
+    if (tipoRelatorio === 'sites' || tipoRelatorio === 'servicos' || tipoRelatorio === 'todos') {
+      resultado.servicos = servicos.filter(s => {
+        const dataServico = new Date(s.data_servico);
+        return isDateInPeriod(dataServico, dataInicio, dataFim);
       });
     }
 
@@ -94,25 +93,15 @@ export const Relatorios = () => {
     }
 
     return resultado;
-  }, [sites, clientes, instalacoes, despesas, emprestimos, dividasNegativadas, periodoRelatorio, semanaEscolhida, mesEscolhido, anoEscolhido, tipoRelatorio]);
+  }, [servicos, clientes, instalacoes, despesas, emprestimos, dividasNegativadas, periodoRelatorio, semanaEscolhida, mesEscolhido, anoEscolhido, tipoRelatorio]);
 
   // Cálculos de métricas
   const metricas = useMemo(() => {
     const { dataInicio, dataFim } = getPeriodoDatas(periodoRelatorio, semanaEscolhida, mesEscolhido, anoEscolhido);
 
-    // Receitas de Sites (só planos com assinatura + hospedagem)
-    const receitaMensalSites = dadosFiltrados.sites
-      .filter(site => site.status === 'Ativo')
-      .reduce((total, site) => {
-        let valorSite = 0;
-        if (site.tipo_plano.toLowerCase().includes('assinatura')) {
-          valorSite += Number(site.valor_mensal);
-        }
-        if (site.hospedagem) {
-          valorSite += 40;
-        }
-        return total + valorSite;
-      }, 0);
+    // Receitas de Serviços (soma dos valores dos serviços do período)
+    const receitaMensalSites = dadosFiltrados.servicos
+      .reduce((total, s) => total + Number(s.valor), 0);
 
     // Instalações concluídas
     const instalacoesConcluidas = dadosFiltrados.instalacoes.filter(inst => inst.status === 'Concluído');
@@ -154,9 +143,10 @@ export const Relatorios = () => {
     });
     const valorDividasPagasNoPeriodo = dividasPagasNoPeriodo.reduce((sum, d) => sum + d.valor_atual, 0);
 
-    // Sites por status
-    const sitesPorStatus = dadosFiltrados.sites.reduce((acc, site) => {
-      acc[site.status] = (acc[site.status] || 0) + 1;
+    // Serviços por status (Pago / Pendente)
+    const sitesPorStatus = dadosFiltrados.servicos.reduce((acc, s) => {
+      const k = s.pago ? 'Pago' : 'Pendente';
+      acc[k] = (acc[k] || 0) + 1;
       return acc;
     }, {} as Record<string, number>);
 
@@ -200,23 +190,13 @@ export const Relatorios = () => {
       const receitaInstalacoes = instPeriodo.reduce((sum, inst) => sum + Number(inst.valor_total), 0);
       const metragem = receitaInstalacoes / 24;
       
-      // Filtrar sites ativos com vencimento no período
-      const sitesAtivos = sites.filter(site => {
-        if (site.status !== 'Ativo') return false;
-        const dataVenc = new Date(site.data_vencimento);
-        return isDateInPeriod(dataVenc, periodo.inicio, periodo.fim);
+      // Filtrar serviços do período
+      const servicosPeriodo = servicos.filter(s => {
+        const dataServ = new Date(s.data_servico);
+        return isDateInPeriod(dataServ, periodo.inicio, periodo.fim);
       });
-      
-      const receitaSites = sitesAtivos.reduce((total, site) => {
-        let valor = 0;
-        if (site.tipo_plano.toLowerCase().includes('assinatura')) {
-          valor += Number(site.valor_mensal);
-        }
-        if (site.hospedagem) {
-          valor += 40;
-        }
-        return total + valor;
-      }, 0);
+
+      const receitaSites = servicosPeriodo.reduce((total, s) => total + Number(s.valor), 0);
       
       // Filtrar despesas do período
       const despesasPeriodo = despesas.filter(desp => {
@@ -235,7 +215,7 @@ export const Relatorios = () => {
         despesas: totalDespesasPeriodo
       };
     });
-  }, [instalacoes, sites, despesas, periodoRelatorio]);
+  }, [instalacoes, servicos, despesas, periodoRelatorio]);
 
   const hoje = new Date();
   const nomesMeses = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 
