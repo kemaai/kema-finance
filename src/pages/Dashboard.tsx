@@ -230,7 +230,7 @@ export const Dashboard = () => {
           <DashboardCard 
             title="Clientes" 
             value={clientesAtivos.toString()} 
-            subValue={`${mediaSites} sites/cliente`} 
+            subValue={`${mediaServicos} serv./cliente`} 
             icon={Users} 
             iconColor="bg-gradient-to-br from-purple-500 to-purple-600" 
           />
@@ -259,7 +259,7 @@ export const Dashboard = () => {
               <span className="text-sm font-medium">+8.2%</span>
             </div>
           </div>
-          <RevenueChart sites={sites} instalacoes={instalacoes} />
+          <RevenueChart sites={[]} instalacoes={instalacoes} />
         </div>
 
         {/* Three columns */}
@@ -272,7 +272,7 @@ export const Dashboard = () => {
                   <Calendar className="w-4 h-4 text-amber-500" />
                 </div>
                 <div>
-                  <h3 className="text-sm font-semibold text-foreground">Vencimentos</h3>
+                  <h3 className="text-sm font-semibold text-foreground">Serviços Pendentes</h3>
                   <p className="text-xs text-muted-foreground">Próximos 60 dias</p>
                 </div>
               </div>
@@ -286,18 +286,18 @@ export const Dashboard = () => {
               {proximosVencimentos.length === 0 ? (
                 <div className="text-center py-6">
                   <Calendar className="w-10 h-10 mx-auto mb-2 text-muted-foreground/40" />
-                  <p className="text-sm text-muted-foreground">Nenhum vencimento próximo</p>
+                  <p className="text-sm text-muted-foreground">Nenhum serviço pendente</p>
                 </div>
               ) : (
-                proximosVencimentos.map(site => (
-                  <div key={site.id} className="flex items-center justify-between p-3 bg-amber-500/10 rounded-lg border border-amber-500/20">
+                proximosVencimentos.map(servico => (
+                  <div key={servico.id} className="flex items-center justify-between p-3 bg-amber-500/10 rounded-lg border border-amber-500/20">
                     <div className="flex-1 min-w-0">
-                      <div className="text-sm font-medium text-foreground truncate">{site.cliente_nome}</div>
-                      <div className="text-xs text-muted-foreground truncate">{site.descricao_projeto}</div>
+                      <div className="text-sm font-medium text-foreground truncate">{servico.cliente_nome}</div>
+                      <div className="text-xs text-muted-foreground truncate">{servico.nome_servico}</div>
                     </div>
                     <div className="text-right ml-3">
-                      <div className="text-sm font-bold text-amber-500">R$ {site.valor_mensal.toFixed(2)}</div>
-                      <div className="text-[10px] text-muted-foreground">{new Date(site.data_vencimento).toLocaleDateString('pt-BR')}</div>
+                      <div className="text-sm font-bold text-amber-500">R$ {Number(servico.valor).toFixed(2)}</div>
+                      <div className="text-[10px] text-muted-foreground">{parseLocalDate(servico.data_servico).toLocaleDateString('pt-BR')}</div>
                     </div>
                   </div>
                 ))
