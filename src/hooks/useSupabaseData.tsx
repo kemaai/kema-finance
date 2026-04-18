@@ -94,6 +94,7 @@ interface Servico {
   descricao: string;
   status: string;
   pago: boolean;
+  recorrente: boolean;
   created_at: string;
   updated_at: string;
 }
