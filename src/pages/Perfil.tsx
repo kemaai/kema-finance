@@ -15,6 +15,7 @@ import {
   emailUpdateSchema,
   passwordUpdateSchema,
 } from '@/lib/validations';
+import { AvatarCropDialog } from '@/components/AvatarCropDialog';
 
 export default function Perfil() {
   const navigate = useNavigate();
@@ -33,6 +34,9 @@ export default function Perfil() {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [updatingPassword, setUpdatingPassword] = useState(false);
 
+  const [cropSrc, setCropSrc] = useState<string | null>(null);
+  const [cropOpen, setCropOpen] = useState(false);
+
   useEffect(() => {
     if (profile?.full_name) setFullName(profile.full_name);
   }, [profile]);
@@ -48,27 +52,42 @@ export default function Perfil() {
 
   const handleAvatarClick = () => fileInputRef.current?.click();
 
-  const handleAvatarChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleAvatarChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file || !user) return;
 
     if (file.size > 5 * 1024 * 1024) {
       toast.error('Imagem deve ter no máximo 5MB');
+      if (fileInputRef.current) fileInputRef.current.value = '';
       return;
     }
     if (!file.type.startsWith('image/')) {
       toast.error('Arquivo deve ser uma imagem');
+      if (fileInputRef.current) fileInputRef.current.value = '';
       return;
     }
 
+    const objectUrl = URL.createObjectURL(file);
+    setCropSrc(objectUrl);
+    setCropOpen(true);
+    if (fileInputRef.current) fileInputRef.current.value = '';
+  };
+
+  const closeCrop = () => {
+    setCropOpen(false);
+    if (cropSrc) URL.revokeObjectURL(cropSrc);
+    setCropSrc(null);
+  };
+
+  const handleCropConfirm = async (blob: Blob) => {
+    if (!user) return;
     setUploadingAvatar(true);
     try {
-      const ext = file.name.split('.').pop() || 'png';
-      const path = `${user.id}/avatar-${Date.now()}.${ext}`;
+      const path = `${user.id}/avatar-${Date.now()}.jpg`;
 
       const { error: uploadError } = await supabase.storage
         .from('avatars')
-        .upload(path, file, { upsert: true, cacheControl: '3600' });
+        .upload(path, blob, { upsert: true, cacheControl: '3600', contentType: 'image/jpeg' });
       if (uploadError) throw uploadError;
 
       const { data: urlData } = supabase.storage.from('avatars').getPublicUrl(path);
@@ -82,11 +101,11 @@ export default function Perfil() {
 
       await refreshProfile();
       toast.success('Foto atualizada com sucesso!');
+      closeCrop();
     } catch (err: any) {
       toast.error(err.message || 'Erro ao enviar foto');
     } finally {
       setUploadingAvatar(false);
-      if (fileInputRef.current) fileInputRef.current.value = '';
     }
   };
 
@@ -331,6 +350,15 @@ export default function Perfil() {
           </Button>
         </CardContent>
       </Card>
+
+      {cropSrc && (
+        <AvatarCropDialog
+          open={cropOpen}
+          imageSrc={cropSrc}
+          onClose={closeCrop}
+          onConfirm={handleCropConfirm}
+        />
+      )}
     </div>
   );
 }
