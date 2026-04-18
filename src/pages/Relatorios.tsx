@@ -909,7 +909,7 @@ export const Relatorios = () => {
               <CardHeader>
                 <CardTitle className="flex items-center gap-2 text-sm md:text-base text-foreground">
                   <Globe className="w-4 h-4 text-orange-500" />
-                  Sites
+                  Serviços
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-2">
