@@ -17,6 +17,7 @@ import { Dividas } from "./pages/Dividas";
 import { Relatorios } from "./pages/Relatorios";
 import { Agente } from "./pages/Agente";
 import { Login } from "./pages/Login";
+import Perfil from "./pages/Perfil";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
