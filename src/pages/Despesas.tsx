@@ -287,7 +287,7 @@ export default function Despesas() {
             <CheckCircle className="h-4 w-4 text-green-500" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-green-500">
+            <div className="font-bold text-green-500 text-xl">
               R$ {estatisticas.pagas.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
             </div>
           </CardContent>
@@ -299,7 +299,7 @@ export default function Despesas() {
             <Clock className="h-4 w-4 text-yellow-500" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-yellow-500">
+            <div className="font-bold text-yellow-500 text-xl">
               R$ {estatisticas.pendentes.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
             </div>
           </CardContent>
@@ -311,7 +311,7 @@ export default function Despesas() {
             <XCircle className="h-4 w-4 text-red-500" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-red-500">
+            <div className="font-bold text-red-500 text-xl">
               {estatisticas.vencidas}
             </div>
           </CardContent>
@@ -322,7 +322,7 @@ export default function Despesas() {
             <CardTitle className="text-sm font-medium">Total Contas</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-foreground">
+            <div className="font-bold text-foreground text-xl">
               {estatisticas.totalContas}
             </div>
           </CardContent>
