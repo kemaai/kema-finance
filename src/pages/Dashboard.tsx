@@ -95,17 +95,18 @@ export const Dashboard = () => {
 
   const receitaPeriodoInstalacoes = instalacoesDoPeriodo.reduce((total, instalacao) => total + Number(instalacao.valor_total), 0);
   const totalM2Periodo = instalacoesDoPeriodo.reduce((total, instalacao) => total + Number(instalacao.valor_total) / 24, 0);
-  const receitaTotal = receitaMensalSites + receitaPeriodoInstalacoes;
+  const receitaTotal = receitaMensalServicos + receitaPeriodoInstalacoes;
 
   const clientesAtivos = clientes.length;
-  const mediaSites = clientesAtivos > 0 ? (sitesAtivos / clientesAtivos).toFixed(1) : 'N/A';
+  const mediaServicos = clientesAtivos > 0 ? (servicosCount / clientesAtivos).toFixed(1) : 'N/A';
 
+  // Próximos serviços pendentes (60 dias)
   const proximosDois = new Date();
   proximosDois.setDate(proximosDois.getDate() + 60);
-  const proximosVencimentos = sites.filter(site => {
-    const vencimento = new Date(site.data_vencimento);
-    return site.status === 'Ativo' && vencimento <= proximosDois && vencimento >= hoje;
-  }).sort((a, b) => new Date(a.data_vencimento).getTime() - new Date(b.data_vencimento).getTime()).slice(0, 5);
+  const proximosVencimentos = servicos.filter(s => {
+    const data = parseLocalDate(s.data_servico);
+    return !s.pago && data <= proximosDois && data >= hoje;
+  }).sort((a, b) => parseLocalDate(a.data_servico).getTime() - parseLocalDate(b.data_servico).getTime()).slice(0, 5);
 
   // Instalações do mês atual (Concluído ou Agendado), separadas por pedido_recebido
   const instalacoesMesTodas = instalacoes.filter(instalacao => {
@@ -145,7 +146,7 @@ export const Dashboard = () => {
     .sort((a, b) => parseLocalDate(a.data_vencimento).getTime() - parseLocalDate(b.data_vencimento).getTime());
   const totalDespesasNaoPagasMes = despesasPendentes.length;
 
-  if (sitesLoading || clientesLoading || instalacoesLoading || despesasLoading) {
+  if (servicosLoading || clientesLoading || instalacoesLoading || despesasLoading) {
     return (
       <div className="min-h-screen bg-background">
         <div className="max-w-7xl mx-auto p-4 md:p-8">
@@ -208,15 +209,15 @@ export const Dashboard = () => {
           <DashboardCard 
             title="Receita Total" 
             value={`R$ ${receitaTotal.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`} 
-            subValue={`Sites: R$ ${receitaMensalSites.toFixed(0)} • Inst: R$ ${receitaPeriodoInstalacoes.toFixed(0)}`} 
+            subValue={`Serviços: R$ ${receitaMensalServicos.toFixed(0)} • Inst: R$ ${receitaPeriodoInstalacoes.toFixed(0)}`} 
             icon={DollarSign} 
             iconColor="bg-gradient-to-br from-green-500 to-green-600" 
           />
           <DashboardCard 
-            title="Sites Ativos" 
-            value={sitesAtivos.toString()} 
-            subValue={`${sitesAtivos} contratos ativos`} 
-            icon={Globe} 
+            title="Serviços do Mês" 
+            value={servicosCount.toString()} 
+            subValue={`Pago: R$ ${receitaServicosPagos.toFixed(0)}`} 
+            icon={Briefcase} 
             iconColor="bg-gradient-to-br from-blue-500 to-blue-600" 
           />
           <DashboardCard 
