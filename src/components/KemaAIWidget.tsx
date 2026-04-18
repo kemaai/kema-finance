@@ -44,14 +44,9 @@ export const KemaAIWidget = () => {
       className="card-tech p-4 md:p-5 cursor-pointer group transition-all duration-300"
     >
       <div className="flex items-center justify-between mb-4">
-        <div className="flex items-center gap-3">
-          <div className={`w-10 h-10 bg-gradient-to-br ${getScoreGradient()} rounded-xl flex items-center justify-center`}>
-            <Brain className="w-5 h-5 text-primary-foreground" />
-          </div>
-          <div>
-            <h3 className="text-base font-semibold text-foreground">KemaFinance AI</h3>
-            <p className="text-xs text-muted-foreground hidden sm:block">Análise financeira inteligente</p>
-          </div>
+        <div>
+          <h3 className="text-base font-semibold text-foreground">KemaFinance AI</h3>
+          <p className="text-xs text-muted-foreground hidden sm:block">Análise financeira inteligente</p>
         </div>
         <div className="flex items-center gap-2 text-muted-foreground group-hover:text-primary transition-colors">
           <span className="text-xs hidden sm:inline">Ver análise</span>

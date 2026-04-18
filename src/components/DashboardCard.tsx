@@ -39,12 +39,6 @@ export const DashboardCard: React.FC<DashboardCardProps> = ({
             <p className={`text-xs font-medium mt-1 ${trendColor}`}>{trend}</p>
           )}
         </div>
-        <div className={cn(
-          "w-10 h-10 rounded-md flex items-center justify-center flex-shrink-0 ml-2 text-sm",
-          iconColor
-        )}>
-          <Icon className="w-5 h-5 text-primary-foreground" />
-        </div>
       </div>
     </div>
   );
