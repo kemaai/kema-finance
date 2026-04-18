@@ -114,7 +114,7 @@ export const useServicos = () => {
     enabled: !!user,
   });
 };
-
+export const useSites = () => {
   const { user } = useAuth();
   
   return useQuery({
