@@ -40,7 +40,7 @@ export const DashboardCard: React.FC<DashboardCardProps> = ({
           )}
         </div>
         <div className={cn(
-          "w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 ml-2",
+          "w-10 h-10 rounded-md flex items-center justify-center flex-shrink-0 ml-2 text-sm",
           iconColor
         )}>
           <Icon className="w-5 h-5 text-primary-foreground" />
