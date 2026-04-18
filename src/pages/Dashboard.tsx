@@ -100,13 +100,18 @@ export const Dashboard = () => {
   const clientesAtivos = clientes.length;
   const mediaServicos = clientesAtivos > 0 ? (servicosCount / clientesAtivos).toFixed(1) : 'N/A';
 
-  // Próximos serviços pendentes (60 dias)
-  const proximosDois = new Date();
-  proximosDois.setDate(proximosDois.getDate() + 60);
-  const proximosVencimentos = servicos.filter(s => {
-    const data = parseLocalDate(s.data_servico);
-    return !s.pago && data <= proximosDois && data >= hoje;
-  }).sort((a, b) => parseLocalDate(a.data_servico).getTime() - parseLocalDate(b.data_servico).getTime()).slice(0, 5);
+  // Serviços do mês atual, agrupados por status
+  const hojeMid = new Date(hoje.getFullYear(), hoje.getMonth(), hoje.getDate());
+  const servicosPagosMes = servicosDoMes
+    .filter(s => s.pago)
+    .sort((a, b) => parseLocalDate(b.data_servico).getTime() - parseLocalDate(a.data_servico).getTime());
+  const servicosPendentesMes = servicosDoMes
+    .filter(s => !s.pago && parseLocalDate(s.data_servico) >= hojeMid)
+    .sort((a, b) => parseLocalDate(a.data_servico).getTime() - parseLocalDate(b.data_servico).getTime());
+  const servicosVencidosMes = servicosDoMes
+    .filter(s => !s.pago && parseLocalDate(s.data_servico) < hojeMid)
+    .sort((a, b) => parseLocalDate(a.data_servico).getTime() - parseLocalDate(b.data_servico).getTime());
+  const totalServicosMes = servicosDoMes.length;
 
   // Instalações do mês atual (Concluído ou Agendado), separadas por pedido_recebido
   const instalacoesMesTodas = instalacoes.filter(instalacao => {
