@@ -318,34 +318,58 @@ export const Dashboard = () => {
                 </div>
                 <div>
                   <h3 className="text-sm font-semibold text-foreground">Despesas Próximas</h3>
-                  <p className="text-xs text-muted-foreground">A vencer em 15 dias</p>
+                  <p className="text-xs text-muted-foreground">Mês atual</p>
                 </div>
               </div>
-              {despesasProximasVencimento.length > 0 && (
+              {totalDespesasNaoPagasMes > 0 && (
                 <div className="w-5 h-5 bg-red-500 rounded-full flex items-center justify-center">
-                  <span className="text-[10px] font-bold text-primary-foreground">{despesasProximasVencimento.length}</span>
+                  <span className="text-[10px] font-bold text-primary-foreground">{totalDespesasNaoPagasMes}</span>
                 </div>
               )}
             </div>
-            <div className="space-y-2 max-h-72 overflow-y-auto">
-              {despesasProximasVencimento.length === 0 ? (
+            <div className="space-y-3 max-h-72 overflow-y-auto">
+              {totalDespesasNaoPagasMes === 0 ? (
                 <div className="text-center py-6">
                   <CreditCard className="w-10 h-10 mx-auto mb-2 text-muted-foreground/40" />
-                  <p className="text-sm text-muted-foreground">Nenhuma despesa próxima</p>
+                  <p className="text-sm text-muted-foreground">Nenhuma despesa pendente</p>
                 </div>
               ) : (
-                despesasProximasVencimento.map(despesa => (
-                  <div key={despesa.id} className="flex items-center justify-between p-3 bg-red-500/10 rounded-lg border border-red-500/20">
-                    <div className="flex-1 min-w-0">
-                      <div className="text-sm font-medium text-foreground truncate">{despesa.nome}</div>
-                      {despesa.anotacao && <div className="text-xs text-muted-foreground truncate">{despesa.anotacao}</div>}
+                <>
+                  {despesasVencidasMes.length > 0 && (
+                    <div className="space-y-2">
+                      <p className="text-[11px] font-semibold uppercase tracking-wide text-red-500">Vencidas ({despesasVencidasMes.length})</p>
+                      {despesasVencidasMes.map(despesa => (
+                        <div key={despesa.id} className="flex items-center justify-between p-3 bg-red-500/10 rounded-lg border border-red-500/30">
+                          <div className="flex-1 min-w-0">
+                            <div className="text-sm font-medium text-foreground truncate">{despesa.nome}</div>
+                            {despesa.anotacao && <div className="text-xs text-muted-foreground truncate">{despesa.anotacao}</div>}
+                          </div>
+                          <div className="text-right ml-3">
+                            <div className="text-sm font-bold text-red-500">R$ {Number(despesa.valor).toFixed(2)}</div>
+                            <div className="text-[10px] text-muted-foreground">{parseLocalDate(despesa.data_vencimento).toLocaleDateString('pt-BR')}</div>
+                          </div>
+                        </div>
+                      ))}
                     </div>
-                    <div className="text-right ml-3">
-                      <div className="text-sm font-bold text-red-500">R$ {Number(despesa.valor).toFixed(2)}</div>
-                      <div className="text-[10px] text-muted-foreground">{new Date(despesa.data_vencimento).toLocaleDateString('pt-BR')}</div>
+                  )}
+                  {despesasAVencerMes.length > 0 && (
+                    <div className="space-y-2">
+                      <p className="text-[11px] font-semibold uppercase tracking-wide text-primary">A vencer ({despesasAVencerMes.length})</p>
+                      {despesasAVencerMes.map(despesa => (
+                        <div key={despesa.id} className="flex items-center justify-between p-3 bg-primary/10 rounded-lg border border-primary/30">
+                          <div className="flex-1 min-w-0">
+                            <div className="text-sm font-medium text-foreground truncate">{despesa.nome}</div>
+                            {despesa.anotacao && <div className="text-xs text-muted-foreground truncate">{despesa.anotacao}</div>}
+                          </div>
+                          <div className="text-right ml-3">
+                            <div className="text-sm font-bold text-primary">R$ {Number(despesa.valor).toFixed(2)}</div>
+                            <div className="text-[10px] text-muted-foreground">{parseLocalDate(despesa.data_vencimento).toLocaleDateString('pt-BR')}</div>
+                          </div>
+                        </div>
+                      ))}
                     </div>
-                  </div>
-                ))
+                  )}
+                </>
               )}
             </div>
           </div>
@@ -359,52 +383,64 @@ export const Dashboard = () => {
                 </div>
                 <div>
                   <h3 className="text-sm font-semibold text-foreground">Instalações</h3>
-                  <p className="text-xs text-muted-foreground">Agendadas e concluídas</p>
+                  <p className="text-xs text-muted-foreground">Mês atual</p>
                 </div>
               </div>
-              {todasInstalacoes.length > 0 && (
+              {totalInstalacoesMes > 0 && (
                 <div className="w-5 h-5 bg-blue-500 rounded-full flex items-center justify-center">
-                  <span className="text-[10px] font-bold text-primary-foreground">{todasInstalacoes.length}</span>
+                  <span className="text-[10px] font-bold text-primary-foreground">{totalInstalacoesMes}</span>
                 </div>
               )}
             </div>
-            <div className="space-y-2 max-h-72 overflow-y-auto">
-              {todasInstalacoes.length === 0 ? (
+            <div className="space-y-3 max-h-72 overflow-y-auto">
+              {totalInstalacoesMes === 0 ? (
                 <div className="text-center py-6">
                   <Scissors className="w-10 h-10 mx-auto mb-2 text-muted-foreground/40" />
-                  <p className="text-sm text-muted-foreground">Nenhuma instalação</p>
+                  <p className="text-sm text-muted-foreground">Nenhuma instalação no mês</p>
                 </div>
               ) : (
-                todasInstalacoes.map(instalacao => (
-                  <div key={instalacao.id} className={`flex items-center justify-between p-3 rounded-lg border ${
-                    instalacao.status === 'Concluído' 
-                      ? 'bg-green-500/10 border-green-500/20' 
-                      : 'bg-blue-500/10 border-blue-500/20'
-                  }`}>
-                    <div className="flex items-center gap-2 flex-1 min-w-0">
-                      {instalacao.status === 'Concluído' && (
-                        <CheckCircle className="w-4 h-4 text-green-500 flex-shrink-0" />
-                      )}
-                      <div className="min-w-0 flex-1">
-                        <div className="text-sm font-medium text-foreground truncate">{instalacao.arquiteto_nome}</div>
-                        <div className="text-xs text-muted-foreground truncate">{instalacao.ambiente}</div>
-                      </div>
+                <>
+                  {instalacoesPagasMes.length > 0 && (
+                    <div className="space-y-2">
+                      <p className="text-[11px] font-semibold uppercase tracking-wide text-green-500">Pagas ({instalacoesPagasMes.length})</p>
+                      {instalacoesPagasMes.map(instalacao => (
+                        <div key={instalacao.id} className="flex items-center justify-between p-3 bg-green-500/10 rounded-lg border border-green-500/30">
+                          <div className="flex items-center gap-2 flex-1 min-w-0">
+                            <CheckCircle className="w-4 h-4 text-green-500 flex-shrink-0" />
+                            <div className="min-w-0 flex-1">
+                              <div className="text-sm font-medium text-foreground truncate">{instalacao.arquiteto_nome}</div>
+                              <div className="text-xs text-muted-foreground truncate">{instalacao.ambiente}</div>
+                            </div>
+                          </div>
+                          <div className="text-right ml-3">
+                            <div className="text-sm font-bold text-green-500">R$ {Number(instalacao.valor_total).toFixed(2)}</div>
+                            <div className="text-[10px] text-muted-foreground">{parseLocalDate(instalacao.data_instalacao).toLocaleDateString('pt-BR')}</div>
+                          </div>
+                        </div>
+                      ))}
                     </div>
-                    <div className="text-right ml-3">
-                      <div className={`text-sm font-bold ${instalacao.status === 'Concluído' ? 'text-green-500' : 'text-blue-500'}`}>
-                        R$ {instalacao.valor_total.toFixed(2)}
-                      </div>
-                      <div className="text-[10px] text-muted-foreground">
-                        {parseLocalDate(instalacao.data_instalacao).toLocaleDateString('pt-BR')}
-                      </div>
+                  )}
+                  {instalacoesNaoPagasMes.length > 0 && (
+                    <div className="space-y-2">
+                      <p className="text-[11px] font-semibold uppercase tracking-wide text-primary">Não pagas ({instalacoesNaoPagasMes.length})</p>
+                      {instalacoesNaoPagasMes.map(instalacao => (
+                        <div key={instalacao.id} className="flex items-center justify-between p-3 bg-primary/10 rounded-lg border border-primary/30">
+                          <div className="flex items-center gap-2 flex-1 min-w-0">
+                            <Clock className="w-4 h-4 text-primary flex-shrink-0" />
+                            <div className="min-w-0 flex-1">
+                              <div className="text-sm font-medium text-foreground truncate">{instalacao.arquiteto_nome}</div>
+                              <div className="text-xs text-muted-foreground truncate">{instalacao.ambiente}</div>
+                            </div>
+                          </div>
+                          <div className="text-right ml-3">
+                            <div className="text-sm font-bold text-primary">R$ {Number(instalacao.valor_total).toFixed(2)}</div>
+                            <div className="text-[10px] text-muted-foreground">{parseLocalDate(instalacao.data_instalacao).toLocaleDateString('pt-BR')}</div>
+                          </div>
+                        </div>
+                      ))}
                     </div>
-                  </div>
-                ))
+                  )}
+                </>
               )}
             </div>
           </div>
-        </div>
-      </div>
-    </div>
-  );
-};
