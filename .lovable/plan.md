@@ -1,43 +1,82 @@
 
 
-## Atualizar cards Despesas Próximas e Instalações
+## Transformar Menu "Sites" em Menu "Serviços"
 
-### Card "Despesas Próximas" (alteração)
-- Mostrar **todas as despesas não pagas do mês atual** (não apenas próximas 15 dias).
-- Remover o subtítulo "A vencer em 15 dias" → trocar por "Mês atual".
-- Separar visualmente em duas seções:
-  - **Vencidas** (não pagas, data < hoje): fundo/borda/valor **vermelho** (red-500).
-  - **A vencer** (não pagas, data >= hoje): fundo/borda/valor **laranja** (primary/orange-500).
-- **Não exibir despesas pagas** (conforme pedido do usuário).
-- Ordenar: vencidas primeiro (mais antigas no topo), depois a vencer (mais próximas no topo).
-- Badge contador exibe o total não pagas do mês.
+Renomear e generalizar o módulo Sites para suportar qualquer tipo de serviço prestado (sites, sistemas, papel de parede, pintura, etc), mantendo o vínculo com clientes.
 
-### Card "Instalações" (alteração)
-- Mostrar **todas as instalações do mês atual** (status `Concluído` ou `Agendado`), separadas em:
-  - **Pagas** (`pedido_recebido = true`): fundo/borda/valor **verde**, ícone `CheckCircle` verde.
-  - **Não pagas** (`pedido_recebido = false`): fundo/borda/valor **laranja** (primary), ícone `Clock` ou similar.
-- Cada grupo com um sub-cabeçalho pequeno: "Pagas (N)" e "Não pagas (N)".
-- Substituir lógica atual `todasInstalacoes` (que mistura próximas + concluídas) por filtro do mês inteiro.
-- Subtítulo do card: "Mês atual".
-- Ordenar dentro de cada grupo por data (mais recentes primeiro).
+### Mudanças no Banco de Dados
 
-### Implementação (1 arquivo: `src/pages/Dashboard.tsx`)
+Criar nova tabela `servicos` (mantendo `sites` intacta por enquanto para evitar perda de dados):
 
-1. **Recalcular dados** (após linha 143):
-   - `despesasNaoPagasMes` = despesas do mês atual onde `paga === false` → dividir em `vencidas` e `aVencer`.
-   - `instalacoesMes` = instalações do mês atual (qualquer status relevante) → dividir por `pedido_recebido` em `pagas` e `naoPagas`.
-   - Remover/substituir variáveis não usadas: `despesasProximasVencimento`, `proximasInstalacoes`, `instalacoesConcluidasMes`, `todasInstalacoes`.
+```sql
+CREATE TABLE public.servicos (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id uuid NOT NULL,
+  cliente_id uuid NOT NULL,
+  cliente_nome text NOT NULL,
+  nome_servico text NOT NULL,
+  valor numeric NOT NULL DEFAULT 0,
+  data_servico date NOT NULL,
+  descricao text NOT NULL,
+  status text NOT NULL DEFAULT 'Pendente', -- Pendente | Pago
+  pago boolean NOT NULL DEFAULT false,
+  created_at timestamptz NOT NULL DEFAULT now(),
+  updated_at timestamptz NOT NULL DEFAULT now()
+);
 
-2. **Atualizar JSX do card Despesas** (linhas 304–343):
-   - Substituir lista única por duas seções renderizadas condicionalmente (vencidas vermelho, a vencer laranja).
-   - Mostrar mensagem vazia somente se ambas estiverem vazias.
+-- RLS idêntica ao padrão das outras tabelas (4 policies por user_id)
+-- Trigger update_updated_at_column
+```
 
-3. **Atualizar JSX do card Instalações** (linhas 345–397):
-   - Substituir mapeamento único por duas seções (Pagas verde, Não pagas laranja) com sub-cabeçalho cada.
-   - Manter scroll `max-h-72 overflow-y-auto`.
+**Observação:** Vou manter a tabela `sites` no banco (não dropar) para preservar dados existentes. Caso queira migrá-los depois, faremos em etapa separada.
 
-### Sem alterações em
-- Lógica de queries / hooks
-- Outros cards (Receita, Sites, Clientes, Despesas total, Vencimentos)
-- Estilo global / componentes compartilhados
+### Mudanças no Frontend
+
+**Renomear/criar arquivos:**
+- `src/pages/Sites.tsx` → `src/pages/Servicos.tsx` (refatorado)
+- `src/components/SiteForm.tsx` → `src/components/ServicoForm.tsx`
+- `src/components/SiteCard.tsx` → `src/components/ServicoCard.tsx`
+
+**Novo formulário (`ServicoForm`)** — campos:
+- Cliente (select dos clientes cadastrados) — obrigatório
+- Nome do serviço (texto livre, ex: "Criação de site", "Pintura sala") — obrigatório
+- Valor cobrado (R$) — obrigatório
+- Data do serviço — obrigatório
+- Descrição (textarea, obrigatório conforme pedido)
+- Status: Pendente / Pago (toggle)
+
+**Novo card (`ServicoCard`)** — exibe nome do serviço, cliente, valor, data, status, descrição truncada; ações editar/excluir.
+
+**Página `Servicos`:**
+- Título: "Serviços" / subtítulo: "Gerencie os serviços prestados"
+- Métrica topo: "Total faturado no mês: R$ X" (soma dos serviços do mês selecionado)
+- Filtro de mês reutilizando lógica existente (`useSiteMonthFilter` adaptado → `useServicoMonthFilter` baseado em `data_servico`)
+- Busca por nome do serviço, cliente ou descrição
+- Grid de cards
+
+**Navegação (`AppSidebar.tsx` + `MobileNavigation.tsx`):**
+- Item "Sites" (ícone Globe) → "Serviços" (ícone `Wrench` ou `Briefcase`)
+- Rota `/sites` → `/servicos`
+
+**Roteamento (`App.tsx`):**
+- Substituir `<Route path="/sites" element={<Sites/>} />` por `<Route path="/servicos" element={<Servicos/>} />`
+- Manter redirect `/sites` → `/servicos` para não quebrar links salvos
+
+**Dashboard (`src/pages/Dashboard.tsx`):**
+- Card "Sites Ativos" → "Serviços do Mês" (conta serviços do mês atual)
+- Cálculo de receita mensal: substituir lógica baseada em `sites` (assinatura/hospedagem) por soma de `servicos.valor` do mês atual onde `pago = true` (faturado) + opcional pendente
+- Receita recorrente de sites será removida (não faz mais sentido conceitualmente — todo serviço agora é pontual)
+
+**Hooks:**
+- Criar `useServicoMonthFilter` (cópia adaptada de `useSiteMonthFilter` usando `data_servico`)
+- `useSupabaseData` / `useKemaFinanceAI` / `RelatorioFilter`: substituir queries de `sites` por `servicos` onde a receita é calculada
+
+### Arquivos Afetados
+- **Migration nova:** criar tabela `servicos` + RLS + trigger
+- **Criados:** `src/pages/Servicos.tsx`, `src/components/ServicoForm.tsx`, `src/components/ServicoCard.tsx`, `src/hooks/useServicoMonthFilter.tsx`
+- **Editados:** `src/App.tsx`, `src/components/AppSidebar.tsx`, `src/components/MobileNavigation.tsx`, `src/pages/Dashboard.tsx`, `src/hooks/useKemaFinanceAI.tsx`, `src/pages/Relatorios.tsx` (se usar sites), `src/components/QuickActions.tsx` (se referenciar sites)
+- **Mantidos (não deletados):** `src/pages/Sites.tsx`, `SiteForm.tsx`, `SiteCard.tsx`, tabela `sites` — para não perder histórico. Podemos remover em iteração futura.
+
+### Ponto de atenção
+O Dashboard hoje calcula "receita mensal recorrente" baseado em assinaturas de sites. Como serviços agora são pontuais, a métrica mudará para "Receita de serviços do mês" (soma de valores com `data_servico` no mês). Confirmaria isso após implementar — se quiser manter recorrência para alguns serviços, podemos adicionar campo `recorrente` posteriormente.
 
