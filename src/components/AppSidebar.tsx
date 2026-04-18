@@ -67,7 +67,7 @@ export function AppSidebar() {
           <div className="w-9 h-9 bg-primary rounded-xl flex items-center justify-center">
             <Brain className="w-5 h-5 text-primary-foreground" />
           </div>
-          <h1 className="text-lg font-bold text-foreground">Kema AI</h1>
+          <h1 className="text-lg font-bold text-foreground">KEMA Finance</h1>
         </div>
       </SidebarHeader>
 
