@@ -1,5 +1,5 @@
 import React from 'react';
-import { Plus, UserPlus, Globe, Scissors, FileText, Bell } from 'lucide-react';
+import { Plus, UserPlus, Briefcase, Scissors, FileText, Bell } from 'lucide-react';
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from 'react-router-dom';
@@ -23,12 +23,12 @@ export const QuickActions: React.FC = () => {
     bgColor: 'bg-blue-100',
     onClick: () => navigate('/clientes')
   }, {
-    icon: Globe,
-    label: 'Novo Site',
-    description: 'Criar novo projeto de site',
+    icon: Briefcase,
+    label: 'Novo Serviço',
+    description: 'Registrar serviço prestado',
     color: 'text-green-600',
     bgColor: 'bg-green-100',
-    onClick: () => navigate('/sites')
+    onClick: () => navigate('/servicos')
   }, {
     icon: Scissors,
     label: 'Nova Instalação',

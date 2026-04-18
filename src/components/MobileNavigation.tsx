@@ -3,7 +3,7 @@ import { NavLink, useLocation } from 'react-router-dom';
 import { 
   BarChart3, 
   Users, 
-  Globe, 
+  Briefcase, 
   Scissors, 
   Receipt,
   FileText,
@@ -14,7 +14,7 @@ import {
 const menuItems = [
   { name: 'Home', icon: BarChart3, path: '/' },
   { name: 'Clientes', icon: Users, path: '/clientes' },
-  { name: 'Sites', icon: Globe, path: '/sites' },
+  { name: 'Serviços', icon: Briefcase, path: '/servicos' },
   { name: 'Instalações', icon: Scissors, path: '/instalacoes' },
   { name: 'Despesas', icon: Receipt, path: '/despesas' },
   { name: 'Dívidas', icon: CreditCard, path: '/dividas' },
