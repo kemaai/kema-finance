@@ -275,7 +275,7 @@ export default function Despesas() {
             <Calculator className="h-4 w-4 text-orange-500" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-orange-500">
+            <div className="font-bold text-orange-500 text-xl">
               R$ {estatisticas.total.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
             </div>
           </CardContent>
