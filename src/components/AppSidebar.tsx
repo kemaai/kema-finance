@@ -1,6 +1,6 @@
 import React from 'react';
 import { Sidebar, SidebarContent, SidebarGroup, SidebarGroupContent, SidebarGroupLabel, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem, SidebarFooter } from "@/components/ui/sidebar";
-import { Home, Users, Globe, Wrench, BarChart3, Receipt, CreditCard, LogOut, User, UserPlus, Scissors, FileText, Moon, Sun, Brain } from "lucide-react";
+import { Home, Users, Briefcase, Wrench, BarChart3, Receipt, CreditCard, LogOut, User, UserPlus, Scissors, FileText, Moon, Sun, Brain } from "lucide-react";
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { Button } from '@/components/ui/button';
@@ -11,7 +11,7 @@ import { useToast } from '@/hooks/use-toast';
 const navigation = [
   { title: "Dashboard", url: "/dashboard", icon: Home },
   { title: "Clientes", url: "/clientes", icon: Users },
-  { title: "Sites", url: "/sites", icon: Globe },
+  { title: "Serviços", url: "/servicos", icon: Briefcase },
   { title: "Instalações", url: "/instalacoes", icon: Wrench },
   { title: "Despesas", url: "/despesas", icon: Receipt },
   { title: "Dívidas", url: "/dividas", icon: CreditCard },
@@ -21,7 +21,7 @@ const navigation = [
 
 const quickActions = [
   { title: "Novo Cliente", url: "/clientes", icon: UserPlus },
-  { title: "Novo Site", url: "/sites", icon: Globe },
+  { title: "Novo Serviço", url: "/servicos", icon: Briefcase },
   { title: "Nova Instalação", url: "/instalacoes", icon: Scissors },
   { title: "Novo Relatório", url: "/relatorios", icon: FileText },
 ];

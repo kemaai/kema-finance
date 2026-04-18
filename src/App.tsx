@@ -10,7 +10,7 @@ import { PWAInstallPrompt } from "./components/PWAInstallPrompt";
 import Index from "./pages/Index";
 import { Dashboard } from "./pages/Dashboard";
 import { Clientes } from "./pages/Clientes";
-import { Sites } from "./pages/Sites";
+import { Servicos } from "./pages/Servicos";
 import { Instalacoes } from "./pages/Instalacoes";
 import Despesas from "./pages/Despesas";
 import { Dividas } from "./pages/Dividas";
@@ -62,15 +62,16 @@ function App() {
                 }
               />
               <Route
-                path="/sites"
+                path="/servicos"
                 element={
                   <ProtectedRoute>
                     <Layout>
-                      <Sites />
+                      <Servicos />
                     </Layout>
                   </ProtectedRoute>
                 }
               />
+              <Route path="/sites" element={<Navigate to="/servicos" replace />} />
               <Route
                 path="/instalacoes"
                 element={

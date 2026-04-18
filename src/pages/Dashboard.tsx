@@ -3,18 +3,18 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { DashboardCard } from '../components/DashboardCard';
 import { RevenueChart } from '../components/RevenueChart';
 import { KemaAIWidget } from '../components/KemaAIWidget';
-import { useSites, useClientes, useInstalacoes, useDespesas } from '../hooks/useSupabaseData';
+import { useServicos, useClientes, useInstalacoes, useDespesas } from '../hooks/useSupabaseData';
 import { useAuth } from '../hooks/useAuth';
 import { parseLocalDate } from '../lib/utils';
 import { useQueryClient } from '@tanstack/react-query';
-import { DollarSign, Globe, Scissors, Users, TrendingUp, Calendar, Bell, CheckCircle, Sparkles, CreditCard, AlertTriangle, RefreshCw, Clock, CalendarDays } from 'lucide-react';
+import { DollarSign, Briefcase, Scissors, Users, TrendingUp, Calendar, Bell, CheckCircle, Sparkles, CreditCard, AlertTriangle, RefreshCw, Clock, CalendarDays } from 'lucide-react';
 
 type PeriodoFiltro = 'semanal' | 'quinzenal' | 'mensal';
 
 export const Dashboard = () => {
   const { profile, user } = useAuth();
   const queryClient = useQueryClient();
-  const { data: sites = [], isLoading: sitesLoading, dataUpdatedAt: sitesUpdatedAt } = useSites();
+  const { data: servicos = [], isLoading: servicosLoading, dataUpdatedAt: servicosUpdatedAt } = useServicos();
   const { data: clientes = [], isLoading: clientesLoading, dataUpdatedAt: clientesUpdatedAt } = useClientes();
   const { data: instalacoes = [], isLoading: instalacoesLoading, dataUpdatedAt: instalacoesUpdatedAt } = useInstalacoes();
   const { data: despesas = [], isLoading: despesasLoading, dataUpdatedAt: despesasUpdatedAt } = useDespesas();
@@ -23,7 +23,7 @@ export const Dashboard = () => {
   const [, setTick] = useState(0);
   const [periodoInstalacoes, setPeriodoInstalacoes] = useState<PeriodoFiltro>('quinzenal');
 
-  const lastSyncTimestamp = Math.max(sitesUpdatedAt || 0, clientesUpdatedAt || 0, instalacoesUpdatedAt || 0, despesasUpdatedAt || 0);
+  const lastSyncTimestamp = Math.max(servicosUpdatedAt || 0, clientesUpdatedAt || 0, instalacoesUpdatedAt || 0, despesasUpdatedAt || 0);
 
   useEffect(() => {
     const interval = setInterval(() => setTick(t => t + 1), 30000);
@@ -32,7 +32,7 @@ export const Dashboard = () => {
 
   const handleRefresh = useCallback(async () => {
     setIsRefreshing(true);
-    await queryClient.invalidateQueries({ queryKey: ['sites'] });
+    await queryClient.invalidateQueries({ queryKey: ['servicos'] });
     await queryClient.invalidateQueries({ queryKey: ['clientes'] });
     await queryClient.invalidateQueries({ queryKey: ['instalacoes'] });
     await queryClient.invalidateQueries({ queryKey: ['despesas'] });
@@ -53,20 +53,15 @@ export const Dashboard = () => {
   const inicioMesAtual = new Date(hoje.getFullYear(), hoje.getMonth(), 1);
   const fimMesAtual = new Date(hoje.getFullYear(), hoje.getMonth() + 1, 0);
 
-  const sitesAtivosMes = sites.filter(site => {
-    const dataVencimento = new Date(site.data_vencimento);
-    return site.status === 'Ativo' && dataVencimento >= inicioMesAtual && dataVencimento <= fimMesAtual;
+  // Serviços do mês atual
+  const servicosDoMes = servicos.filter(s => {
+    const dataServico = parseLocalDate(s.data_servico);
+    return dataServico >= inicioMesAtual && dataServico <= fimMesAtual;
   });
 
-  const sitesAtivos = sitesAtivosMes.length;
-
-  const receitaMensalSites = sitesAtivosMes
-    .filter(site => site.tipo_plano.includes('assinatura') || site.hospedagem)
-    .reduce((total, site) => {
-      if (site.tipo_plano.includes('assinatura')) return total + site.valor_mensal;
-      if (site.hospedagem) return total + 40;
-      return total;
-    }, 0);
+  const servicosCount = servicosDoMes.length;
+  const receitaMensalServicos = servicosDoMes.reduce((total, s) => total + Number(s.valor), 0);
+  const receitaServicosPagos = servicosDoMes.filter(s => s.pago).reduce((total, s) => total + Number(s.valor), 0);
 
   const getInstalacoesPeriodo = () => {
     const now = new Date();
@@ -100,17 +95,18 @@ export const Dashboard = () => {
 
   const receitaPeriodoInstalacoes = instalacoesDoPeriodo.reduce((total, instalacao) => total + Number(instalacao.valor_total), 0);
   const totalM2Periodo = instalacoesDoPeriodo.reduce((total, instalacao) => total + Number(instalacao.valor_total) / 24, 0);
-  const receitaTotal = receitaMensalSites + receitaPeriodoInstalacoes;
+  const receitaTotal = receitaMensalServicos + receitaPeriodoInstalacoes;
 
   const clientesAtivos = clientes.length;
-  const mediaSites = clientesAtivos > 0 ? (sitesAtivos / clientesAtivos).toFixed(1) : 'N/A';
+  const mediaServicos = clientesAtivos > 0 ? (servicosCount / clientesAtivos).toFixed(1) : 'N/A';
 
+  // Próximos serviços pendentes (60 dias)
   const proximosDois = new Date();
   proximosDois.setDate(proximosDois.getDate() + 60);
-  const proximosVencimentos = sites.filter(site => {
-    const vencimento = new Date(site.data_vencimento);
-    return site.status === 'Ativo' && vencimento <= proximosDois && vencimento >= hoje;
-  }).sort((a, b) => new Date(a.data_vencimento).getTime() - new Date(b.data_vencimento).getTime()).slice(0, 5);
+  const proximosVencimentos = servicos.filter(s => {
+    const data = parseLocalDate(s.data_servico);
+    return !s.pago && data <= proximosDois && data >= hoje;
+  }).sort((a, b) => parseLocalDate(a.data_servico).getTime() - parseLocalDate(b.data_servico).getTime()).slice(0, 5);
 
   // Instalações do mês atual (Concluído ou Agendado), separadas por pedido_recebido
   const instalacoesMesTodas = instalacoes.filter(instalacao => {
@@ -150,7 +146,7 @@ export const Dashboard = () => {
     .sort((a, b) => parseLocalDate(a.data_vencimento).getTime() - parseLocalDate(b.data_vencimento).getTime());
   const totalDespesasNaoPagasMes = despesasPendentes.length;
 
-  if (sitesLoading || clientesLoading || instalacoesLoading || despesasLoading) {
+  if (servicosLoading || clientesLoading || instalacoesLoading || despesasLoading) {
     return (
       <div className="min-h-screen bg-background">
         <div className="max-w-7xl mx-auto p-4 md:p-8">
@@ -213,15 +209,15 @@ export const Dashboard = () => {
           <DashboardCard 
             title="Receita Total" 
             value={`R$ ${receitaTotal.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`} 
-            subValue={`Sites: R$ ${receitaMensalSites.toFixed(0)} • Inst: R$ ${receitaPeriodoInstalacoes.toFixed(0)}`} 
+            subValue={`Serviços: R$ ${receitaMensalServicos.toFixed(0)} • Inst: R$ ${receitaPeriodoInstalacoes.toFixed(0)}`} 
             icon={DollarSign} 
             iconColor="bg-gradient-to-br from-green-500 to-green-600" 
           />
           <DashboardCard 
-            title="Sites Ativos" 
-            value={sitesAtivos.toString()} 
-            subValue={`${sitesAtivos} contratos ativos`} 
-            icon={Globe} 
+            title="Serviços do Mês" 
+            value={servicosCount.toString()} 
+            subValue={`Pago: R$ ${receitaServicosPagos.toFixed(0)}`} 
+            icon={Briefcase} 
             iconColor="bg-gradient-to-br from-blue-500 to-blue-600" 
           />
           <DashboardCard 
@@ -234,7 +230,7 @@ export const Dashboard = () => {
           <DashboardCard 
             title="Clientes" 
             value={clientesAtivos.toString()} 
-            subValue={`${mediaSites} sites/cliente`} 
+            subValue={`${mediaServicos} serv./cliente`} 
             icon={Users} 
             iconColor="bg-gradient-to-br from-purple-500 to-purple-600" 
           />
@@ -263,7 +259,7 @@ export const Dashboard = () => {
               <span className="text-sm font-medium">+8.2%</span>
             </div>
           </div>
-          <RevenueChart sites={sites} instalacoes={instalacoes} />
+          <RevenueChart sites={[]} instalacoes={instalacoes} />
         </div>
 
         {/* Three columns */}
@@ -276,7 +272,7 @@ export const Dashboard = () => {
                   <Calendar className="w-4 h-4 text-amber-500" />
                 </div>
                 <div>
-                  <h3 className="text-sm font-semibold text-foreground">Vencimentos</h3>
+                  <h3 className="text-sm font-semibold text-foreground">Serviços Pendentes</h3>
                   <p className="text-xs text-muted-foreground">Próximos 60 dias</p>
                 </div>
               </div>
@@ -290,18 +286,18 @@ export const Dashboard = () => {
               {proximosVencimentos.length === 0 ? (
                 <div className="text-center py-6">
                   <Calendar className="w-10 h-10 mx-auto mb-2 text-muted-foreground/40" />
-                  <p className="text-sm text-muted-foreground">Nenhum vencimento próximo</p>
+                  <p className="text-sm text-muted-foreground">Nenhum serviço pendente</p>
                 </div>
               ) : (
-                proximosVencimentos.map(site => (
-                  <div key={site.id} className="flex items-center justify-between p-3 bg-amber-500/10 rounded-lg border border-amber-500/20">
+                proximosVencimentos.map(servico => (
+                  <div key={servico.id} className="flex items-center justify-between p-3 bg-amber-500/10 rounded-lg border border-amber-500/20">
                     <div className="flex-1 min-w-0">
-                      <div className="text-sm font-medium text-foreground truncate">{site.cliente_nome}</div>
-                      <div className="text-xs text-muted-foreground truncate">{site.descricao_projeto}</div>
+                      <div className="text-sm font-medium text-foreground truncate">{servico.cliente_nome}</div>
+                      <div className="text-xs text-muted-foreground truncate">{servico.nome_servico}</div>
                     </div>
                     <div className="text-right ml-3">
-                      <div className="text-sm font-bold text-amber-500">R$ {site.valor_mensal.toFixed(2)}</div>
-                      <div className="text-[10px] text-muted-foreground">{new Date(site.data_vencimento).toLocaleDateString('pt-BR')}</div>
+                      <div className="text-sm font-bold text-amber-500">R$ {Number(servico.valor).toFixed(2)}</div>
+                      <div className="text-[10px] text-muted-foreground">{parseLocalDate(servico.data_servico).toLocaleDateString('pt-BR')}</div>
                     </div>
                   </div>
                 ))

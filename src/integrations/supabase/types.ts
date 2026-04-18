@@ -328,6 +328,51 @@ export type Database = {
         }
         Relationships: []
       }
+      servicos: {
+        Row: {
+          cliente_id: string
+          cliente_nome: string
+          created_at: string
+          data_servico: string
+          descricao: string
+          id: string
+          nome_servico: string
+          pago: boolean
+          status: string
+          updated_at: string
+          user_id: string
+          valor: number
+        }
+        Insert: {
+          cliente_id: string
+          cliente_nome: string
+          created_at?: string
+          data_servico: string
+          descricao: string
+          id?: string
+          nome_servico: string
+          pago?: boolean
+          status?: string
+          updated_at?: string
+          user_id: string
+          valor?: number
+        }
+        Update: {
+          cliente_id?: string
+          cliente_nome?: string
+          created_at?: string
+          data_servico?: string
+          descricao?: string
+          id?: string
+          nome_servico?: string
+          pago?: boolean
+          status?: string
+          updated_at?: string
+          user_id?: string
+          valor?: number
+        }
+        Relationships: []
+      }
       sites: {
         Row: {
           cliente_id: string
