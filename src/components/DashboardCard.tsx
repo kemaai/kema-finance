@@ -31,7 +31,7 @@ export const DashboardCard: React.FC<DashboardCardProps> = ({
       <div className="flex items-start justify-between">
         <div className="flex-1 min-w-0">
           <p className="text-muted-foreground text-xs font-medium mb-1.5 truncate md:whitespace-normal md:overflow-visible md:break-words">{title}</p>
-          <h3 className="text-lg md:text-xl lg:text-2xl font-bold text-foreground mb-0.5 truncate md:whitespace-normal md:overflow-visible md:break-words tabular-nums">{value}</h3>
+          <h3 className="text-lg lg:text-2xl font-bold text-foreground mb-0.5 truncate md:whitespace-normal md:overflow-visible md:break-words tabular-nums font-serif rounded-md opacity-90 md:text-base">{value}</h3>
           {subValue && (
             <p className="text-muted-foreground text-[11px] md:text-xs truncate md:whitespace-normal md:overflow-visible md:break-words">{subValue}</p>
           )}
