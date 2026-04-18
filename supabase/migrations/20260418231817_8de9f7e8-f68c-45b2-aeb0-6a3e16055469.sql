@@ -1,0 +1,1 @@
+ALTER TABLE public.servicos ADD COLUMN recorrente boolean NOT NULL DEFAULT false;
