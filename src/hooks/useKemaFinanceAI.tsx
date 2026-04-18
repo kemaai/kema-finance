@@ -1,5 +1,5 @@
 import { useState, useMemo, useCallback } from 'react';
-import { useSites, useClientes, useInstalacoes, useDespesas, useEmprestimos, useDividasNegativadas } from './useSupabaseData';
+import { useServicos, useClientes, useInstalacoes, useDespesas, useEmprestimos, useDividasNegativadas } from './useSupabaseData';
 
 export interface DiagnosticoFinanceiro {
   receitaTotal: number;
@@ -43,7 +43,7 @@ export interface ChatMessage {
 }
 
 export function useKemaFinanceAI() {
-  const { data: sites = [] } = useSites();
+  const { data: servicos = [] } = useServicos();
   const { data: clientes = [] } = useClientes();
   const { data: instalacoes = [] } = useInstalacoes();
   const { data: despesas = [] } = useDespesas();
@@ -59,24 +59,13 @@ export function useKemaFinanceAI() {
 
   // Calculate diagnostic
   const diagnostico = useMemo<DiagnosticoFinanceiro>(() => {
-    // Sites ativos no mês
-    const sitesAtivosMes = sites.filter(site => {
-      const dataVencimento = new Date(site.data_vencimento);
-      return site.status === 'Ativo' && 
-             dataVencimento >= inicioMesAtual && 
-             dataVencimento <= fimMesAtual;
+    // Serviços do mês (data_servico no mês atual)
+    const servicosDoMes = servicos.filter(s => {
+      const dataServ = new Date(s.data_servico);
+      return dataServ >= inicioMesAtual && dataServ <= fimMesAtual;
     });
 
-    const receitaSites = sitesAtivosMes
-      .filter(site => site.tipo_plano.includes('assinatura') || site.hospedagem)
-      .reduce((total, site) => {
-        if (site.tipo_plano.includes('assinatura')) {
-          return total + site.valor_mensal;
-        } else if (site.hospedagem) {
-          return total + 40;
-        }
-        return total;
-      }, 0);
+    const receitaSites = servicosDoMes.reduce((total, s) => total + Number(s.valor), 0);
 
     // Instalações do mês
     const instalacoesDoMes = instalacoes.filter(inst => {
@@ -176,12 +165,12 @@ export function useKemaFinanceAI() {
       capacidadeEconomia,
       metaReservaEmergencia,
       prazoReserva,
-      sitesAtivos: sitesAtivosMes.length,
+      sitesAtivos: servicosDoMes.length,
       instalacoesDoMes: instalacoesDoMes.length,
       totalClientes: clientes.length,
       despesasRecorrentes: despesasDoMes.length,
     };
-  }, [sites, clientes, instalacoes, despesas, emprestimos, dividasNegativadas, inicioMesAtual, fimMesAtual]);
+  }, [servicos, clientes, instalacoes, despesas, emprestimos, dividasNegativadas, inicioMesAtual, fimMesAtual]);
 
   // Generate smart alerts
   const alertas = useMemo<Alerta[]>(() => {
