@@ -42,7 +42,7 @@ export const RelatorioFilter: React.FC<RelatorioFilterProps> = ({
   const tiposRelatorio = [
     { value: 'todos', label: 'Todos os Dados' },
     { value: 'receita', label: 'Análise de Receita' },
-    { value: 'sites', label: 'Sites e Contratos' },
+    { value: 'servicos', label: 'Serviços' },
     { value: 'instalacoes', label: 'Instalações' },
     { value: 'clientes', label: 'Base de Clientes' },
     { value: 'despesas', label: 'Despesas' },

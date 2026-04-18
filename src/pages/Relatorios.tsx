@@ -514,11 +514,11 @@ export const Relatorios = () => {
 
             <Card className="card-tech">
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-xs md:text-sm font-medium">Sites Ativos</CardTitle>
+                <CardTitle className="text-xs md:text-sm font-medium">Serviços</CardTitle>
                 <Globe className="h-3 w-3 md:h-4 md:w-4 text-orange-500" />
               </CardHeader>
               <CardContent>
-                <div className="text-lg md:text-2xl font-bold text-orange-500">{metricas.sitesPorStatus['Ativo'] || 0}</div>
+                <div className="text-lg md:text-2xl font-bold text-orange-500">{dadosFiltrados.servicos.length}</div>
                 <p className="text-xs text-muted-foreground">no período</p>
               </CardContent>
             </Card>
@@ -707,7 +707,7 @@ export const Relatorios = () => {
               </CardHeader>
               <CardContent className="space-y-3 md:space-y-4">
                 <div className="flex justify-between items-center p-2 md:p-3 bg-blue-500/10 border border-blue-500/30 rounded-lg">
-                  <span className="font-medium text-xs md:text-sm text-foreground">Sites Recorrentes</span>
+                  <span className="font-medium text-xs md:text-sm text-foreground">Serviços</span>
                   <span className="text-sm md:text-lg font-bold text-blue-500">R$ {metricas.receitaMensalSites.toFixed(2)}</span>
                 </div>
                 <div className="flex justify-between items-center p-2 md:p-3 bg-orange-500/10 border border-orange-500/30 rounded-lg">
@@ -839,8 +839,8 @@ export const Relatorios = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
             <Card className="card-tech">
               <CardHeader>
-                <CardTitle className="text-sm md:text-base text-foreground">Próximos Vencimentos</CardTitle>
-                <CardDescription className="text-xs md:text-sm text-muted-foreground">Contratos que vencem nos próximos 30 dias</CardDescription>
+                <CardTitle className="text-sm md:text-base text-foreground">Próximos Serviços</CardTitle>
+                <CardDescription className="text-xs md:text-sm text-muted-foreground">Serviços agendados nos próximos 30 dias</CardDescription>
               </CardHeader>
               <CardContent>
                 <div className="space-y-2">
