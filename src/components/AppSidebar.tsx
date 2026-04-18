@@ -133,21 +133,37 @@ export function AppSidebar() {
 
       <SidebarFooter className="p-4 border-t border-border">
         <div className="space-y-3">
-          <button
-            type="button"
-            onClick={() => navigate('/perfil')}
-            className="flex items-center gap-3 p-3 bg-muted/30 rounded-xl border border-border w-full text-left hover:bg-muted/50 hover:border-primary/40 transition-colors"
-          >
-            <div className="w-9 h-9 bg-accent/20 rounded-full flex items-center justify-center">
-              <User className="w-4 h-4 text-accent" />
-            </div>
-            <div className="flex-1 min-w-0">
-              <p className="text-sm font-medium text-foreground truncate">
-                Adriano Silva
-              </p>
-              <p className="text-xs text-muted-foreground truncate">Ver meu perfil</p>
-            </div>
-          </button>
+          {(() => {
+            const displayName = profile?.full_name || profile?.first_name || user?.email?.split('@')[0] || 'Usuário';
+            const initials = displayName
+              .split(' ')
+              .map((p) => p[0])
+              .slice(0, 2)
+              .join('')
+              .toUpperCase();
+            return (
+              <button
+                type="button"
+                onClick={() => navigate('/perfil')}
+                className="flex items-center gap-3 p-3 bg-muted/30 rounded-xl border border-border w-full text-left hover:bg-muted/50 hover:border-primary/40 transition-colors"
+              >
+                <Avatar className="w-9 h-9">
+                  <AvatarImage src={profile?.avatar_url || undefined} alt={displayName} />
+                  <AvatarFallback className="bg-accent/20 text-accent text-xs">
+                    {initials}
+                  </AvatarFallback>
+                </Avatar>
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-medium text-foreground truncate">
+                    {displayName}
+                  </p>
+                  <p className="text-xs text-muted-foreground truncate">
+                    {user?.email || 'Ver meu perfil'}
+                  </p>
+                </div>
+              </button>
+            );
+          })()}
           
           <div className="flex items-center justify-between p-2.5 rounded-lg hover:bg-muted/30 transition-colors">
             <div className="flex items-center gap-2">
