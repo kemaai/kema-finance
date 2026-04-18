@@ -123,6 +123,16 @@ function App() {
                   </ProtectedRoute>
                 }
               />
+              <Route
+                path="/perfil"
+                element={
+                  <ProtectedRoute>
+                    <Layout>
+                      <Perfil />
+                    </Layout>
+                  </ProtectedRoute>
+                }
+              />
               <Route path="/404" element={<NotFound />} />
               <Route path="*" element={<Navigate to="/404" replace />} />
             </Routes>
