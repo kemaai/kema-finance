@@ -7,6 +7,7 @@ interface UserProfile {
   id: string;
   first_name: string | null;
   full_name: string | null;
+  avatar_url: string | null;
 }
 
 interface AuthContextType {
@@ -14,6 +15,7 @@ interface AuthContextType {
   profile: UserProfile | null;
   loading: boolean;
   signOut: () => Promise<void>;
+  refreshProfile: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType>({
@@ -21,6 +23,7 @@ const AuthContext = createContext<AuthContextType>({
   profile: null,
   loading: true,
   signOut: async () => {},
+  refreshProfile: async () => {},
 });
 
 export const useAuth = () => {
@@ -40,16 +43,20 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     try {
       const { data, error } = await supabase
         .from('profiles')
-        .select('id, first_name, full_name')
+        .select('id, first_name, full_name, avatar_url')
         .eq('id', userId)
         .maybeSingle();
 
       if (error) throw error;
-      setProfile(data);
+      setProfile(data as UserProfile | null);
     } catch (error) {
       console.error('Error fetching profile:', error);
       setProfile(null);
     }
+  };
+
+  const refreshProfile = async () => {
+    if (user) await fetchProfile(user.id);
   };
 
   useEffect(() => {
@@ -93,6 +100,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     profile,
     loading,
     signOut,
+    refreshProfile,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
