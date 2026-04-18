@@ -100,13 +100,18 @@ export const Dashboard = () => {
   const clientesAtivos = clientes.length;
   const mediaServicos = clientesAtivos > 0 ? (servicosCount / clientesAtivos).toFixed(1) : 'N/A';
 
-  // Próximos serviços pendentes (60 dias)
-  const proximosDois = new Date();
-  proximosDois.setDate(proximosDois.getDate() + 60);
-  const proximosVencimentos = servicos.filter(s => {
-    const data = parseLocalDate(s.data_servico);
-    return !s.pago && data <= proximosDois && data >= hoje;
-  }).sort((a, b) => parseLocalDate(a.data_servico).getTime() - parseLocalDate(b.data_servico).getTime()).slice(0, 5);
+  // Serviços do mês atual, agrupados por status
+  const hojeMid = new Date(hoje.getFullYear(), hoje.getMonth(), hoje.getDate());
+  const servicosPagosMes = servicosDoMes
+    .filter(s => s.pago)
+    .sort((a, b) => parseLocalDate(b.data_servico).getTime() - parseLocalDate(a.data_servico).getTime());
+  const servicosPendentesMes = servicosDoMes
+    .filter(s => !s.pago && parseLocalDate(s.data_servico) >= hojeMid)
+    .sort((a, b) => parseLocalDate(a.data_servico).getTime() - parseLocalDate(b.data_servico).getTime());
+  const servicosVencidosMes = servicosDoMes
+    .filter(s => !s.pago && parseLocalDate(s.data_servico) < hojeMid)
+    .sort((a, b) => parseLocalDate(a.data_servico).getTime() - parseLocalDate(b.data_servico).getTime());
+  const totalServicosMes = servicosDoMes.length;
 
   // Instalações do mês atual (Concluído ou Agendado), separadas por pedido_recebido
   const instalacoesMesTodas = instalacoes.filter(instalacao => {
@@ -272,35 +277,87 @@ export const Dashboard = () => {
                   <Calendar className="w-4 h-4 text-amber-500" />
                 </div>
                 <div>
-                  <h3 className="text-sm font-semibold text-foreground">Serviços Pendentes</h3>
-                  <p className="text-xs text-muted-foreground">Próximos 60 dias</p>
+                  <h3 className="text-sm font-semibold text-foreground">Serviços do Mês</h3>
+                  <p className="text-xs text-muted-foreground">Mês atual</p>
                 </div>
               </div>
-              {proximosVencimentos.length > 0 && (
+              {totalServicosMes > 0 && (
                 <div className="w-5 h-5 bg-amber-500 rounded-full flex items-center justify-center">
-                  <span className="text-[10px] font-bold text-primary-foreground">{proximosVencimentos.length}</span>
+                  <span className="text-[10px] font-bold text-primary-foreground">{totalServicosMes}</span>
                 </div>
               )}
             </div>
-            <div className="space-y-2 max-h-72 overflow-y-auto">
-              {proximosVencimentos.length === 0 ? (
+            <div className="space-y-3 max-h-72 overflow-y-auto">
+              {totalServicosMes === 0 ? (
                 <div className="text-center py-6">
                   <Calendar className="w-10 h-10 mx-auto mb-2 text-muted-foreground/40" />
-                  <p className="text-sm text-muted-foreground">Nenhum serviço pendente</p>
+                  <p className="text-sm text-muted-foreground">Nenhum serviço neste mês</p>
                 </div>
               ) : (
-                proximosVencimentos.map(servico => (
-                  <div key={servico.id} className="flex items-center justify-between p-3 bg-amber-500/10 rounded-lg border border-amber-500/20">
-                    <div className="flex-1 min-w-0">
-                      <div className="text-sm font-medium text-foreground truncate">{servico.cliente_nome}</div>
-                      <div className="text-xs text-muted-foreground truncate">{servico.nome_servico}</div>
+                <>
+                  {servicosPagosMes.length > 0 && (
+                    <div className="space-y-2">
+                      <div className="flex items-center gap-1.5 px-1">
+                        <CheckCircle className="w-3 h-3 text-green-500" />
+                        <span className="text-[10px] font-bold uppercase tracking-wider text-green-500">Pagas ({servicosPagosMes.length})</span>
+                      </div>
+                      {servicosPagosMes.map(servico => (
+                        <div key={servico.id} className="flex items-center justify-between p-3 bg-green-500/10 rounded-lg border border-green-500/20">
+                          <div className="flex-1 min-w-0">
+                            <div className="text-sm font-medium text-foreground truncate">{servico.cliente_nome}</div>
+                            <div className="text-xs text-muted-foreground truncate">{servico.nome_servico}</div>
+                          </div>
+                          <div className="text-right ml-3">
+                            <div className="text-sm font-bold text-green-500">R$ {Number(servico.valor).toFixed(2)}</div>
+                            <div className="text-[10px] text-muted-foreground">{parseLocalDate(servico.data_servico).toLocaleDateString('pt-BR')}</div>
+                          </div>
+                        </div>
+                      ))}
                     </div>
-                    <div className="text-right ml-3">
-                      <div className="text-sm font-bold text-amber-500">R$ {Number(servico.valor).toFixed(2)}</div>
-                      <div className="text-[10px] text-muted-foreground">{parseLocalDate(servico.data_servico).toLocaleDateString('pt-BR')}</div>
+                  )}
+
+                  {servicosPendentesMes.length > 0 && (
+                    <div className="space-y-2">
+                      <div className="flex items-center gap-1.5 px-1">
+                        <Clock className="w-3 h-3 text-amber-500" />
+                        <span className="text-[10px] font-bold uppercase tracking-wider text-amber-500">Pendentes ({servicosPendentesMes.length})</span>
+                      </div>
+                      {servicosPendentesMes.map(servico => (
+                        <div key={servico.id} className="flex items-center justify-between p-3 bg-amber-500/10 rounded-lg border border-amber-500/20">
+                          <div className="flex-1 min-w-0">
+                            <div className="text-sm font-medium text-foreground truncate">{servico.cliente_nome}</div>
+                            <div className="text-xs text-muted-foreground truncate">{servico.nome_servico}</div>
+                          </div>
+                          <div className="text-right ml-3">
+                            <div className="text-sm font-bold text-amber-500">R$ {Number(servico.valor).toFixed(2)}</div>
+                            <div className="text-[10px] text-muted-foreground">{parseLocalDate(servico.data_servico).toLocaleDateString('pt-BR')}</div>
+                          </div>
+                        </div>
+                      ))}
                     </div>
-                  </div>
-                ))
+                  )}
+
+                  {servicosVencidosMes.length > 0 && (
+                    <div className="space-y-2">
+                      <div className="flex items-center gap-1.5 px-1">
+                        <AlertTriangle className="w-3 h-3 text-red-500" />
+                        <span className="text-[10px] font-bold uppercase tracking-wider text-red-500">Não Pagas ({servicosVencidosMes.length})</span>
+                      </div>
+                      {servicosVencidosMes.map(servico => (
+                        <div key={servico.id} className="flex items-center justify-between p-3 bg-red-500/10 rounded-lg border border-red-500/20">
+                          <div className="flex-1 min-w-0">
+                            <div className="text-sm font-medium text-foreground truncate">{servico.cliente_nome}</div>
+                            <div className="text-xs text-muted-foreground truncate">{servico.nome_servico}</div>
+                          </div>
+                          <div className="text-right ml-3">
+                            <div className="text-sm font-bold text-red-500">R$ {Number(servico.valor).toFixed(2)}</div>
+                            <div className="text-[10px] text-muted-foreground">{parseLocalDate(servico.data_servico).toLocaleDateString('pt-BR')}</div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </>
               )}
             </div>
           </div>
