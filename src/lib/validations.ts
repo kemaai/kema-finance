@@ -157,7 +157,36 @@ export const pagamentoEmprestimoSchema = z.object({
   data_pagamento: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Data inválida')
 });
 
+export const profileSchema = z.object({
+  full_name: z.string()
+    .trim()
+    .min(1, 'Nome é obrigatório')
+    .max(100, 'Nome deve ter no máximo 100 caracteres'),
+});
+
+export const emailUpdateSchema = z.object({
+  email: z.string()
+    .trim()
+    .email('Email inválido')
+    .max(255, 'Email deve ter no máximo 255 caracteres'),
+});
+
+export const passwordUpdateSchema = z.object({
+  password: z.string()
+    .min(8, 'Senha deve ter no mínimo 8 caracteres')
+    .max(72, 'Senha deve ter no máximo 72 caracteres')
+    .regex(/[A-Z]/, 'Senha deve conter ao menos uma letra maiúscula')
+    .regex(/[0-9]/, 'Senha deve conter ao menos um número'),
+  confirmPassword: z.string(),
+}).refine((d) => d.password === d.confirmPassword, {
+  message: 'As senhas não coincidem',
+  path: ['confirmPassword'],
+});
+
 export type ClienteFormData = z.infer<typeof clienteSchema>;
 export type SiteFormData = z.infer<typeof siteSchema>;
 export type InstalacaoFormData = z.infer<typeof instalacaoSchema>;
 export type PagamentoEmprestimoFormData = z.infer<typeof pagamentoEmprestimoSchema>;
+export type ProfileFormData = z.infer<typeof profileSchema>;
+export type EmailUpdateFormData = z.infer<typeof emailUpdateSchema>;
+export type PasswordUpdateFormData = z.infer<typeof passwordUpdateSchema>;
