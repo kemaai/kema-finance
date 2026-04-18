@@ -112,17 +112,22 @@ export const Dashboard = () => {
     return site.status === 'Ativo' && vencimento <= proximosDois && vencimento >= hoje;
   }).sort((a, b) => new Date(a.data_vencimento).getTime() - new Date(b.data_vencimento).getTime()).slice(0, 5);
 
-  const proximasInstalacoes = instalacoes.filter(instalacao => {
+  // Instalações do mês atual (Concluído ou Agendado), separadas por pedido_recebido
+  const instalacoesMesTodas = instalacoes.filter(instalacao => {
     const dataInstalacao = parseLocalDate(instalacao.data_instalacao);
-    return instalacao.status === 'Agendado' && dataInstalacao >= hoje && dataInstalacao <= proximosDois;
-  }).sort((a, b) => parseLocalDate(a.data_instalacao).getTime() - parseLocalDate(b.data_instalacao).getTime()).slice(0, 3);
-
-  const instalacoesConcluidasMes = instalacoes.filter(instalacao => {
-    const dataInstalacao = parseLocalDate(instalacao.data_instalacao);
-    return instalacao.status === 'Concluído' && dataInstalacao >= inicioMesAtual && dataInstalacao <= fimMesAtual;
-  }).sort((a, b) => parseLocalDate(b.data_instalacao).getTime() - parseLocalDate(a.data_instalacao).getTime()).slice(0, 3);
-
-  const todasInstalacoes = [...proximasInstalacoes, ...instalacoesConcluidasMes];
+    return (
+      (instalacao.status === 'Concluído' || instalacao.status === 'Agendado') &&
+      dataInstalacao >= inicioMesAtual &&
+      dataInstalacao <= fimMesAtual
+    );
+  });
+  const instalacoesPagasMes = instalacoesMesTodas
+    .filter(i => i.pedido_recebido)
+    .sort((a, b) => parseLocalDate(b.data_instalacao).getTime() - parseLocalDate(a.data_instalacao).getTime());
+  const instalacoesNaoPagasMes = instalacoesMesTodas
+    .filter(i => !i.pedido_recebido)
+    .sort((a, b) => parseLocalDate(b.data_instalacao).getTime() - parseLocalDate(a.data_instalacao).getTime());
+  const totalInstalacoesMes = instalacoesMesTodas.length;
 
   const despesasDoMes = despesas.filter(despesa => {
     const dataVencimento = new Date(despesa.data_vencimento);
@@ -135,12 +140,15 @@ export const Dashboard = () => {
   const totalDespesasPagas = despesasPagas.reduce((total, despesa) => total + Number(despesa.valor), 0);
   const totalDespesasPendentes = despesasPendentes.reduce((total, despesa) => total + Number(despesa.valor), 0);
 
-  const proximasDespesas = new Date();
-  proximasDespesas.setDate(proximasDespesas.getDate() + 15);
-  const despesasProximasVencimento = despesas.filter(despesa => {
-    const vencimento = new Date(despesa.data_vencimento);
-    return !despesa.paga && vencimento <= proximasDespesas && vencimento >= hoje;
-  }).sort((a, b) => new Date(a.data_vencimento).getTime() - new Date(b.data_vencimento).getTime()).slice(0, 5);
+  // Despesas não pagas do mês atual, separadas em vencidas e a vencer
+  const hojeMidnight = new Date(hoje.getFullYear(), hoje.getMonth(), hoje.getDate());
+  const despesasVencidasMes = despesasPendentes
+    .filter(d => parseLocalDate(d.data_vencimento) < hojeMidnight)
+    .sort((a, b) => parseLocalDate(a.data_vencimento).getTime() - parseLocalDate(b.data_vencimento).getTime());
+  const despesasAVencerMes = despesasPendentes
+    .filter(d => parseLocalDate(d.data_vencimento) >= hojeMidnight)
+    .sort((a, b) => parseLocalDate(a.data_vencimento).getTime() - parseLocalDate(b.data_vencimento).getTime());
+  const totalDespesasNaoPagasMes = despesasPendentes.length;
 
   if (sitesLoading || clientesLoading || instalacoesLoading || despesasLoading) {
     return (
