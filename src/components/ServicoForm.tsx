@@ -22,6 +22,7 @@ export interface Servico {
   descricao: string;
   status: string;
   pago: boolean;
+  recorrente: boolean;
   created_at: string;
   updated_at: string;
 }
@@ -46,6 +47,7 @@ export const ServicoForm: React.FC<ServicoFormProps> = ({ isOpen, onClose, onSav
     descricao: '',
     status: 'Pendente',
     pago: false,
+    recorrente: false,
   });
 
   useEffect(() => {
@@ -59,6 +61,7 @@ export const ServicoForm: React.FC<ServicoFormProps> = ({ isOpen, onClose, onSav
         descricao: servico.descricao,
         status: servico.status,
         pago: servico.pago,
+        recorrente: servico.recorrente ?? false,
       });
     } else {
       setFormData({
@@ -70,6 +73,7 @@ export const ServicoForm: React.FC<ServicoFormProps> = ({ isOpen, onClose, onSav
         descricao: '',
         status: 'Pendente',
         pago: false,
+        recorrente: false,
       });
     }
   }, [servico, isOpen]);
@@ -188,6 +192,19 @@ export const ServicoForm: React.FC<ServicoFormProps> = ({ isOpen, onClose, onSav
                 className="min-h-[100px]"
               />
             </div>
+
+            <label className="flex items-center gap-3 p-3 border border-input rounded-md cursor-pointer hover:bg-accent/30 transition-colors">
+              <input
+                type="checkbox"
+                checked={formData.recorrente}
+                onChange={(e) => handleChange('recorrente', e.target.checked)}
+                className="w-4 h-4 accent-primary"
+              />
+              <div className="flex-1">
+                <div className="text-sm font-medium text-foreground">Serviço recorrente (mensal)</div>
+                <div className="text-xs text-muted-foreground">Marque para serviços contínuos como hospedagem, manutenção, etc.</div>
+              </div>
+            </label>
 
             <div className="flex flex-col sm:flex-row gap-2 pt-4">
               <Button type="submit" className="flex-1">
