@@ -17,6 +17,7 @@ const navigation = [
   { title: "Dívidas", url: "/dividas", icon: CreditCard },
   { title: "Relatórios", url: "/relatorios", icon: BarChart3 },
   { title: "KemaFinance AI", url: "/agente", icon: Brain },
+  { title: "Meu Perfil", url: "/perfil", icon: User },
 ];
 
 const quickActions = [
