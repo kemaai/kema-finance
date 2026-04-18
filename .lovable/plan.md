@@ -1,29 +1,43 @@
 
 
-## Fix Desktop Card Truncation
+## Atualizar cards Despesas Próximas e Instalações
 
-The dashboard cards on desktop are truncating values like "R$ 631,..." and "R$ 8.11..." because `DashboardCard.tsx` uses `truncate` on the value/subValue, and the 5-card row at ~929px width gives each card too little space.
+### Card "Despesas Próximas" (alteração)
+- Mostrar **todas as despesas não pagas do mês atual** (não apenas próximas 15 dias).
+- Remover o subtítulo "A vencer em 15 dias" → trocar por "Mês atual".
+- Separar visualmente em duas seções:
+  - **Vencidas** (não pagas, data < hoje): fundo/borda/valor **vermelho** (red-500).
+  - **A vencer** (não pagas, data >= hoje): fundo/borda/valor **laranja** (primary/orange-500).
+- **Não exibir despesas pagas** (conforme pedido do usuário).
+- Ordenar: vencidas primeiro (mais antigas no topo), depois a vencer (mais próximas no topo).
+- Badge contador exibe o total não pagas do mês.
 
-### Root Cause
+### Card "Instalações" (alteração)
+- Mostrar **todas as instalações do mês atual** (status `Concluído` ou `Agendado`), separadas em:
+  - **Pagas** (`pedido_recebido = true`): fundo/borda/valor **verde**, ícone `CheckCircle` verde.
+  - **Não pagas** (`pedido_recebido = false`): fundo/borda/valor **laranja** (primary), ícone `Clock` ou similar.
+- Cada grupo com um sub-cabeçalho pequeno: "Pagas (N)" e "Não pagas (N)".
+- Substituir lógica atual `todasInstalacoes` (que mistura próximas + concluídas) por filtro do mês inteiro.
+- Subtítulo do card: "Mês atual".
+- Ordenar dentro de cada grupo por data (mais recentes primeiro).
 
-In `src/components/DashboardCard.tsx`:
-- `<h3>` value uses `truncate` always → cuts off "R$ 631,250.00"
-- `<p>` subValue uses `truncate` always → cuts off "Sites: R$ 0 • Inst: R$..."
-- Title also uses `truncate`
-- Font size `text-lg md:text-2xl` is too large for narrow desktop cards
+### Implementação (1 arquivo: `src/pages/Dashboard.tsx`)
 
-The memory note `ui/dashboard-desktop-layout-optimization` mentions responsive classes `md:whitespace-normal md:overflow-visible` should already exist — but the current file does NOT have them.
+1. **Recalcular dados** (após linha 143):
+   - `despesasNaoPagasMes` = despesas do mês atual onde `paga === false` → dividir em `vencidas` e `aVencer`.
+   - `instalacoesMes` = instalações do mês atual (qualquer status relevante) → dividir por `pedido_recebido` em `pagas` e `naoPagas`.
+   - Remover/substituir variáveis não usadas: `despesasProximasVencimento`, `proximasInstalacoes`, `instalacoesConcluidasMes`, `todasInstalacoes`.
 
-### Fix (single file: `src/components/DashboardCard.tsx`)
+2. **Atualizar JSX do card Despesas** (linhas 304–343):
+   - Substituir lista única por duas seções renderizadas condicionalmente (vencidas vermelho, a vencer laranja).
+   - Mostrar mensagem vazia somente se ambas estiverem vazias.
 
-1. Remove `truncate` on desktop for value, subValue, and title — allow wrapping with `md:whitespace-normal md:break-words`
-2. Slightly reduce desktop value font size to `md:text-xl lg:text-2xl` to better fit at narrow desktop widths
-3. Keep mobile behavior identical (`truncate` + `text-lg` on mobile preserved via base classes)
-4. Allow value `<h3>` to use `tabular-nums` for cleaner number alignment
+3. **Atualizar JSX do card Instalações** (linhas 345–397):
+   - Substituir mapeamento único por duas seções (Pagas verde, Não pagas laranja) com sub-cabeçalho cada.
+   - Manter scroll `max-h-72 overflow-y-auto`.
 
-### Result
-- Mobile: unchanged (truncated, compact)
-- Desktop: full values visible, wrapping naturally if needed, no horizontal overflow
-
-Only `src/components/DashboardCard.tsx` is modified. No layout/grid changes to `Dashboard.tsx`.
+### Sem alterações em
+- Lógica de queries / hooks
+- Outros cards (Receita, Sites, Clientes, Despesas total, Vencimentos)
+- Estilo global / componentes compartilhados
 
