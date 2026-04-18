@@ -1,5 +1,5 @@
 import React from 'react';
-import { Edit, Trash2, Calendar, DollarSign, User, Briefcase } from 'lucide-react';
+import { Edit, Trash2, Calendar, DollarSign, User, Briefcase, Repeat } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { parseLocalDate } from '@/lib/utils';
 import type { Servico } from './ServicoForm';
@@ -66,10 +66,16 @@ export const ServicoCard: React.FC<ServicoCardProps> = ({ servico, onEdit, onDel
             </div>
           </div>
 
-          <div className="flex justify-between items-center">
+          <div className="flex justify-between items-center gap-2 flex-wrap">
             <span className={`px-2 py-1 rounded-full text-xs font-medium ${statusStyles[servico.status] || 'bg-muted text-muted-foreground'}`}>
               {servico.status}
             </span>
+            {servico.recorrente && (
+              <span className="px-2 py-1 rounded-full text-xs font-medium bg-blue-900/40 text-blue-400 border border-blue-700/50 flex items-center gap-1">
+                <Repeat className="w-3 h-3" />
+                Recorrente
+              </span>
+            )}
           </div>
 
           {servico.descricao && (

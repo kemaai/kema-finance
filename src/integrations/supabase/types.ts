@@ -338,6 +338,7 @@ export type Database = {
           id: string
           nome_servico: string
           pago: boolean
+          recorrente: boolean
           status: string
           updated_at: string
           user_id: string
@@ -352,6 +353,7 @@ export type Database = {
           id?: string
           nome_servico: string
           pago?: boolean
+          recorrente?: boolean
           status?: string
           updated_at?: string
           user_id: string
@@ -366,6 +368,7 @@ export type Database = {
           id?: string
           nome_servico?: string
           pago?: boolean
+          recorrente?: boolean
           status?: string
           updated_at?: string
           user_id?: string
