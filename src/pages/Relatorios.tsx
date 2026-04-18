@@ -4,13 +4,13 @@ import { useIsMobile } from '../hooks/use-mobile';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
-import { useSites, useClientes, useInstalacoes, useDespesas, useEmprestimos, usePagamentosEmprestimo, useDividasNegativadas } from '../hooks/useSupabaseData';
+import { useServicos, useClientes, useInstalacoes, useDespesas, useEmprestimos, usePagamentosEmprestimo, useDividasNegativadas } from '../hooks/useSupabaseData';
 import { RelatorioFilter } from '../components/RelatorioFilter';
 import { RelatorioChart } from '../components/RelatorioChart';
 import { getWeekNumber, getPeriodoDatas, formatPeriodo, isDateInPeriod, getHistoricoPeriodos } from '@/lib/dateUtils';
 
 export const Relatorios = () => {
-  const { data: sites = [], isLoading: sitesLoading } = useSites();
+  const { data: servicos = [], isLoading: sitesLoading } = useServicos();
   const { data: clientes = [], isLoading: clientesLoading } = useClientes();
   const { data: instalacoes = [], isLoading: instalacoesLoading } = useInstalacoes();
   const { data: despesas = [], isLoading: despesasLoading } = useDespesas();
@@ -42,7 +42,7 @@ export const Relatorios = () => {
     const { dataInicio, dataFim } = getPeriodoDatas(periodoRelatorio, semanaEscolhida, mesEscolhido, anoEscolhido);
 
     let resultado = {
-      sites: sites,
+      servicos: servicos,
       clientes: clientes,
       instalacoes: instalacoes,
       despesas: despesas,
@@ -58,12 +58,11 @@ export const Relatorios = () => {
       });
     }
 
-    // Filtrar sites ativos com vencimento no período
-    if (tipoRelatorio === 'sites' || tipoRelatorio === 'todos') {
-      resultado.sites = sites.filter(site => {
-        if (site.status !== 'Ativo') return false;
-        const dataVencimento = new Date(site.data_vencimento);
-        return isDateInPeriod(dataVencimento, dataInicio, dataFim);
+    // Filtrar serviços com data no período
+    if (tipoRelatorio === 'sites' || tipoRelatorio === 'servicos' || tipoRelatorio === 'todos') {
+      resultado.servicos = servicos.filter(s => {
+        const dataServico = new Date(s.data_servico);
+        return isDateInPeriod(dataServico, dataInicio, dataFim);
       });
     }
 
@@ -94,25 +93,15 @@ export const Relatorios = () => {
     }
 
     return resultado;
-  }, [sites, clientes, instalacoes, despesas, emprestimos, dividasNegativadas, periodoRelatorio, semanaEscolhida, mesEscolhido, anoEscolhido, tipoRelatorio]);
+  }, [servicos, clientes, instalacoes, despesas, emprestimos, dividasNegativadas, periodoRelatorio, semanaEscolhida, mesEscolhido, anoEscolhido, tipoRelatorio]);
 
   // Cálculos de métricas
   const metricas = useMemo(() => {
     const { dataInicio, dataFim } = getPeriodoDatas(periodoRelatorio, semanaEscolhida, mesEscolhido, anoEscolhido);
 
-    // Receitas de Sites (só planos com assinatura + hospedagem)
-    const receitaMensalSites = dadosFiltrados.sites
-      .filter(site => site.status === 'Ativo')
-      .reduce((total, site) => {
-        let valorSite = 0;
-        if (site.tipo_plano.toLowerCase().includes('assinatura')) {
-          valorSite += Number(site.valor_mensal);
-        }
-        if (site.hospedagem) {
-          valorSite += 40;
-        }
-        return total + valorSite;
-      }, 0);
+    // Receitas de Serviços (soma dos valores dos serviços do período)
+    const receitaMensalSites = dadosFiltrados.servicos
+      .reduce((total, s) => total + Number(s.valor), 0);
 
     // Instalações concluídas
     const instalacoesConcluidas = dadosFiltrados.instalacoes.filter(inst => inst.status === 'Concluído');
@@ -154,9 +143,10 @@ export const Relatorios = () => {
     });
     const valorDividasPagasNoPeriodo = dividasPagasNoPeriodo.reduce((sum, d) => sum + d.valor_atual, 0);
 
-    // Sites por status
-    const sitesPorStatus = dadosFiltrados.sites.reduce((acc, site) => {
-      acc[site.status] = (acc[site.status] || 0) + 1;
+    // Serviços por status (Pago / Pendente)
+    const sitesPorStatus = dadosFiltrados.servicos.reduce((acc, s) => {
+      const k = s.pago ? 'Pago' : 'Pendente';
+      acc[k] = (acc[k] || 0) + 1;
       return acc;
     }, {} as Record<string, number>);
 
@@ -200,23 +190,13 @@ export const Relatorios = () => {
       const receitaInstalacoes = instPeriodo.reduce((sum, inst) => sum + Number(inst.valor_total), 0);
       const metragem = receitaInstalacoes / 24;
       
-      // Filtrar sites ativos com vencimento no período
-      const sitesAtivos = sites.filter(site => {
-        if (site.status !== 'Ativo') return false;
-        const dataVenc = new Date(site.data_vencimento);
-        return isDateInPeriod(dataVenc, periodo.inicio, periodo.fim);
+      // Filtrar serviços do período
+      const servicosPeriodo = servicos.filter(s => {
+        const dataServ = new Date(s.data_servico);
+        return isDateInPeriod(dataServ, periodo.inicio, periodo.fim);
       });
-      
-      const receitaSites = sitesAtivos.reduce((total, site) => {
-        let valor = 0;
-        if (site.tipo_plano.toLowerCase().includes('assinatura')) {
-          valor += Number(site.valor_mensal);
-        }
-        if (site.hospedagem) {
-          valor += 40;
-        }
-        return total + valor;
-      }, 0);
+
+      const receitaSites = servicosPeriodo.reduce((total, s) => total + Number(s.valor), 0);
       
       // Filtrar despesas do período
       const despesasPeriodo = despesas.filter(desp => {
@@ -235,7 +215,7 @@ export const Relatorios = () => {
         despesas: totalDespesasPeriodo
       };
     });
-  }, [instalacoes, sites, despesas, periodoRelatorio]);
+  }, [instalacoes, servicos, despesas, periodoRelatorio]);
 
   const hoje = new Date();
   const nomesMeses = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 
@@ -274,7 +254,7 @@ export const Relatorios = () => {
         dados += `=== RESUMO ===\n`;
         dados += `Clientes Novos no Período: ${metricas.clientesNovos}\n`;
         dados += `Total de Clientes: ${metricas.totalClientesGeral}\n`;
-        dados += `Sites Ativos: ${metricas.sitesPorStatus['Ativo'] || 0}\n`;
+        dados += `Serviços no Período: ${dadosFiltrados.servicos.length}\n`;
         dados += `Empréstimos Restantes: R$ ${metricas.totalEmprestimos.toFixed(2)}\n`;
         dados += `Pagamentos de Empréstimos no Período: R$ ${metricas.totalPagoNoPeriodo.toFixed(2)}\n`;
         dados += `Dívidas Pendentes: R$ ${metricas.totalDividas.toFixed(2)}\n`;
@@ -286,7 +266,7 @@ export const Relatorios = () => {
         
       case 'receita':
         dados = `Relatório de Receitas - ${periodoLabel}\n\n`;
-        dados += `Sites Ativos: R$ ${metricas.receitaMensalSites.toFixed(2)}\n`;
+        dados += `Serviços: R$ ${metricas.receitaMensalSites.toFixed(2)}\n`;
         dados += `Instalações Concluídas: R$ ${metricas.receitaInstalacoes.toFixed(2)}\n`;
         dados += `Total: R$ ${metricas.receitaTotal.toFixed(2)}\n`;
         nomeArquivo = `relatorio-receitas-${periodoNomeArquivo}.txt`;
@@ -305,20 +285,21 @@ export const Relatorios = () => {
         break;
 
       case 'sites':
-        dados = `Relatório de Sites - ${periodoLabel}\n\n`;
-        dados += `Total de Sites Ativos: ${dadosFiltrados.sites.filter(s => s.status === 'Ativo').length}\n`;
-        dados += `Receita Recorrente: R$ ${metricas.receitaMensalSites.toFixed(2)}\n\n`;
+      case 'servicos':
+        dados = `Relatório de Serviços - ${periodoLabel}\n\n`;
+        dados += `Total de Serviços no Período: ${dadosFiltrados.servicos.length}\n`;
+        dados += `Receita Total: R$ ${metricas.receitaMensalSites.toFixed(2)}\n\n`;
         dados += `Detalhamento:\n`;
-        dadosFiltrados.sites.forEach(site => {
-          dados += `\nCliente: ${site.cliente_nome}\n`;
-          dados += `Status: ${site.status}\n`;
-          dados += `Plano: ${site.tipo_plano}\n`;
-          dados += `Valor Mensal: R$ ${site.valor_mensal.toFixed(2)}\n`;
-          dados += `Hospedagem: ${site.hospedagem ? 'Sim (+R$ 40)' : 'Não'}\n`;
-          dados += `Vencimento: ${new Date(site.data_vencimento).toLocaleDateString('pt-BR')}\n`;
+        dadosFiltrados.servicos.forEach(s => {
+          dados += `\nCliente: ${s.cliente_nome}\n`;
+          dados += `Serviço: ${s.nome_servico}\n`;
+          dados += `Valor: R$ ${Number(s.valor).toFixed(2)}\n`;
+          dados += `Data: ${new Date(s.data_servico).toLocaleDateString('pt-BR')}\n`;
+          dados += `Status: ${s.pago ? 'PAGO' : 'PENDENTE'}\n`;
+          dados += `Descrição: ${s.descricao}\n`;
           dados += `---\n`;
         });
-        nomeArquivo = `relatorio-sites-${periodoNomeArquivo}.txt`;
+        nomeArquivo = `relatorio-servicos-${periodoNomeArquivo}.txt`;
         break;
 
       case 'instalacoes':
@@ -533,11 +514,11 @@ export const Relatorios = () => {
 
             <Card className="card-tech">
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-xs md:text-sm font-medium">Sites Ativos</CardTitle>
+                <CardTitle className="text-xs md:text-sm font-medium">Serviços</CardTitle>
                 <Globe className="h-3 w-3 md:h-4 md:w-4 text-orange-500" />
               </CardHeader>
               <CardContent>
-                <div className="text-lg md:text-2xl font-bold text-orange-500">{metricas.sitesPorStatus['Ativo'] || 0}</div>
+                <div className="text-lg md:text-2xl font-bold text-orange-500">{dadosFiltrados.servicos.length}</div>
                 <p className="text-xs text-muted-foreground">no período</p>
               </CardContent>
             </Card>
@@ -726,7 +707,7 @@ export const Relatorios = () => {
               </CardHeader>
               <CardContent className="space-y-3 md:space-y-4">
                 <div className="flex justify-between items-center p-2 md:p-3 bg-blue-500/10 border border-blue-500/30 rounded-lg">
-                  <span className="font-medium text-xs md:text-sm text-foreground">Sites Recorrentes</span>
+                  <span className="font-medium text-xs md:text-sm text-foreground">Serviços</span>
                   <span className="text-sm md:text-lg font-bold text-blue-500">R$ {metricas.receitaMensalSites.toFixed(2)}</span>
                 </div>
                 <div className="flex justify-between items-center p-2 md:p-3 bg-orange-500/10 border border-orange-500/30 rounded-lg">
@@ -858,38 +839,36 @@ export const Relatorios = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
             <Card className="card-tech">
               <CardHeader>
-                <CardTitle className="text-sm md:text-base text-foreground">Próximos Vencimentos</CardTitle>
-                <CardDescription className="text-xs md:text-sm text-muted-foreground">Contratos que vencem nos próximos 30 dias</CardDescription>
+                <CardTitle className="text-sm md:text-base text-foreground">Próximos Serviços</CardTitle>
+                <CardDescription className="text-xs md:text-sm text-muted-foreground">Serviços agendados nos próximos 30 dias</CardDescription>
               </CardHeader>
               <CardContent>
                 <div className="space-y-2">
-                  {sites
-                    .filter(site => {
-                      const vencimento = new Date(site.data_vencimento);
-                      const em30Dias = new Date();
-                      em30Dias.setDate(hoje.getDate() + 30);
-                      return site.status === 'Ativo' && vencimento <= em30Dias && vencimento >= hoje;
-                    })
-                    .slice(0, 5)
-                    .map((site) => (
-                      <div key={site.id} className="flex justify-between items-center p-2 border border-orange-500/30 rounded bg-background/50">
+                  {(() => {
+                    const proximos = servicos
+                      .filter(s => {
+                        if (s.pago) return false;
+                        const dataServ = new Date(s.data_servico);
+                        const em30Dias = new Date();
+                        em30Dias.setDate(hoje.getDate() + 30);
+                        return dataServ <= em30Dias && dataServ >= hoje;
+                      })
+                      .slice(0, 5);
+                    if (proximos.length === 0) {
+                      return <p className="text-xs md:text-sm text-muted-foreground">Nenhum serviço próximo</p>;
+                    }
+                    return proximos.map(s => (
+                      <div key={s.id} className="flex justify-between items-center p-2 border border-orange-500/30 rounded bg-background/50">
                         <div>
-                          <div className="font-medium text-xs md:text-sm text-foreground">{site.cliente_nome}</div>
+                          <div className="font-medium text-xs md:text-sm text-foreground">{s.cliente_nome}</div>
                           <div className="text-xs text-muted-foreground">
-                            {new Date(site.data_vencimento).toLocaleDateString('pt-BR')}
+                            {s.nome_servico} — {new Date(s.data_servico).toLocaleDateString('pt-BR')}
                           </div>
                         </div>
-                        <div className="text-xs md:text-sm font-medium text-orange-500">R$ {site.valor_mensal.toFixed(2)}</div>
+                        <div className="text-xs md:text-sm font-medium text-orange-500">R$ {Number(s.valor).toFixed(2)}</div>
                       </div>
-                    ))}
-                  {sites.filter(site => {
-                    const vencimento = new Date(site.data_vencimento);
-                    const em30Dias = new Date();
-                    em30Dias.setDate(hoje.getDate() + 30);
-                    return site.status === 'Ativo' && vencimento <= em30Dias && vencimento >= hoje;
-                  }).length === 0 && (
-                    <p className="text-xs md:text-sm text-muted-foreground">Nenhum vencimento próximo</p>
-                  )}
+                    ));
+                  })()}
                 </div>
               </CardContent>
             </Card>
@@ -930,7 +909,7 @@ export const Relatorios = () => {
               <CardHeader>
                 <CardTitle className="flex items-center gap-2 text-sm md:text-base text-foreground">
                   <Globe className="w-4 h-4 text-orange-500" />
-                  Sites
+                  Serviços
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-2">
@@ -1042,8 +1021,8 @@ export const Relatorios = () => {
                     <span className="font-semibold text-foreground">{metricas.totalClientesGeral}</span>
                   </div>
                   <div className="flex justify-between p-2 bg-background/50 rounded border border-orange-500/20">
-                    <span className="text-muted-foreground">Sites período:</span>
-                    <span className="font-semibold text-foreground">{dadosFiltrados.sites.length}</span>
+                    <span className="text-muted-foreground">Serviços período:</span>
+                    <span className="font-semibold text-foreground">{dadosFiltrados.servicos.length}</span>
                   </div>
                   <div className="flex justify-between p-2 bg-background/50 rounded border border-orange-500/20">
                     <span className="text-muted-foreground">Instalações:</span>
