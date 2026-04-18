@@ -3,18 +3,18 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { DashboardCard } from '../components/DashboardCard';
 import { RevenueChart } from '../components/RevenueChart';
 import { KemaAIWidget } from '../components/KemaAIWidget';
-import { useSites, useClientes, useInstalacoes, useDespesas } from '../hooks/useSupabaseData';
+import { useServicos, useClientes, useInstalacoes, useDespesas } from '../hooks/useSupabaseData';
 import { useAuth } from '../hooks/useAuth';
 import { parseLocalDate } from '../lib/utils';
 import { useQueryClient } from '@tanstack/react-query';
-import { DollarSign, Globe, Scissors, Users, TrendingUp, Calendar, Bell, CheckCircle, Sparkles, CreditCard, AlertTriangle, RefreshCw, Clock, CalendarDays } from 'lucide-react';
+import { DollarSign, Briefcase, Scissors, Users, TrendingUp, Calendar, Bell, CheckCircle, Sparkles, CreditCard, AlertTriangle, RefreshCw, Clock, CalendarDays } from 'lucide-react';
 
 type PeriodoFiltro = 'semanal' | 'quinzenal' | 'mensal';
 
 export const Dashboard = () => {
   const { profile, user } = useAuth();
   const queryClient = useQueryClient();
-  const { data: sites = [], isLoading: sitesLoading, dataUpdatedAt: sitesUpdatedAt } = useSites();
+  const { data: servicos = [], isLoading: servicosLoading, dataUpdatedAt: servicosUpdatedAt } = useServicos();
   const { data: clientes = [], isLoading: clientesLoading, dataUpdatedAt: clientesUpdatedAt } = useClientes();
   const { data: instalacoes = [], isLoading: instalacoesLoading, dataUpdatedAt: instalacoesUpdatedAt } = useInstalacoes();
   const { data: despesas = [], isLoading: despesasLoading, dataUpdatedAt: despesasUpdatedAt } = useDespesas();
@@ -23,7 +23,7 @@ export const Dashboard = () => {
   const [, setTick] = useState(0);
   const [periodoInstalacoes, setPeriodoInstalacoes] = useState<PeriodoFiltro>('quinzenal');
 
-  const lastSyncTimestamp = Math.max(sitesUpdatedAt || 0, clientesUpdatedAt || 0, instalacoesUpdatedAt || 0, despesasUpdatedAt || 0);
+  const lastSyncTimestamp = Math.max(servicosUpdatedAt || 0, clientesUpdatedAt || 0, instalacoesUpdatedAt || 0, despesasUpdatedAt || 0);
 
   useEffect(() => {
     const interval = setInterval(() => setTick(t => t + 1), 30000);
@@ -32,7 +32,7 @@ export const Dashboard = () => {
 
   const handleRefresh = useCallback(async () => {
     setIsRefreshing(true);
-    await queryClient.invalidateQueries({ queryKey: ['sites'] });
+    await queryClient.invalidateQueries({ queryKey: ['servicos'] });
     await queryClient.invalidateQueries({ queryKey: ['clientes'] });
     await queryClient.invalidateQueries({ queryKey: ['instalacoes'] });
     await queryClient.invalidateQueries({ queryKey: ['despesas'] });
@@ -53,20 +53,15 @@ export const Dashboard = () => {
   const inicioMesAtual = new Date(hoje.getFullYear(), hoje.getMonth(), 1);
   const fimMesAtual = new Date(hoje.getFullYear(), hoje.getMonth() + 1, 0);
 
-  const sitesAtivosMes = sites.filter(site => {
-    const dataVencimento = new Date(site.data_vencimento);
-    return site.status === 'Ativo' && dataVencimento >= inicioMesAtual && dataVencimento <= fimMesAtual;
+  // Serviços do mês atual
+  const servicosDoMes = servicos.filter(s => {
+    const dataServico = parseLocalDate(s.data_servico);
+    return dataServico >= inicioMesAtual && dataServico <= fimMesAtual;
   });
 
-  const sitesAtivos = sitesAtivosMes.length;
-
-  const receitaMensalSites = sitesAtivosMes
-    .filter(site => site.tipo_plano.includes('assinatura') || site.hospedagem)
-    .reduce((total, site) => {
-      if (site.tipo_plano.includes('assinatura')) return total + site.valor_mensal;
-      if (site.hospedagem) return total + 40;
-      return total;
-    }, 0);
+  const servicosCount = servicosDoMes.length;
+  const receitaMensalServicos = servicosDoMes.reduce((total, s) => total + Number(s.valor), 0);
+  const receitaServicosPagos = servicosDoMes.filter(s => s.pago).reduce((total, s) => total + Number(s.valor), 0);
 
   const getInstalacoesPeriodo = () => {
     const now = new Date();

@@ -83,7 +83,38 @@ interface DividaNegativada {
   updated_at: string;
 }
 
-export const useSites = () => {
+interface Servico {
+  id: string;
+  user_id: string;
+  cliente_id: string;
+  cliente_nome: string;
+  nome_servico: string;
+  valor: number;
+  data_servico: string;
+  descricao: string;
+  status: string;
+  pago: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
+export const useServicos = () => {
+  const { user } = useAuth();
+  return useQuery({
+    queryKey: ['servicos'],
+    queryFn: async (): Promise<Servico[]> => {
+      if (!user) return [];
+      const { data, error } = await supabase
+        .from('servicos')
+        .select('*')
+        .order('data_servico', { ascending: false });
+      if (error) throw error;
+      return (data || []) as Servico[];
+    },
+    enabled: !!user,
+  });
+};
+
   const { user } = useAuth();
   
   return useQuery({
