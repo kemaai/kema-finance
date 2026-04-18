@@ -254,7 +254,7 @@ export const Relatorios = () => {
         dados += `=== RESUMO ===\n`;
         dados += `Clientes Novos no Período: ${metricas.clientesNovos}\n`;
         dados += `Total de Clientes: ${metricas.totalClientesGeral}\n`;
-        dados += `Sites Ativos: ${metricas.sitesPorStatus['Ativo'] || 0}\n`;
+        dados += `Serviços no Período: ${dadosFiltrados.servicos.length}\n`;
         dados += `Empréstimos Restantes: R$ ${metricas.totalEmprestimos.toFixed(2)}\n`;
         dados += `Pagamentos de Empréstimos no Período: R$ ${metricas.totalPagoNoPeriodo.toFixed(2)}\n`;
         dados += `Dívidas Pendentes: R$ ${metricas.totalDividas.toFixed(2)}\n`;
@@ -266,7 +266,7 @@ export const Relatorios = () => {
         
       case 'receita':
         dados = `Relatório de Receitas - ${periodoLabel}\n\n`;
-        dados += `Sites Ativos: R$ ${metricas.receitaMensalSites.toFixed(2)}\n`;
+        dados += `Serviços: R$ ${metricas.receitaMensalSites.toFixed(2)}\n`;
         dados += `Instalações Concluídas: R$ ${metricas.receitaInstalacoes.toFixed(2)}\n`;
         dados += `Total: R$ ${metricas.receitaTotal.toFixed(2)}\n`;
         nomeArquivo = `relatorio-receitas-${periodoNomeArquivo}.txt`;
