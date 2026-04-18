@@ -112,6 +112,9 @@ export const Dashboard = () => {
     .filter(s => !s.pago && parseLocalDate(s.data_servico) < hojeMid)
     .sort((a, b) => parseLocalDate(a.data_servico).getTime() - parseLocalDate(b.data_servico).getTime());
   const totalServicosMes = servicosDoMes.length;
+  const totalPagoServicosMes = servicosPagosMes.reduce((t, s) => t + Number(s.valor), 0);
+  const totalPendenteServicosMes = servicosPendentesMes.reduce((t, s) => t + Number(s.valor), 0);
+  const totalVencidoServicosMes = servicosVencidosMes.reduce((t, s) => t + Number(s.valor), 0);
 
   // Instalações do mês atual (Concluído ou Agendado), separadas por pedido_recebido
   const instalacoesMesTodas = instalacoes.filter(instalacao => {
@@ -287,6 +290,22 @@ export const Dashboard = () => {
                 </div>
               )}
             </div>
+            {totalServicosMes > 0 && (
+              <div className="grid grid-cols-3 gap-1.5 mb-3">
+                <div className="p-2 rounded-lg bg-green-500/10 border border-green-500/20 text-center">
+                  <div className="text-[9px] uppercase tracking-wider text-green-500 font-semibold">Pago</div>
+                  <div className="text-xs font-bold text-green-500 truncate">R$ {totalPagoServicosMes.toFixed(0)}</div>
+                </div>
+                <div className="p-2 rounded-lg bg-amber-500/10 border border-amber-500/20 text-center">
+                  <div className="text-[9px] uppercase tracking-wider text-amber-500 font-semibold">Pendente</div>
+                  <div className="text-xs font-bold text-amber-500 truncate">R$ {totalPendenteServicosMes.toFixed(0)}</div>
+                </div>
+                <div className="p-2 rounded-lg bg-red-500/10 border border-red-500/20 text-center">
+                  <div className="text-[9px] uppercase tracking-wider text-red-500 font-semibold">Vencido</div>
+                  <div className="text-xs font-bold text-red-500 truncate">R$ {totalVencidoServicosMes.toFixed(0)}</div>
+                </div>
+              </div>
+            )}
             <div className="space-y-3 max-h-72 overflow-y-auto">
               {totalServicosMes === 0 ? (
                 <div className="text-center py-6">
