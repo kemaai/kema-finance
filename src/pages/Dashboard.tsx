@@ -112,6 +112,9 @@ export const Dashboard = () => {
     .filter(s => !s.pago && parseLocalDate(s.data_servico) < hojeMid)
     .sort((a, b) => parseLocalDate(a.data_servico).getTime() - parseLocalDate(b.data_servico).getTime());
   const totalServicosMes = servicosDoMes.length;
+  const totalPagoServicosMes = servicosPagosMes.reduce((t, s) => t + Number(s.valor), 0);
+  const totalPendenteServicosMes = servicosPendentesMes.reduce((t, s) => t + Number(s.valor), 0);
+  const totalVencidoServicosMes = servicosVencidosMes.reduce((t, s) => t + Number(s.valor), 0);
 
   // Instalações do mês atual (Concluído ou Agendado), separadas por pedido_recebido
   const instalacoesMesTodas = instalacoes.filter(instalacao => {
