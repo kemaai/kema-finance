@@ -132,7 +132,11 @@ export function AppSidebar() {
 
       <SidebarFooter className="p-4 border-t border-border">
         <div className="space-y-3">
-          <div className="flex items-center gap-3 p-3 bg-muted/30 rounded-xl border border-border">
+          <button
+            type="button"
+            onClick={() => navigate('/perfil')}
+            className="flex items-center gap-3 p-3 bg-muted/30 rounded-xl border border-border w-full text-left hover:bg-muted/50 hover:border-primary/40 transition-colors"
+          >
             <div className="w-9 h-9 bg-accent/20 rounded-full flex items-center justify-center">
               <User className="w-4 h-4 text-accent" />
             </div>
@@ -140,8 +144,9 @@ export function AppSidebar() {
               <p className="text-sm font-medium text-foreground truncate">
                 Adriano Silva
               </p>
+              <p className="text-xs text-muted-foreground truncate">Ver meu perfil</p>
             </div>
-          </div>
+          </button>
           
           <div className="flex items-center justify-between p-2.5 rounded-lg hover:bg-muted/30 transition-colors">
             <div className="flex items-center gap-2">
