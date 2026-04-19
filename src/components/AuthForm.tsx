@@ -7,7 +7,8 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { toast } from 'sonner';
-import { Eye, EyeOff, LogIn, UserPlus, Brain } from 'lucide-react';
+import { Eye, EyeOff, LogIn, UserPlus } from 'lucide-react';
+import kemaIcon from '@/assets/kema-icon.png';
 
 export const AuthForm = () => {
   const [isLoading, setIsLoading] = useState(false);
@@ -86,10 +87,13 @@ export const AuthForm = () => {
       
       <div className="w-full max-w-md relative z-10">
         <div className="text-center mb-8">
-          <div className="w-16 h-16 bg-primary rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg shadow-primary/25">
-            <Brain className="w-8 h-8 text-primary-foreground" />
-          </div>
-          <h1 className="text-3xl font-bold text-foreground">KemaAI</h1>
+          <img
+            src={kemaIcon}
+            alt="KemaFinance"
+            width={224}
+            height={224}
+            className="w-56 h-56 mx-auto mb-4 rounded-3xl object-contain shadow-lg shadow-primary/25"
+          />
           <p className="text-muted-foreground mt-2">Sistema de Gestão Inteligente</p>
         </div>
 
