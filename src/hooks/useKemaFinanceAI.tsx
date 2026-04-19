@@ -3,7 +3,7 @@ import { useServicos, useClientes, useInstalacoes, useDespesas, useEmprestimos, 
 
 export interface DiagnosticoFinanceiro {
   receitaTotal: number;
-  receitaSites: number;
+  receitaServicos: number;
   receitaInstalacoes: number;
   despesaTotal: number;
   despesasPagas: number;
@@ -65,7 +65,7 @@ export function useKemaFinanceAI() {
       return dataServ >= inicioMesAtual && dataServ <= fimMesAtual;
     });
 
-    const receitaSites = servicosDoMes.reduce((total, s) => total + Number(s.valor), 0);
+    const receitaServicos = servicosDoMes.reduce((total, s) => total + Number(s.valor), 0);
 
     // Instalações do mês
     const instalacoesDoMes = instalacoes.filter(inst => {
@@ -74,7 +74,7 @@ export function useKemaFinanceAI() {
     });
 
     const receitaInstalacoes = instalacoesDoMes.reduce((total, inst) => total + inst.valor_total, 0);
-    const receitaTotal = receitaSites + receitaInstalacoes;
+    const receitaTotal = receitaServicos + receitaInstalacoes;
 
     // Despesas do mês
     const despesasDoMes = despesas.filter(despesa => {
@@ -148,7 +148,7 @@ export function useKemaFinanceAI() {
 
     return {
       receitaTotal,
-      receitaSites,
+      receitaServicos,
       receitaInstalacoes,
       despesaTotal,
       despesasPagas: despesasPagasTotal,
