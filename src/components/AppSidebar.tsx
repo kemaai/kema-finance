@@ -1,12 +1,12 @@
 import React from 'react';
 import { Sidebar, SidebarContent, SidebarGroup, SidebarGroupContent, SidebarGroupLabel, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem, SidebarFooter } from "@/components/ui/sidebar";
-import { Home, Users, Briefcase, Wrench, BarChart3, Receipt, CreditCard, LogOut, User, UserPlus, Scissors, FileText, Moon, Sun, Brain, UserCog } from "lucide-react";
+import { Home, Users, Briefcase, Wrench, BarChart3, Receipt, CreditCard, LogOut, User, UserPlus, Scissors, FileText, Moon, Sun, Brain } from "lucide-react";
 import kemaIcon from "@/assets/kema-icon.png";
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { Button } from '@/components/ui/button';
+import { Switch } from '@/components/ui/switch';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { useLocalStorage } from '@/hooks/useLocalStorage';
 import { useToast } from '@/hooks/use-toast';
 
@@ -147,55 +147,47 @@ export function AppSidebar() {
               .join('')
               .toUpperCase();
             return (
-              <Popover>
-                <PopoverTrigger asChild>
-                  <button
-                    type="button"
-                    className="flex items-center gap-3 p-3 bg-muted/30 rounded-xl border border-border w-full text-left hover:bg-muted/50 hover:border-primary/40 transition-colors"
-                  >
-                    <Avatar className="w-9 h-9">
-                      <AvatarImage src={profile?.avatar_url || undefined} alt={displayName} />
-                      <AvatarFallback className="bg-accent/20 text-accent text-xs">
-                        {initials}
-                      </AvatarFallback>
-                    </Avatar>
-                    <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium text-foreground truncate">
-                        {displayName}
-                      </p>
-                    </div>
-                  </button>
-                </PopoverTrigger>
-                <PopoverContent side="top" align="start" className="w-60 p-2 bg-popover border-border">
-                  <Button
-                    variant="ghost"
-                    className="w-full justify-start h-10 px-3 text-foreground"
-                    onClick={() => navigate('/perfil')}
-                  >
-                    <UserCog className="w-4 h-4 mr-3" />
-                    Meu Perfil
-                  </Button>
-                  <Button
-                    onClick={handleSignOut}
-                    variant="ghost"
-                    className="w-full justify-start h-10 px-3 text-destructive hover:text-destructive hover:bg-destructive/10"
-                  >
-                    <LogOut className="w-4 h-4 mr-3" />
-                    Sair
-                  </Button>
-                </PopoverContent>
-              </Popover>
+              <button
+                type="button"
+                onClick={() => navigate('/perfil')}
+                className="flex items-center gap-3 p-3 bg-muted/30 rounded-xl border border-border w-full text-left hover:bg-muted/50 hover:border-primary/40 transition-colors"
+              >
+                <Avatar className="w-9 h-9">
+                  <AvatarImage src={profile?.avatar_url || undefined} alt={displayName} />
+                  <AvatarFallback className="bg-accent/20 text-accent text-xs">
+                    {initials}
+                  </AvatarFallback>
+                </Avatar>
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-medium text-foreground truncate">
+                    {displayName}
+                  </p>
+                </div>
+              </button>
             );
           })()}
+          
+          <div className="flex items-center justify-between p-2.5 rounded-lg hover:bg-muted/30 transition-colors">
+            <div className="flex items-center gap-2">
+              {isDarkMode ? <Moon className="w-4 h-4 text-accent" /> : <Sun className="w-4 h-4 text-amber-500" />}
+              <span className="text-sm text-foreground">Tema Escuro</span>
+            </div>
+            <Switch
+              checked={isDarkMode}
+              onCheckedChange={toggleDarkMode}
+              className="data-[state=checked]:bg-primary"
+            />
+          </div>
 
-          <button
-            type="button"
-            onClick={toggleDarkMode}
-            aria-label={isDarkMode ? 'Ativar tema claro' : 'Ativar tema escuro'}
-            className="flex items-center justify-center w-9 h-9 rounded-lg hover:bg-muted/50 transition-colors mx-auto"
+          <Button
+            onClick={handleSignOut}
+            variant="ghost"
+            size="sm"
+            className="w-full justify-start gap-2 text-muted-foreground hover:text-destructive hover:bg-destructive/10"
           >
-            {isDarkMode ? <Moon className="w-4 h-4 text-accent" /> : <Sun className="w-4 h-4 text-amber-500" />}
-          </button>
+            <LogOut className="w-4 h-4" />
+            Sair
+          </Button>
         </div>
       </SidebarFooter>
     </Sidebar>
