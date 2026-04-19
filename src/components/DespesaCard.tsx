@@ -1,7 +1,7 @@
 import React from 'react';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
+import { StatusBadge } from '@/components/ui/status-badge';
 import { Copy, Edit, Trash2, Check, X } from 'lucide-react';
 import { format, isAfter, isBefore, isToday } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
@@ -40,16 +40,10 @@ export const DespesaCard: React.FC<DespesaCardProps> = ({
   const isVenceHoje = !despesa.paga && isToday(dataVencimento);
 
   const getStatusBadge = () => {
-    if (despesa.paga) {
-      return <Badge className="bg-green-100 text-green-700 border border-green-200 dark:bg-green-900/50 dark:text-green-400 dark:border-green-700/50">Paga</Badge>;
-    }
-    if (isVencida) {
-      return <Badge className="bg-red-100 text-red-700 border border-red-200 dark:bg-red-900/50 dark:text-red-400 dark:border-red-700/50">Vencida</Badge>;
-    }
-    if (isVenceHoje) {
-      return <Badge className="bg-amber-100 text-amber-700 border border-amber-200 dark:bg-amber-900/50 dark:text-amber-400 dark:border-amber-700/50">Vence Hoje</Badge>;
-    }
-    return <Badge className="bg-muted text-muted-foreground border border-border">Pendente</Badge>;
+    if (despesa.paga) return <StatusBadge tone="success">Paga</StatusBadge>;
+    if (isVencida) return <StatusBadge tone="danger">Vencida</StatusBadge>;
+    if (isVenceHoje) return <StatusBadge tone="warning">Vence Hoje</StatusBadge>;
+    return <StatusBadge tone="warning">Pendente</StatusBadge>;
   };
 
   const getCardStyle = () => {

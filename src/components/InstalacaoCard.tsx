@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Scissors, Edit, Trash2, ChevronDown, ChevronUp, Calendar, DollarSign, MapPin } from 'lucide-react';
 import { Checkbox } from '@/components/ui/checkbox';
+import { StatusBadge, getStatusMeta } from '@/components/ui/status-badge';
 import { parseLocalDate } from '@/lib/utils';
 
 interface Instalacao {
@@ -25,18 +26,9 @@ interface InstalacaoCardProps {
   onTogglePedidoRecebido: (id: string, recebido: boolean) => void;
 }
 
-const getStatusColor = (status: string) => {
-  switch (status) {
-    case 'Agendado': return 'bg-blue-100 text-blue-700 border border-blue-200 dark:bg-blue-900/50 dark:text-blue-400 dark:border-blue-700/50';
-    case 'Em Andamento': return 'bg-amber-100 text-amber-700 border border-amber-200 dark:bg-amber-900/50 dark:text-amber-400 dark:border-amber-700/50';
-    case 'Concluído': return 'bg-green-100 text-green-700 border border-green-200 dark:bg-green-900/50 dark:text-green-400 dark:border-green-700/50';
-    case 'Cancelado': return 'bg-red-100 text-red-700 border border-red-200 dark:bg-red-900/50 dark:text-red-400 dark:border-red-700/50';
-    default: return 'bg-muted text-muted-foreground';
-  }
-};
-
 export const InstalacaoCard: React.FC<InstalacaoCardProps> = ({ instalacao, onEdit, onDelete, onTogglePedidoRecebido }) => {
   const [isExpanded, setIsExpanded] = useState(false);
+  const statusMeta = getStatusMeta(instalacao.status);
 
   return (
     <div className="card-tech rounded-xl overflow-hidden border border-border border-l-4 border-l-orange-500 hover:border-primary/50 hover:border-l-orange-400 transition-all duration-300">
@@ -47,9 +39,9 @@ export const InstalacaoCard: React.FC<InstalacaoCardProps> = ({ instalacao, onEd
             <h3 className="font-semibold text-foreground truncate">#{instalacao.numero_pedido}</h3>
             <p className="text-sm text-muted-foreground truncate">{instalacao.arquiteto_nome}</p>
           </div>
-          <span className={`px-2 py-1 rounded-full text-xs font-medium whitespace-nowrap ml-2 ${getStatusColor(instalacao.status)}`}>
+          <StatusBadge tone={statusMeta.tone} icon={statusMeta.icon} className="ml-2">
             {instalacao.status}
-          </span>
+          </StatusBadge>
         </div>
         
         <div className={`flex items-center gap-2 mb-3 p-2 rounded-lg transition-colors border ${

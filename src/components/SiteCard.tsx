@@ -38,14 +38,6 @@ const getTipoPlanoLabel = (tipo: string) => {
   return tipos[tipo] || tipo;
 };
 
-const getStatusColor = (status: string) => {
-  const colors: Record<string, string> = {
-    'Ativo': 'bg-green-900/50 text-green-400 border border-green-700/50',
-    'Suspenso': 'bg-amber-900/50 text-amber-400 border border-amber-700/50',
-    'Cancelado': 'bg-red-900/50 text-red-400 border border-red-700/50'
-  };
-  return colors[status] || 'bg-muted text-muted-foreground';
-};
 
 const getServicosAdicionais = (site: Site) => {
   const servicos = [];
