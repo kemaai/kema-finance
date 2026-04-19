@@ -4,10 +4,9 @@ import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { toast } from 'sonner';
-import { Eye, EyeOff, LogIn, UserPlus } from 'lucide-react';
+import { Eye, EyeOff, Mail, Lock, User as UserIcon, Sparkles, ShieldCheck, TrendingUp } from 'lucide-react';
 import kemaIcon from '@/assets/kema-icon.png';
 
 export const AuthForm = () => {
@@ -16,15 +15,12 @@ export const AuthForm = () => {
   const [formData, setFormData] = useState({
     email: '',
     password: '',
-    fullName: ''
+    fullName: '',
   });
   const navigate = useNavigate();
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setFormData(prev => ({
-      ...prev,
-      [e.target.name]: e.target.value
-    }));
+    setFormData((prev) => ({ ...prev, [e.target.name]: e.target.value }));
   };
 
   const handleSignIn = async (e: React.FormEvent) => {
@@ -33,7 +29,7 @@ export const AuthForm = () => {
     try {
       const { data, error } = await supabase.auth.signInWithPassword({
         email: formData.email,
-        password: formData.password
+        password: formData.password,
       });
       if (error) {
         toast.error('Erro no login: ' + error.message);
@@ -45,7 +41,6 @@ export const AuthForm = () => {
       }
     } catch (error) {
       toast.error('Erro inesperado no login');
-      console.error('Login error:', error);
     } finally {
       setIsLoading(false);
     }
@@ -61,8 +56,8 @@ export const AuthForm = () => {
         password: formData.password,
         options: {
           emailRedirectTo: redirectUrl,
-          data: { full_name: formData.fullName }
-        }
+          data: { full_name: formData.fullName },
+        },
       });
       if (error) {
         toast.error('Erro no cadastro: ' + error.message);
@@ -74,107 +69,224 @@ export const AuthForm = () => {
       }
     } catch (error) {
       toast.error('Erro inesperado no cadastro');
-      console.error('Sign up error:', error);
     } finally {
       setIsLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen bg-background flex items-center justify-center p-4 relative overflow-hidden">
-      {/* Subtle background */}
-      <div className="absolute inset-0 bg-tech-particles"></div>
-      
-      <div className="w-full max-w-md relative z-10">
-        <div className="text-center mb-8">
-          <img
-            src={kemaIcon}
-            alt="KemaFinance"
-            width={96}
-            height={96}
-            className="w-24 h-24 mx-auto mb-4 object-contain"
-          />
-          <h1 className="text-3xl font-bold text-foreground">KemaFinance</h1>
-          <p className="text-muted-foreground mt-2">Sistema de Gestão Inteligente</p>
+    <div className="min-h-screen w-full bg-background grid lg:grid-cols-2 relative overflow-hidden">
+      {/* Decorative background blobs */}
+      <div className="pointer-events-none absolute -top-40 -right-40 w-[500px] h-[500px] bg-primary/20 rounded-full blur-[120px]" />
+      <div className="pointer-events-none absolute -bottom-40 -left-40 w-[500px] h-[500px] bg-accent/20 rounded-full blur-[120px]" />
+
+      {/* LEFT — Branding panel (desktop only) */}
+      <aside className="hidden lg:flex relative flex-col justify-between p-12 overflow-hidden bg-gradient-to-br from-card via-card to-background border-r border-border">
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_20%,hsl(var(--primary)/0.15),transparent_50%)]" />
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_80%_80%,hsl(var(--accent)/0.1),transparent_50%)]" />
+
+        <div className="relative z-10 flex items-center gap-3">
+          <img src={kemaIcon} alt="KemaFinance" width={48} height={48} className="w-12 h-12 object-contain" />
+          <span className="text-xl font-bold text-foreground tracking-tight">KemaFinance</span>
         </div>
 
-        <Card className="card-tech border-border/50">
+        <div className="relative z-10 space-y-8">
+          <div className="space-y-4">
+            <h2 className="text-5xl font-bold leading-tight text-foreground">
+              Gestão financeira <br />
+              <span className="bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
+                inteligente
+              </span>
+            </h2>
+            <p className="text-lg text-muted-foreground max-w-md leading-relaxed">
+              Controle clientes, serviços, despesas e metas em um só lugar — com IA dedicada à sua saúde financeira.
+            </p>
+          </div>
+
+          <div className="space-y-4 max-w-md">
+            {[
+              { icon: Sparkles, label: 'Análise preditiva com KemaFinance AI' },
+              { icon: TrendingUp, label: 'Metas inteligentes pelo método 50-30-20' },
+              { icon: ShieldCheck, label: 'Dados protegidos com isolamento por usuário' },
+            ].map((feat) => (
+              <div key={feat.label} className="flex items-center gap-3">
+                <div className="w-9 h-9 rounded-lg bg-primary/10 border border-primary/20 flex items-center justify-center shrink-0">
+                  <feat.icon className="w-4 h-4 text-primary" />
+                </div>
+                <span className="text-sm text-foreground/90">{feat.label}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <div className="relative z-10 text-xs text-muted-foreground">
+          © {new Date().getFullYear()} KemaFinance · Todos os direitos reservados
+        </div>
+      </aside>
+
+      {/* RIGHT — Form */}
+      <main className="relative z-10 flex items-center justify-center p-6 sm:p-10">
+        <div className="w-full max-w-md space-y-8">
+          {/* Mobile branding */}
+          <div className="lg:hidden text-center space-y-3">
+            <img src={kemaIcon} alt="KemaFinance" width={72} height={72} className="w-18 h-18 mx-auto object-contain" />
+            <h1 className="text-2xl font-bold text-foreground">KemaFinance</h1>
+            <p className="text-sm text-muted-foreground">Sistema de Gestão Inteligente</p>
+          </div>
+
+          <div className="hidden lg:block space-y-2">
+            <h2 className="text-3xl font-bold text-foreground tracking-tight">Bem-vindo de volta</h2>
+            <p className="text-muted-foreground">Acesse sua conta para continuar</p>
+          </div>
+
           <Tabs defaultValue="signin" className="w-full">
-            <TabsList className="grid w-full grid-cols-2 bg-muted/50">
-              <TabsTrigger value="signin" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+            <TabsList className="grid w-full grid-cols-2 bg-muted/40 p-1 h-11 rounded-xl">
+              <TabsTrigger
+                value="signin"
+                className="rounded-lg data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-md transition-all"
+              >
                 Entrar
               </TabsTrigger>
-              <TabsTrigger value="signup" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+              <TabsTrigger
+                value="signup"
+                className="rounded-lg data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-md transition-all"
+              >
                 Cadastrar
               </TabsTrigger>
             </TabsList>
-            
-            <TabsContent value="signin">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2 text-foreground">
-                  <LogIn className="w-5 h-5 text-primary" />
-                  Fazer Login
-                </CardTitle>
-                <CardDescription>Entre com suas credenciais</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <form onSubmit={handleSignIn} className="space-y-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="email" className="text-foreground">Email</Label>
-                    <Input id="email" name="email" type="email" placeholder="seu@email.com" value={formData.email} onChange={handleInputChange} required className="bg-input border-border focus:border-primary focus:ring-primary/20" />
+
+            {/* SIGN IN */}
+            <TabsContent value="signin" className="mt-6">
+              <form onSubmit={handleSignIn} className="space-y-5">
+                <div className="space-y-2">
+                  <Label htmlFor="email" className="text-foreground text-sm font-medium">Email</Label>
+                  <div className="relative">
+                    <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                    <Input
+                      id="email"
+                      name="email"
+                      type="email"
+                      placeholder="seu@email.com"
+                      value={formData.email}
+                      onChange={handleInputChange}
+                      required
+                      className="pl-10 h-11 bg-card border-border focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all"
+                    />
                   </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="password" className="text-foreground">Senha</Label>
-                    <div className="relative">
-                      <Input id="password" name="password" type={showPassword ? "text" : "password"} placeholder="Digite sua senha" value={formData.password} onChange={handleInputChange} required className="bg-input border-border focus:border-primary focus:ring-primary/20" />
-                      <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-3 top-1/2 transform -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors">
-                        {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                      </button>
-                    </div>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="password" className="text-foreground text-sm font-medium">Senha</Label>
+                  <div className="relative">
+                    <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                    <Input
+                      id="password"
+                      name="password"
+                      type={showPassword ? 'text' : 'password'}
+                      placeholder="Digite sua senha"
+                      value={formData.password}
+                      onChange={handleInputChange}
+                      required
+                      className="pl-10 pr-10 h-11 bg-card border-border focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword(!showPassword)}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                    >
+                      {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                    </button>
                   </div>
-                  <Button type="submit" className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-semibold" disabled={isLoading}>
-                    {isLoading ? 'Entrando...' : 'Entrar'}
-                  </Button>
-                </form>
-              </CardContent>
+                </div>
+
+                <Button
+                  type="submit"
+                  className="w-full h-11 bg-primary hover:bg-primary/90 text-primary-foreground font-semibold rounded-xl shadow-lg shadow-primary/20 transition-all hover:shadow-xl hover:shadow-primary/30"
+                  disabled={isLoading}
+                >
+                  {isLoading ? 'Entrando...' : 'Entrar na conta'}
+                </Button>
+              </form>
             </TabsContent>
-            
-            <TabsContent value="signup">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2 text-foreground">
-                  <UserPlus className="w-5 h-5 text-primary" />
-                  Criar Conta
-                </CardTitle>
-                <CardDescription>Crie uma nova conta</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <form onSubmit={handleSignUp} className="space-y-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="fullName" className="text-foreground">Nome Completo</Label>
-                    <Input id="fullName" name="fullName" type="text" placeholder="Seu nome completo" value={formData.fullName} onChange={handleInputChange} required className="bg-input border-border focus:border-primary focus:ring-primary/20" />
+
+            {/* SIGN UP */}
+            <TabsContent value="signup" className="mt-6">
+              <form onSubmit={handleSignUp} className="space-y-5">
+                <div className="space-y-2">
+                  <Label htmlFor="fullName" className="text-foreground text-sm font-medium">Nome completo</Label>
+                  <div className="relative">
+                    <UserIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                    <Input
+                      id="fullName"
+                      name="fullName"
+                      type="text"
+                      placeholder="Seu nome completo"
+                      value={formData.fullName}
+                      onChange={handleInputChange}
+                      required
+                      className="pl-10 h-11 bg-card border-border focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all"
+                    />
                   </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="signup-email" className="text-foreground">Email</Label>
-                    <Input id="signup-email" name="email" type="email" placeholder="seu@email.com" value={formData.email} onChange={handleInputChange} required className="bg-input border-border focus:border-primary focus:ring-primary/20" />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="signup-email" className="text-foreground text-sm font-medium">Email</Label>
+                  <div className="relative">
+                    <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                    <Input
+                      id="signup-email"
+                      name="email"
+                      type="email"
+                      placeholder="seu@email.com"
+                      value={formData.email}
+                      onChange={handleInputChange}
+                      required
+                      className="pl-10 h-11 bg-card border-border focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all"
+                    />
                   </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="signup-password" className="text-foreground">Senha</Label>
-                    <div className="relative">
-                      <Input id="signup-password" name="password" type={showPassword ? "text" : "password"} placeholder="Crie uma senha segura" value={formData.password} onChange={handleInputChange} required minLength={6} className="bg-input border-border focus:border-primary focus:ring-primary/20" />
-                      <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-3 top-1/2 transform -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors">
-                        {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                      </button>
-                    </div>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="signup-password" className="text-foreground text-sm font-medium">Senha</Label>
+                  <div className="relative">
+                    <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                    <Input
+                      id="signup-password"
+                      name="password"
+                      type={showPassword ? 'text' : 'password'}
+                      placeholder="Mínimo 6 caracteres"
+                      value={formData.password}
+                      onChange={handleInputChange}
+                      required
+                      minLength={6}
+                      className="pl-10 pr-10 h-11 bg-card border-border focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword(!showPassword)}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                    >
+                      {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                    </button>
                   </div>
-                  <Button type="submit" className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-semibold" disabled={isLoading}>
-                    {isLoading ? 'Criando conta...' : 'Criar Conta'}
-                  </Button>
-                </form>
-              </CardContent>
+                </div>
+
+                <Button
+                  type="submit"
+                  className="w-full h-11 bg-primary hover:bg-primary/90 text-primary-foreground font-semibold rounded-xl shadow-lg shadow-primary/20 transition-all hover:shadow-xl hover:shadow-primary/30"
+                  disabled={isLoading}
+                >
+                  {isLoading ? 'Criando conta...' : 'Criar minha conta'}
+                </Button>
+              </form>
             </TabsContent>
           </Tabs>
-        </Card>
-      </div>
+
+          <p className="text-xs text-center text-muted-foreground">
+            Ao continuar, você concorda com nossos termos e política de privacidade.
+          </p>
+        </div>
+      </main>
     </div>
   );
 };
