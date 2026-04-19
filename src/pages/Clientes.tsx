@@ -36,9 +36,9 @@ export const Clientes = () => {
   const { data: clientes = [], isLoading } = useQuery({
     queryKey: ['clientes'],
     queryFn: async () => {
-      console.log('Fetching clientes for user:', user?.id);
-      const { data, error } = await supabase
-        .from('clientes')
+      // Usa view segura que retorna CPF/CNPJ já mascarado no banco
+      const { data, error } = await (supabase as any)
+        .from('clientes_safe')
         .select('*')
         .order('created_at', { ascending: false });
 
@@ -46,12 +46,27 @@ export const Clientes = () => {
         console.error('Error fetching clientes:', error);
         throw error;
       }
-      
-      console.log('Clientes fetched:', data);
-      return data as Cliente[];
+
+      return (data || []) as Cliente[];
     },
     enabled: !!user,
   });
+
+  // Ao editar, busca o CPF/CNPJ completo sob demanda (RLS já garante acesso)
+  const handleEditClienteAsync = async (cliente: Cliente) => {
+    const { data, error } = await supabase
+      .from('clientes')
+      .select('cpf_cnpj')
+      .eq('id', cliente.id)
+      .single();
+
+    if (error) {
+      toast.error('Erro ao carregar dados do cliente');
+      return;
+    }
+
+    setEditingCliente({ ...cliente, cpf_cnpj: data.cpf_cnpj });
+  };
 
   const createClienteMutation = useMutation({
     mutationFn: async (clienteData: Omit<Cliente, 'id' | 'created_at' | 'updated_at' | 'user_id'>) => {
