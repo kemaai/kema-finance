@@ -1,65 +1,66 @@
 
-Vou analisar os 5 avisos de segurança e propor correções.
+## Padronização Visual dos Cards
 
-## Análise dos Avisos
+O usuário quer que **todos os cards** da plataforma sigam o padrão da **primeira imagem** (cards coloridos com borda e ícone temáticos por categoria), em vez do padrão atual da **segunda imagem** (cards uniformes em navy escuro sem cor distintiva).
 
-1. **CPF/CNPJ sem criptografia** (warn) — dados em plaintext na tabela `clientes`
-2. **Proteção de senha vazada desativada** (warn) — config Supabase Auth
-3. **OTP com longa validade** (warn) — config Supabase Auth
-4. **Bucket público permite listagem** (warn) — bucket `avatars` permite listar arquivos
-5. **Postgres com patches disponíveis** (warn) — upgrade de infraestrutura
+### Análise do Padrão Alvo (imagem 1)
 
-Itens 2, 3 e 5 são **configurações de painel Supabase** que apenas o usuário pode ajustar (não há código a alterar). Vou orientá-los com links diretos.
+Cada card tem cor temática aplicada em 3 elementos:
+- **Borda colorida sutil** (border + glow)
+- **Ícone colorido** dentro de um badge translúcido
+- **Valor principal colorido** (texto destacado)
+- Fundo permanece escuro mas com tom levemente tingido pela cor
 
-Itens 1 e 4 são **resolvíveis via código/migration**.
+Mapa de cores por tipo de métrica:
+| Métrica | Cor |
+|---|---|
+| Instalações / Serviços | Orange (`primary`) |
+| Receita / Pago | Green (`emerald-400`) |
+| Metragem / Clientes | Blue (`blue-400`) |
+| Despesas / Pendências | Red (`red-400`) |
+| Dívidas / Empréstimos | Amber (`amber-400`) |
+| Metas / Reservas | Indigo/Purple (`accent`) |
 
----
+### Plano de Implementação
 
-## Plano de Correção
+**1. Refatorar `DashboardCard.tsx`** (componente base)
+- Adicionar prop `variant: 'orange' | 'green' | 'blue' | 'red' | 'amber' | 'purple'`
+- Aplicar classes condicionais:
+  - Borda: `border-{cor}/30`
+  - Background tingido: `bg-gradient-to-br from-{cor}/5 to-transparent`
+  - Badge do ícone: fundo `{cor}/10` com ícone `{cor}-400`
+  - Valor principal: `text-{cor}-400`
+- Reposicionar ícone para ficar **ao lado do título** (header do card), como na imagem 1
 
-### 1. Bucket `avatars` — Restringir listagem (migration)
-Adicionar policy em `storage.objects` que:
-- Permite SELECT público apenas de arquivos individuais (acesso por URL direta continua funcionando para avatares já exibidos)
-- Restringe LIST/listagem genérica do bucket
-- Mantém INSERT/UPDATE/DELETE apenas para o próprio usuário (path = `{user_id}/...`)
+**2. Atualizar `Dashboard.tsx`** — atribuir variant correto a cada card:
+- Receita Total → `green`
+- Serviços do Mês → `orange`
+- Instalações → `orange`
+- Clientes → `blue`
+- Despesas → `red`
+- Metragem → `blue`
 
-Estratégia: criar policies owner-scoped para INSERT/UPDATE/DELETE e manter SELECT público (necessário para `<img src>` funcionar com bucket público), mas garantir que não exista policy ampla permitindo listagem indiscriminada via API.
+**3. Aplicar o mesmo padrão em outros componentes de card que exibem métricas:**
+- `MetasProgressCard` → `purple`
+- `MetaReservaCard` → `purple`
+- `AlertasWidget` → `amber`
+- `DiagnosticoCard` → manter neutro (texto longo)
+- `PlanoDistribuicaoCard` → `indigo`
 
-### 2. CPF/CNPJ — Mascaramento em camadas (migration + código)
-Como criptografia via Vault é complexa e quebra busca/edição, aplicar **defesa em profundidade prática**:
+**4. Cards de listagem/CRUD** (`ClienteCard`, `SiteCard`, `ServicoCard`, `EmprestimoCard`, `DespesaCard`, `InstalacaoCard`, `DividaNegativadaCard`):
+- Adicionar **faixa lateral colorida** (`border-l-4`) na cor da categoria para identificação visual rápida, sem alterar densidade da informação interna.
 
-- **Migration**: criar função `public.mask_cpf_cnpj(text)` SECURITY DEFINER que retorna apenas os 4 últimos dígitos.
-- **Migration**: criar view `public.clientes_safe` que expõe `cpf_cnpj_mascarado` em vez do valor completo, com RLS herdada via `security_invoker=true`.
-- **Código**: refatorar listagens (`Clientes.tsx`, `ClienteCard`) para consumir a view mascarada. Apenas o formulário de edição (`ClienteForm`) busca o valor completo sob demanda via `select('cpf_cnpj').eq('id', X)` com RLS já existente.
-- Atualizar memory `mem://security/pii-masking` registrando a nova camada DB-level.
+**5. Atualizar memory `mem://style/premium-design-system`** registrando o novo padrão "cards categorizados por cor".
 
-### 3. Configurações do Painel Supabase (ação do usuário)
-Não há código. Vou listar links diretos:
-- **Leaked password protection**: ativar em Auth > Policies
-- **OTP expiry**: reduzir para ≤ 3600s em Auth > Email
-- **Postgres upgrade**: aplicar em Settings > Infrastructure
+### Tailwind — Garantia de classes
+Como Tailwind faz purge, vou usar **classes completas estáticas** dentro de um mapa de variants (sem template strings dinâmicas), garantindo que `border-orange-500/30`, `text-emerald-400`, etc. sejam preservadas.
 
----
-
-## Arquivos Afetados
-
-**Migrations (1 arquivo SQL):**
-- Policies do bucket `avatars` (DROP de policies amplas + recriação owner-scoped)
-- Função `mask_cpf_cnpj` + view `clientes_safe`
-
-**Código:**
-- `src/pages/Clientes.tsx` — usar view `clientes_safe` para listagem
-- `src/components/ClienteCard.tsx` — receber valor já mascarado
-- `src/components/ClienteForm.tsx` — buscar CPF completo sob demanda ao editar
-- `src/hooks/useSupabaseData.tsx` — ajustar tipo/select de clientes se aplicável
-
-**Memory:**
-- Atualizar `mem://security/pii-masking` com a nova camada
-
----
-
-## Findings a marcar como tratados após aplicação
-- `pii_no_encryption` → fixed (mascaramento DB-level + UI)
-- `SUPA_public_bucket_allows_listing` → fixed (policies restritivas)
-
-Os 3 restantes (`leaked_password_protection`, `otp_long_expiry`, `vulnerable_postgres_version`) ficam pendentes de ação manual do usuário no painel Supabase — vou fornecer os links e instruções claras.
+### Arquivos afetados
+- `src/components/DashboardCard.tsx` (refator principal)
+- `src/pages/Dashboard.tsx` (atribuir variants)
+- `src/components/MetasProgressCard.tsx`
+- `src/components/MetaReservaCard.tsx`
+- `src/components/AlertasWidget.tsx`
+- `src/components/PlanoDistribuicaoCard.tsx`
+- 7 cards de listagem (faixa lateral colorida apenas)
+- `mem://style/premium-design-system` (atualização)
