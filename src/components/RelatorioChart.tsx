@@ -79,7 +79,7 @@ const CustomTooltip = ({ active, payload, label }: any) => {
 const getMetricLabel = (metric: string): string => {
   const labels: Record<string, string> = {
     receita: 'Receita Total',
-    receitaSites: 'Receita Sites',
+    receitaSites: 'Receita Serviços',
     receitaInstalacoes: 'Receita Instalações',
     instalacoes: 'Instalações',
     metragem: 'Metragem',
