@@ -1,6 +1,7 @@
 import React from 'react';
 import { Sidebar, SidebarContent, SidebarGroup, SidebarGroupContent, SidebarGroupLabel, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem, SidebarFooter } from "@/components/ui/sidebar";
 import { Home, Users, Briefcase, Wrench, BarChart3, Receipt, CreditCard, LogOut, User, UserPlus, Scissors, FileText, Moon, Sun, Brain } from "lucide-react";
+import kemaIcon from "@/assets/kema-icon.png";
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { Button } from '@/components/ui/button';
@@ -65,11 +66,14 @@ export function AppSidebar() {
   return (
     <Sidebar className="border-r border-border bg-sidebar">
       <SidebarHeader className="p-5 border-b border-border">
-        <div className="flex items-center gap-3">
-          <div className="w-9 h-9 bg-primary rounded-xl flex items-center justify-center">
-            <Brain className="w-5 h-5 text-primary-foreground" />
-          </div>
-          <h1 className="text-lg font-bold text-foreground">KEMA Finance</h1>
+        <div className="flex items-center justify-center">
+          <img
+            src={kemaIcon}
+            alt="KemaFinance"
+            width={144}
+            height={144}
+            className="w-36 h-36 rounded-2xl object-contain"
+          />
         </div>
       </SidebarHeader>
 
