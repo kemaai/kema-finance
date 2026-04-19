@@ -17,6 +17,7 @@ import { Dividas } from "./pages/Dividas";
 import { Relatorios } from "./pages/Relatorios";
 import { Agente } from "./pages/Agente";
 import { Login } from "./pages/Login";
+import { ResetPassword } from "./pages/ResetPassword";
 import Perfil from "./pages/Perfil";
 import NotFound from "./pages/NotFound";
 
@@ -32,6 +33,7 @@ function App() {
           <BrowserRouter>
             <Routes>
               <Route path="/login" element={<Login />} />
+              <Route path="/reset-password" element={<ResetPassword />} />
               <Route
                 path="/"
                 element={
