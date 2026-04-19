@@ -6,12 +6,15 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { toast } from 'sonner';
-import { Eye, EyeOff, Mail, Lock, User as UserIcon, Sparkles, ShieldCheck, TrendingUp } from 'lucide-react';
+import { Eye, EyeOff, Mail, Lock, User as UserIcon, Sparkles, ShieldCheck, TrendingUp, ArrowLeft } from 'lucide-react';
 import kemaIcon from '@/assets/kema-icon.png';
 
 export const AuthForm = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const [showForgotPassword, setShowForgotPassword] = useState(false);
+  const [forgotEmail, setForgotEmail] = useState('');
+  const [forgotSent, setForgotSent] = useState(false);
   const [formData, setFormData] = useState({
     email: '',
     password: '',
@@ -21,6 +24,30 @@ export const AuthForm = () => {
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData((prev) => ({ ...prev, [e.target.name]: e.target.value }));
+  };
+
+  const handleForgotPassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!forgotEmail) {
+      toast.error('Informe seu email');
+      return;
+    }
+    setIsLoading(true);
+    try {
+      const { error } = await supabase.auth.resetPasswordForEmail(forgotEmail, {
+        redirectTo: `${window.location.origin}/reset-password`,
+      });
+      if (error) {
+        toast.error('Erro ao enviar email: ' + error.message);
+        return;
+      }
+      setForgotSent(true);
+      toast.success('Email de recuperação enviado!');
+    } catch {
+      toast.error('Erro inesperado');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const handleSignIn = async (e: React.FormEvent) => {
@@ -135,10 +162,80 @@ export const AuthForm = () => {
           </div>
 
           <div className="hidden lg:block space-y-2">
-            <h2 className="text-3xl font-bold text-foreground tracking-tight">Bem-vindo de volta</h2>
-            <p className="text-muted-foreground">Acesse sua conta para continuar</p>
+            <h2 className="text-3xl font-bold text-foreground tracking-tight">
+              {showForgotPassword ? 'Recuperar senha' : 'Bem-vindo de volta'}
+            </h2>
+            <p className="text-muted-foreground">
+              {showForgotPassword
+                ? 'Enviaremos um link para redefinir sua senha'
+                : 'Acesse sua conta para continuar'}
+            </p>
           </div>
 
+          {showForgotPassword ? (
+            <div className="space-y-5">
+              {forgotSent ? (
+                <div className="text-center space-y-4 bg-card border border-border rounded-2xl p-8">
+                  <div className="w-14 h-14 mx-auto rounded-full bg-primary/10 border border-primary/20 flex items-center justify-center">
+                    <Mail className="w-6 h-6 text-primary" />
+                  </div>
+                  <div className="space-y-2">
+                    <h3 className="text-lg font-semibold text-foreground">Verifique seu email</h3>
+                    <p className="text-sm text-muted-foreground">
+                      Enviamos um link de recuperação para{' '}
+                      <span className="text-foreground font-medium">{forgotEmail}</span>.
+                      Clique no link para definir uma nova senha.
+                    </p>
+                  </div>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => {
+                      setShowForgotPassword(false);
+                      setForgotSent(false);
+                    }}
+                    className="w-full h-11 rounded-xl"
+                  >
+                    <ArrowLeft className="w-4 h-4 mr-2" />
+                    Voltar para o login
+                  </Button>
+                </div>
+              ) : (
+                <form onSubmit={handleForgotPassword} className="space-y-5">
+                  <div className="space-y-2">
+                    <Label htmlFor="forgot-email" className="text-sm font-medium">Email</Label>
+                    <div className="relative">
+                      <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                      <Input
+                        id="forgot-email"
+                        type="email"
+                        placeholder="seu@email.com"
+                        value={forgotEmail}
+                        onChange={(e) => setForgotEmail(e.target.value)}
+                        required
+                        className="pl-10 h-11 bg-card border-border focus:border-primary focus:ring-2 focus:ring-primary/20"
+                      />
+                    </div>
+                  </div>
+                  <Button
+                    type="submit"
+                    disabled={isLoading}
+                    className="w-full h-11 bg-primary hover:bg-primary/90 text-primary-foreground font-semibold rounded-xl shadow-lg shadow-primary/20"
+                  >
+                    {isLoading ? 'Enviando...' : 'Enviar link de recuperação'}
+                  </Button>
+                  <button
+                    type="button"
+                    onClick={() => setShowForgotPassword(false)}
+                    className="flex items-center justify-center gap-2 w-full text-sm text-muted-foreground hover:text-primary transition-colors font-medium"
+                  >
+                    <ArrowLeft className="w-4 h-4" />
+                    Voltar para o login
+                  </button>
+                </form>
+              )}
+            </div>
+          ) : (
           <Tabs defaultValue="signin" className="w-full">
             <TabsList className="grid w-full grid-cols-2 bg-muted/40 p-1 h-11 rounded-xl">
               <TabsTrigger
@@ -206,6 +303,20 @@ export const AuthForm = () => {
                 >
                   {isLoading ? 'Entrando...' : 'Entrar na conta'}
                 </Button>
+
+                <div className="text-center">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setForgotEmail(formData.email);
+                      setForgotSent(false);
+                      setShowForgotPassword(true);
+                    }}
+                    className="text-sm text-muted-foreground hover:text-primary transition-colors font-medium"
+                  >
+                    Esqueci minha senha
+                  </button>
+                </div>
               </form>
             </TabsContent>
 
@@ -281,6 +392,7 @@ export const AuthForm = () => {
               </form>
             </TabsContent>
           </Tabs>
+          )}
 
           <p className="text-xs text-center text-muted-foreground">
             Ao continuar, você concorda com nossos termos e política de privacidade.
