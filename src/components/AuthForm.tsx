@@ -458,6 +458,7 @@ export const AuthForm = () => {
                   {isLoading ? 'Criando conta...' : 'Criar minha conta'}
                 </Button>
               </form>
+              </div>
             </TabsContent>
           </Tabs>
           )}
