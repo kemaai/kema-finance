@@ -90,10 +90,11 @@ export const AuthForm = () => {
           <img
             src={kemaIcon}
             alt="KemaFinance"
-            width={224}
-            height={224}
-            className="w-56 h-56 mx-auto mb-4 rounded-3xl object-contain shadow-lg shadow-primary/25"
+            width={96}
+            height={96}
+            className="w-24 h-24 mx-auto mb-4 object-contain"
           />
+          <h1 className="text-3xl font-bold text-foreground">KemaFinance</h1>
           <p className="text-muted-foreground mt-2">Sistema de Gestão Inteligente</p>
         </div>
 

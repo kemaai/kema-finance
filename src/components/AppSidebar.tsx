@@ -66,14 +66,15 @@ export function AppSidebar() {
   return (
     <Sidebar className="border-r border-border bg-sidebar">
       <SidebarHeader className="p-5 border-b border-border">
-        <div className="flex items-center justify-center">
+        <div className="flex items-center gap-3">
           <img
             src={kemaIcon}
             alt="KemaFinance"
-            width={144}
-            height={144}
-            className="w-36 h-36 rounded-2xl object-contain"
+            width={36}
+            height={36}
+            className="w-9 h-9 object-contain"
           />
+          <h1 className="text-lg font-bold text-foreground">KemaFinance</h1>
         </div>
       </SidebarHeader>
 
