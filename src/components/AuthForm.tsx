@@ -6,12 +6,15 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { toast } from 'sonner';
-import { Eye, EyeOff, Mail, Lock, User as UserIcon, Sparkles, ShieldCheck, TrendingUp } from 'lucide-react';
+import { Eye, EyeOff, Mail, Lock, User as UserIcon, Sparkles, ShieldCheck, TrendingUp, ArrowLeft } from 'lucide-react';
 import kemaIcon from '@/assets/kema-icon.png';
 
 export const AuthForm = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const [showForgotPassword, setShowForgotPassword] = useState(false);
+  const [forgotEmail, setForgotEmail] = useState('');
+  const [forgotSent, setForgotSent] = useState(false);
   const [formData, setFormData] = useState({
     email: '',
     password: '',
@@ -21,6 +24,30 @@ export const AuthForm = () => {
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData((prev) => ({ ...prev, [e.target.name]: e.target.value }));
+  };
+
+  const handleForgotPassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!forgotEmail) {
+      toast.error('Informe seu email');
+      return;
+    }
+    setIsLoading(true);
+    try {
+      const { error } = await supabase.auth.resetPasswordForEmail(forgotEmail, {
+        redirectTo: `${window.location.origin}/reset-password`,
+      });
+      if (error) {
+        toast.error('Erro ao enviar email: ' + error.message);
+        return;
+      }
+      setForgotSent(true);
+      toast.success('Email de recuperação enviado!');
+    } catch {
+      toast.error('Erro inesperado');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const handleSignIn = async (e: React.FormEvent) => {
@@ -206,6 +233,20 @@ export const AuthForm = () => {
                 >
                   {isLoading ? 'Entrando...' : 'Entrar na conta'}
                 </Button>
+
+                <div className="text-center">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setForgotEmail(formData.email);
+                      setForgotSent(false);
+                      setShowForgotPassword(true);
+                    }}
+                    className="text-sm text-muted-foreground hover:text-primary transition-colors font-medium"
+                  >
+                    Esqueci minha senha
+                  </button>
+                </div>
               </form>
             </TabsContent>
 
