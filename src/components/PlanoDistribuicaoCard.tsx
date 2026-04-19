@@ -66,10 +66,11 @@ export function PlanoDistribuicaoCard({ plano, diagnostico }: PlanoDistribuicaoC
   };
 
   return (
-    <div className="card-tech p-6">
+    <div className="card-tech p-6 border border-purple-500/30 bg-gradient-to-br from-purple-500/10 via-purple-500/5 to-transparent relative overflow-hidden">
+      <div className="absolute top-0 left-0 right-0 h-0.5 bg-purple-500 opacity-70" />
       <div className="flex items-center gap-3 mb-6">
-        <div className="w-10 h-10 bg-gradient-to-br from-primary to-accent rounded-xl flex items-center justify-center">
-          <Wallet className="w-5 h-5 text-white" />
+        <div className="w-10 h-10 bg-purple-500/15 rounded-xl flex items-center justify-center">
+          <Wallet className="w-5 h-5 text-purple-400" />
         </div>
         <div>
           <h3 className="text-lg font-semibold text-foreground">Distribuição de Recursos</h3>

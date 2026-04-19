@@ -210,7 +210,7 @@ export const EmprestimoCard: React.FC<EmprestimoCardProps> = ({
   const isFullyPaid = remainingAmount <= 0;
 
   return (
-    <Card className="card-tech border-border hover:border-primary/50 transition-all duration-300 w-full max-w-sm mx-auto">
+    <Card className="card-tech border-border border-l-4 border-l-amber-500 hover:border-primary/50 hover:border-l-amber-400 transition-all duration-300 w-full max-w-sm mx-auto">
       <CardHeader className="pb-3">
         <div className="flex justify-between items-start gap-2">
           <div className="flex-1 min-w-0">
