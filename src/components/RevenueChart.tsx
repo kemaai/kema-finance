@@ -100,7 +100,7 @@ export const RevenueChart: React.FC<RevenueChartProps> = ({ sites = [], instalac
             <YAxis stroke="currentColor" fontSize={11} tickFormatter={(v) => `R$ ${v}`} tickLine={false} opacity={0.4} />
             <Tooltip content={<CustomTooltip />} />
             <Legend formatter={(value) => <span className="text-foreground text-xs">{value}</span>} />
-            <Line type="monotone" dataKey="sites" stroke={COLORS.sites} strokeWidth={2.5} name="Sites" dot={{ fill: COLORS.sites, r: 3 }} />
+            <Line type="monotone" dataKey="sites" stroke={COLORS.sites} strokeWidth={2.5} name="Serviços" dot={{ fill: COLORS.sites, r: 3 }} />
             <Line type="monotone" dataKey="instalacoes" stroke={COLORS.instalacoes} strokeWidth={2.5} name="Instalações" dot={{ fill: COLORS.instalacoes, r: 3 }} />
           </LineChart>
         </ResponsiveContainer>
@@ -126,7 +126,7 @@ export const RevenueChart: React.FC<RevenueChartProps> = ({ sites = [], instalac
             <YAxis stroke="currentColor" fontSize={11} tickFormatter={(v) => `R$ ${v}`} tickLine={false} opacity={0.4} />
             <Tooltip content={<CustomTooltip />} />
             <Legend formatter={(value) => <span className="text-foreground text-xs">{value}</span>} />
-            <Bar dataKey="sites" fill={COLORS.sites} name="Sites" radius={[6, 6, 0, 0]} />
+            <Bar dataKey="sites" fill={COLORS.sites} name="Serviços" radius={[6, 6, 0, 0]} />
             <Bar dataKey="instalacoes" fill={COLORS.instalacoes} name="Instalações" radius={[6, 6, 0, 0]} />
           </BarChart>
         </ResponsiveContainer>
