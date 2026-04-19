@@ -32,11 +32,7 @@ export const ClienteCard: React.FC<ClienteCardProps> = ({ cliente, onEdit, onDel
         <div className="flex justify-between items-start mb-3">
           <div className="flex-1">
             <h3 className="font-semibold text-lg text-foreground mb-1">{cliente.nome}</h3>
-            <p className="text-sm text-muted-foreground">
-              {cliente.cpf_cnpj.length > 4 
-                ? '•'.repeat(cliente.cpf_cnpj.length - 4) + cliente.cpf_cnpj.slice(-4)
-                : cliente.cpf_cnpj}
-            </p>
+            <p className="text-sm text-muted-foreground">{cliente.cpf_cnpj}</p>
           </div>
           <div className="flex gap-1">
             <button
