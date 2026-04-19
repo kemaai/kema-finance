@@ -39,7 +39,7 @@ export const InstalacaoCard: React.FC<InstalacaoCardProps> = ({ instalacao, onEd
   const [isExpanded, setIsExpanded] = useState(false);
 
   return (
-    <div className="card-tech rounded-xl overflow-hidden border border-border hover:border-primary/50 transition-all duration-300">
+    <div className="card-tech rounded-xl overflow-hidden border border-border border-l-4 border-l-orange-500 hover:border-primary/50 hover:border-l-orange-400 transition-all duration-300">
       {/* Card Header */}
       <div className="p-4">
         <div className="flex items-start justify-between mb-3">

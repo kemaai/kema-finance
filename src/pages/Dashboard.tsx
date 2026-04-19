@@ -219,35 +219,35 @@ export const Dashboard = () => {
             value={`R$ ${receitaTotal.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`} 
             subValue={`Serviços: R$ ${receitaMensalServicos.toFixed(0)} • Inst: R$ ${receitaPeriodoInstalacoes.toFixed(0)}`} 
             icon={DollarSign} 
-            iconColor="bg-gradient-to-br from-green-500 to-green-600" 
+            variant="green"
           />
           <DashboardCard 
             title="Serviços do Mês" 
             value={servicosCount.toString()} 
             subValue={`Pago: R$ ${receitaServicosPagos.toFixed(0)}`} 
             icon={Briefcase} 
-            iconColor="bg-gradient-to-br from-blue-500 to-blue-600" 
+            variant="orange"
           />
           <DashboardCard 
             title="Instalações" 
             value={instalacoesDoPeriodo.length.toString()} 
             subValue={`${totalM2Periodo.toFixed(1)} m² ${labelPeriodo}`} 
             icon={Scissors} 
-            iconColor="bg-gradient-to-br from-primary to-accent" 
+            variant="orange"
           />
           <DashboardCard 
             title="Clientes" 
             value={clientesAtivos.toString()} 
             subValue={`${mediaServicos} serv./cliente`} 
             icon={Users} 
-            iconColor="bg-gradient-to-br from-purple-500 to-purple-600" 
+            variant="blue"
           />
           <DashboardCard 
             title="Despesas" 
             value={`R$ ${totalDespesasMes.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`} 
             subValue={`Pend: R$ ${totalDespesasPendentes.toFixed(0)}`} 
             icon={CreditCard} 
-            iconColor="bg-gradient-to-br from-red-500 to-red-600" 
+            variant="red"
             className="col-span-2 lg:col-span-1"
           />
         </div>

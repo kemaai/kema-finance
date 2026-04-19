@@ -77,7 +77,7 @@ export const DividaNegativadaCard: React.FC<DividaNegativadaCardProps> = ({
   };
 
   return (
-    <Card className="card-tech border-border hover:border-primary/50 transition-all duration-300">
+    <Card className="card-tech border-border border-l-4 border-l-amber-500 hover:border-primary/50 hover:border-l-amber-400 transition-all duration-300">
       <CardHeader className="pb-3">
         <div className="flex justify-between items-start">
           <div>

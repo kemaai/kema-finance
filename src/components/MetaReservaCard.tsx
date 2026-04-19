@@ -111,9 +111,11 @@ export function MetaReservaCard({ diagnostico, metaReserva, onUpdate }: MetaRese
   };
 
   return (
-    <div className="card-tech p-6 relative overflow-hidden">
+    <div className="card-tech p-6 relative overflow-hidden border border-purple-500/30 bg-gradient-to-br from-purple-500/10 via-purple-500/5 to-transparent">
+      {/* Top accent bar */}
+      <div className="absolute top-0 left-0 right-0 h-0.5 bg-purple-500 opacity-70" />
       {/* Background decoration */}
-      <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-emerald-500/10 to-transparent rounded-full blur-2xl" />
+      <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-purple-500/10 to-transparent rounded-full blur-2xl" />
       
       <div className="relative">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">

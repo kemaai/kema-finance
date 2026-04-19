@@ -63,7 +63,7 @@ export const DespesaCard: React.FC<DespesaCardProps> = ({
   };
 
   return (
-    <Card className={`w-full card-tech ${getCardStyle()} hover:border-primary/50 transition-all duration-300`}>
+    <Card className={`w-full card-tech border-l-4 border-l-red-500 hover:border-l-red-400 ${getCardStyle()} hover:border-primary/50 transition-all duration-300`}>
       <CardHeader className="pb-3">
         <div className="flex justify-between items-start">
           <div className="flex-1">

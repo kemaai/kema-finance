@@ -17,7 +17,7 @@ const statusStyles: Record<string, string> = {
 
 export const ServicoCard: React.FC<ServicoCardProps> = ({ servico, onEdit, onDelete }) => {
   return (
-    <Card className="card-tech border-border hover:border-primary/50 transition-all duration-300">
+    <Card className="card-tech border-border border-l-4 border-l-orange-500 hover:border-primary/50 hover:border-l-orange-400 transition-all duration-300">
       <CardContent className="p-3 sm:p-4">
         <div className="flex flex-col gap-3">
           <div className="flex justify-between items-start gap-2">

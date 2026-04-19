@@ -27,7 +27,7 @@ interface ClienteCardProps {
 
 export const ClienteCard: React.FC<ClienteCardProps> = ({ cliente, onEdit, onDelete }) => {
   return (
-    <Card className="card-tech">
+    <Card className="card-tech border-l-4 border-l-blue-500 hover:border-l-blue-400 transition-colors">
       <CardContent className="p-4">
         <div className="flex justify-between items-start mb-3">
           <div className="flex-1">

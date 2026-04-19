@@ -56,7 +56,7 @@ const getServicosAdicionais = (site: Site) => {
 
 export const SiteCard: React.FC<SiteCardProps> = ({ site, onEdit, onDelete, onDuplicate }) => {
   return (
-    <Card className="card-tech border-border hover:border-primary/50 transition-all duration-300">
+    <Card className="card-tech border-border border-l-4 border-l-cyan-500 hover:border-primary/50 hover:border-l-cyan-400 transition-all duration-300">
       <CardContent className="p-3 sm:p-4">
         <div className="flex flex-col gap-3">
           {/* Header com título e ações */}

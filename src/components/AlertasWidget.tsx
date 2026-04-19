@@ -38,11 +38,14 @@ export function AlertasWidget({ alertas, maxAlertas = 5 }: AlertasWidgetProps) {
   const displayAlertas = alertas.slice(0, maxAlertas);
 
   return (
-    <Card className="card-tech border-primary/30">
+    <Card className="card-tech border border-amber-500/30 bg-gradient-to-br from-amber-500/10 via-amber-500/5 to-transparent relative overflow-hidden">
+      <div className="absolute top-0 left-0 right-0 h-0.5 bg-amber-500 opacity-70" />
       <CardHeader className="pb-4">
         <div className="flex items-center justify-between">
           <CardTitle className="text-lg font-semibold text-foreground flex items-center gap-2">
-            <AlertCircle className="w-5 h-5 text-primary" />
+            <div className="w-9 h-9 bg-amber-500/15 rounded-xl flex items-center justify-center">
+              <AlertCircle className="w-5 h-5 text-amber-400" />
+            </div>
             Alertas Inteligentes
           </CardTitle>
           {alertas.length > 0 && (
