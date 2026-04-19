@@ -79,7 +79,7 @@ export const RevenueChart: React.FC<RevenueChartProps> = ({ sites = [], instalac
   const totalSites = data.reduce((sum, item) => sum + item.sites, 0);
   const totalInstalacoes = data.reduce((sum, item) => sum + item.instalacoes, 0);
   const pieData = [
-    { name: 'Sites', value: totalSites },
+    { name: 'Serviços', value: totalSites },
     { name: 'Instalações', value: totalInstalacoes }
   ];
   const pieColors = [COLORS.sites, COLORS.instalacoes];
