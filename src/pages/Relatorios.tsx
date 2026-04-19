@@ -240,7 +240,7 @@ export const Relatorios = () => {
         dados += `Gerado em: ${dataAtual}\n`;
         dados += `Tipo de Período: ${periodoRelatorio.toUpperCase()}\n\n`;
         dados += `=== RECEITAS ===\n`;
-        dados += `Sites Ativos: R$ ${metricas.receitaMensalSites.toFixed(2)}\n`;
+        dados += `Serviços: R$ ${metricas.receitaMensalSites.toFixed(2)}\n`;
         dados += `Instalações: R$ ${metricas.receitaInstalacoes.toFixed(2)}\n`;
         dados += `Total Receitas: R$ ${metricas.receitaTotal.toFixed(2)}\n\n`;
         dados += `=== INSTALAÇÕES ===\n`;
