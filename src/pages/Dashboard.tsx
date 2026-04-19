@@ -267,7 +267,7 @@ export const Dashboard = () => {
               <span className="text-sm font-medium">+8.2%</span>
             </div>
           </div>
-          <RevenueChart sites={[]} instalacoes={instalacoes} />
+          <RevenueChart servicos={servicos} instalacoes={instalacoes} despesas={despesas} />
         </div>
 
         {/* Three columns */}
