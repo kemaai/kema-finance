@@ -203,7 +203,7 @@ export const Clientes = () => {
   };
 
   const handleEditCliente = (cliente: Cliente) => {
-    setEditingCliente(cliente);
+    handleEditClienteAsync(cliente);
   };
 
   if (!user) {
