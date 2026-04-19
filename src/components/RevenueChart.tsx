@@ -7,9 +7,10 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { parseLocalDate } from '@/lib/utils';
 
 const COLORS = {
-  servicos: '#F97316',   // orange
+  servicos: '#F97316',    // orange
   instalacoes: '#6366F1', // indigo
   despesas: '#EF4444',    // red
+  saldo: '#10B981',       // emerald
 };
 
 interface Servico {
@@ -93,6 +94,7 @@ export const RevenueChart: React.FC<RevenueChartProps> = ({ servicos = [], insta
         servicos: servicosRevenue,
         instalacoes: instalacoesRevenue,
         despesas: despesasMes,
+        saldo: servicosRevenue + instalacoesRevenue - despesasMes,
       });
     }
     return chartData;
@@ -128,6 +130,7 @@ export const RevenueChart: React.FC<RevenueChartProps> = ({ servicos = [], insta
             <Line type="monotone" dataKey="servicos" stroke={COLORS.servicos} strokeWidth={2.5} name="Serviços" dot={{ fill: COLORS.servicos, r: 3 }} />
             <Line type="monotone" dataKey="instalacoes" stroke={COLORS.instalacoes} strokeWidth={2.5} name="Instalações" dot={{ fill: COLORS.instalacoes, r: 3 }} />
             <Line type="monotone" dataKey="despesas" stroke={COLORS.despesas} strokeWidth={2.5} name="Despesas" dot={{ fill: COLORS.despesas, r: 3 }} />
+            <Line type="monotone" dataKey="saldo" stroke={COLORS.saldo} strokeWidth={2.5} strokeDasharray="6 4" name="Saldo Líquido" dot={{ fill: COLORS.saldo, r: 3 }} />
           </LineChart>
         </ResponsiveContainer>
       </TabsContent>
