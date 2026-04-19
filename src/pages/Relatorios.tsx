@@ -100,7 +100,7 @@ export const Relatorios = () => {
     const { dataInicio, dataFim } = getPeriodoDatas(periodoRelatorio, semanaEscolhida, mesEscolhido, anoEscolhido);
 
     // Receitas de Serviços (soma dos valores dos serviços do período)
-    const receitaMensalSites = dadosFiltrados.servicos
+    const receitaServicos = dadosFiltrados.servicos
       .reduce((total, s) => total + Number(s.valor), 0);
 
     // Instalações concluídas
@@ -144,7 +144,7 @@ export const Relatorios = () => {
     const valorDividasPagasNoPeriodo = dividasPagasNoPeriodo.reduce((sum, d) => sum + d.valor_atual, 0);
 
     // Serviços por status (Pago / Pendente)
-    const sitesPorStatus = dadosFiltrados.servicos.reduce((acc, s) => {
+    const servicosPorStatus = dadosFiltrados.servicos.reduce((acc, s) => {
       const k = s.pago ? 'Pago' : 'Pendente';
       acc[k] = (acc[k] || 0) + 1;
       return acc;
@@ -155,7 +155,7 @@ export const Relatorios = () => {
     const totalClientesGeral = clientes.length;
 
     return {
-      receitaMensalSites,
+      receitaServicos,
       receitaInstalacoes,
       metragemTotal,
       instalacoesConcluidas: instalacoesConcluidas.length,
@@ -167,11 +167,11 @@ export const Relatorios = () => {
       totalPagoNoPeriodo,
       totalDividas,
       valorDividasPagasNoPeriodo,
-      sitesPorStatus,
+      servicosPorStatus,
       clientesNovos,
       totalClientesGeral,
-      receitaTotal: receitaMensalSites + receitaInstalacoes,
-      saldoLiquido: receitaMensalSites + receitaInstalacoes - despesasPendentes - totalEmprestimos - totalDividas
+      receitaTotal: receitaServicos + receitaInstalacoes,
+      saldoLiquido: receitaServicos + receitaInstalacoes - despesasPendentes - totalEmprestimos - totalDividas
     };
   }, [dadosFiltrados, pagamentosEmprestimo, clientes, periodoRelatorio, semanaEscolhida, mesEscolhido, anoEscolhido]);
 
@@ -196,7 +196,7 @@ export const Relatorios = () => {
         return isDateInPeriod(dataServ, periodo.inicio, periodo.fim);
       });
 
-      const receitaSites = servicosPeriodo.reduce((total, s) => total + Number(s.valor), 0);
+      const receitaServicos = servicosPeriodo.reduce((total, s) => total + Number(s.valor), 0);
       
       // Filtrar despesas do período
       const despesasPeriodo = despesas.filter(desp => {
@@ -207,8 +207,8 @@ export const Relatorios = () => {
       
       return {
         periodo: periodo.label,
-        receita: receitaSites + receitaInstalacoes,
-        receitaSites,
+        receita: receitaServicos + receitaInstalacoes,
+        receitaServicos,
         receitaInstalacoes,
         instalacoes: instPeriodo.length,
         metragem,
@@ -240,7 +240,7 @@ export const Relatorios = () => {
         dados += `Gerado em: ${dataAtual}\n`;
         dados += `Tipo de Período: ${periodoRelatorio.toUpperCase()}\n\n`;
         dados += `=== RECEITAS ===\n`;
-        dados += `Serviços: R$ ${metricas.receitaMensalSites.toFixed(2)}\n`;
+        dados += `Serviços: R$ ${metricas.receitaServicos.toFixed(2)}\n`;
         dados += `Instalações: R$ ${metricas.receitaInstalacoes.toFixed(2)}\n`;
         dados += `Total Receitas: R$ ${metricas.receitaTotal.toFixed(2)}\n\n`;
         dados += `=== INSTALAÇÕES ===\n`;
@@ -266,7 +266,7 @@ export const Relatorios = () => {
         
       case 'receita':
         dados = `Relatório de Receitas - ${periodoLabel}\n\n`;
-        dados += `Serviços: R$ ${metricas.receitaMensalSites.toFixed(2)}\n`;
+        dados += `Serviços: R$ ${metricas.receitaServicos.toFixed(2)}\n`;
         dados += `Instalações Concluídas: R$ ${metricas.receitaInstalacoes.toFixed(2)}\n`;
         dados += `Total: R$ ${metricas.receitaTotal.toFixed(2)}\n`;
         nomeArquivo = `relatorio-receitas-${periodoNomeArquivo}.txt`;
@@ -288,7 +288,7 @@ export const Relatorios = () => {
       case 'servicos':
         dados = `Relatório de Serviços - ${periodoLabel}\n\n`;
         dados += `Total de Serviços no Período: ${dadosFiltrados.servicos.length}\n`;
-        dados += `Receita Total: R$ ${metricas.receitaMensalSites.toFixed(2)}\n\n`;
+        dados += `Receita Total: R$ ${metricas.receitaServicos.toFixed(2)}\n\n`;
         dados += `Detalhamento:\n`;
         dadosFiltrados.servicos.forEach(s => {
           dados += `\nCliente: ${s.cliente_nome}\n`;
@@ -613,7 +613,7 @@ export const Relatorios = () => {
                 <RelatorioChart 
                   data={dadosGrafico}
                   tipo="area"
-                  metricas={['receitaSites', 'receitaInstalacoes']}
+                  metricas={['receitaServicos', 'receitaInstalacoes']}
                   showTabs={true}
                 />
               </CardContent>
@@ -708,7 +708,7 @@ export const Relatorios = () => {
               <CardContent className="space-y-3 md:space-y-4">
                 <div className="flex justify-between items-center p-2 md:p-3 bg-blue-500/10 border border-blue-500/30 rounded-lg">
                   <span className="font-medium text-xs md:text-sm text-foreground">Serviços</span>
-                  <span className="text-sm md:text-lg font-bold text-blue-500">R$ {metricas.receitaMensalSites.toFixed(2)}</span>
+                  <span className="text-sm md:text-lg font-bold text-blue-500">R$ {metricas.receitaServicos.toFixed(2)}</span>
                 </div>
                 <div className="flex justify-between items-center p-2 md:p-3 bg-orange-500/10 border border-orange-500/30 rounded-lg">
                   <span className="font-medium text-xs md:text-sm text-foreground">Instalações</span>
@@ -913,7 +913,7 @@ export const Relatorios = () => {
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-2">
-                {Object.entries(metricas.sitesPorStatus).map(([status, quantidade]) => (
+                {Object.entries(metricas.servicosPorStatus).map(([status, quantidade]) => (
                   <div key={status} className="flex justify-between items-center p-2 border border-orange-500/20 rounded text-xs md:text-sm bg-background/50">
                     <span className="text-foreground">{status}</span>
                     <span className="font-semibold text-orange-500">{quantidade}</span>

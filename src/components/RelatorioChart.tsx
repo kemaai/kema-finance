@@ -33,7 +33,7 @@ const COLORS = {
 interface ChartDataPoint {
   periodo: string;
   receita?: number;
-  receitaSites?: number;
+  receitaServicos?: number;
   receitaInstalacoes?: number;
   instalacoes?: number;
   metragem?: number;
@@ -43,7 +43,7 @@ interface ChartDataPoint {
 interface RelatorioChartProps {
   data: ChartDataPoint[];
   tipo?: 'linha' | 'barra' | 'area' | 'combinado';
-  metricas?: ('receita' | 'instalacoes' | 'metragem' | 'despesas' | 'receitaSites' | 'receitaInstalacoes')[];
+  metricas?: ('receita' | 'instalacoes' | 'metragem' | 'despesas' | 'receitaServicos' | 'receitaInstalacoes')[];
   titulo?: string;
   showTabs?: boolean;
 }
@@ -79,7 +79,7 @@ const CustomTooltip = ({ active, payload, label }: any) => {
 const getMetricLabel = (metric: string): string => {
   const labels: Record<string, string> = {
     receita: 'Receita Total',
-    receitaSites: 'Receita Serviços',
+    receitaServicos: 'Receita Serviços',
     receitaInstalacoes: 'Receita Instalações',
     instalacoes: 'Instalações',
     metragem: 'Metragem',
@@ -91,7 +91,7 @@ const getMetricLabel = (metric: string): string => {
 const getMetricColor = (metric: string): string => {
   const colors: Record<string, string> = {
     receita: COLORS.success,
-    receitaSites: COLORS.info,
+    receitaServicos: COLORS.info,
     receitaInstalacoes: COLORS.primary,
     instalacoes: COLORS.secondary,
     metragem: COLORS.tertiary,

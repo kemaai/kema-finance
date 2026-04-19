@@ -109,7 +109,7 @@ CONTEXTO FINANCEIRO ATUAL DO USUÁRIO:
 
 📊 RESUMO GERAL:
 - Receita Total Mensal: R$ ${safeNum(financialContext.receitaTotal).toFixed(2)}
-  • Sites: R$ ${safeNum(financialContext.receitaSites).toFixed(2)}
+  • Sites: R$ ${safeNum(financialContext.receitaServicos).toFixed(2)}
   • Instalações: R$ ${safeNum(financialContext.receitaInstalacoes).toFixed(2)}
 - Despesas Totais do Mês: R$ ${safeNum(financialContext.despesaTotal).toFixed(2)}
   • Pagas: R$ ${safeNum(financialContext.despesasPagas).toFixed(2)}
