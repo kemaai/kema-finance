@@ -392,6 +392,7 @@ export const AuthForm = () => {
               </form>
             </TabsContent>
           </Tabs>
+          )}
 
           <p className="text-xs text-center text-muted-foreground">
             Ao continuar, você concorda com nossos termos e política de privacidade.
