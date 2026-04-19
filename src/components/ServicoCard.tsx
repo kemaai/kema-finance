@@ -2,6 +2,7 @@ import React from 'react';
 import { Edit, Trash2, Calendar, DollarSign, User, Briefcase, Repeat } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { parseLocalDate } from '@/lib/utils';
+import { StatusBadge, getStatusMeta } from '@/components/ui/status-badge';
 import type { Servico } from './ServicoForm';
 
 interface ServicoCardProps {
@@ -9,11 +10,6 @@ interface ServicoCardProps {
   onEdit: (s: Servico) => void;
   onDelete: (id: string) => void;
 }
-
-const statusStyles: Record<string, string> = {
-  'Pago': 'bg-green-900/50 text-green-400 border border-green-700/50',
-  'Pendente': 'bg-amber-900/50 text-amber-400 border border-amber-700/50',
-};
 
 export const ServicoCard: React.FC<ServicoCardProps> = ({ servico, onEdit, onDelete }) => {
   return (
@@ -67,14 +63,18 @@ export const ServicoCard: React.FC<ServicoCardProps> = ({ servico, onEdit, onDel
           </div>
 
           <div className="flex justify-between items-center gap-2 flex-wrap">
-            <span className={`px-2 py-1 rounded-full text-xs font-medium ${statusStyles[servico.status] || 'bg-muted text-muted-foreground'}`}>
-              {servico.status}
-            </span>
+            {(() => {
+              const meta = getStatusMeta(servico.status);
+              return (
+                <StatusBadge tone={meta.tone} icon={meta.icon}>
+                  {servico.status}
+                </StatusBadge>
+              );
+            })()}
             {servico.recorrente && (
-              <span className="px-2 py-1 rounded-full text-xs font-medium bg-blue-900/40 text-blue-400 border border-blue-700/50 flex items-center gap-1">
-                <Repeat className="w-3 h-3" />
+              <StatusBadge tone="accent" icon={Repeat}>
                 Recorrente
-              </span>
+              </StatusBadge>
             )}
           </div>
 

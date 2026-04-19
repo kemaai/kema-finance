@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
+import { StatusBadge } from '@/components/ui/status-badge';
 import { Trash2, Check } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
@@ -86,12 +86,9 @@ export const DividaNegativadaCard: React.FC<DividaNegativadaCardProps> = ({
               Criado em {new Date(divida.created_at).toLocaleDateString('pt-BR')}
             </CardDescription>
           </div>
-          <Badge className={divida.pago 
-            ? 'bg-green-900/50 text-green-400 border border-green-700/50' 
-            : 'bg-red-900/50 text-red-400 border border-red-700/50'
-          }>
+          <StatusBadge tone={divida.pago ? 'success' : 'danger'}>
             {divida.pago ? 'Pago' : 'Pendente'}
-          </Badge>
+          </StatusBadge>
         </div>
       </CardHeader>
       

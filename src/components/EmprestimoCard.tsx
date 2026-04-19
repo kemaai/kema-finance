@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
+import { StatusBadge } from '@/components/ui/status-badge';
 import { Edit, Trash2, Plus, Receipt } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
@@ -228,12 +228,9 @@ export const EmprestimoCard: React.FC<EmprestimoCardProps> = ({
             >
               <Edit className="w-3 h-3" />
             </Button>
-            <Badge className={isFullyPaid 
-              ? 'bg-green-900/50 text-green-400 border border-green-700/50' 
-              : 'bg-amber-900/50 text-amber-400 border border-amber-700/50'
-            }>
+            <StatusBadge tone={isFullyPaid ? 'success' : 'warning'}>
               {isFullyPaid ? 'Quitado' : 'Em andamento'}
-            </Badge>
+            </StatusBadge>
           </div>
         </div>
       </CardHeader>

@@ -1,6 +1,7 @@
 import React from 'react';
 import { Edit, Trash2, Globe, Calendar, DollarSign, Copy } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
+import { StatusBadge, getStatusMeta } from '@/components/ui/status-badge';
 import { parseLocalDate } from '@/lib/utils';
 
 interface Site {
@@ -38,14 +39,6 @@ const getTipoPlanoLabel = (tipo: string) => {
   return tipos[tipo] || tipo;
 };
 
-const getStatusColor = (status: string) => {
-  const colors: Record<string, string> = {
-    'Ativo': 'bg-green-900/50 text-green-400 border border-green-700/50',
-    'Suspenso': 'bg-amber-900/50 text-amber-400 border border-amber-700/50',
-    'Cancelado': 'bg-red-900/50 text-red-400 border border-red-700/50'
-  };
-  return colors[status] || 'bg-muted text-muted-foreground';
-};
 
 const getServicosAdicionais = (site: Site) => {
   const servicos = [];
@@ -136,9 +129,14 @@ export const SiteCard: React.FC<SiteCardProps> = ({ site, onEdit, onDelete, onDu
 
           {/* Status */}
           <div className="flex justify-between items-center">
-            <span className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(site.status)}`}>
-              {site.status}
-            </span>
+            {(() => {
+              const meta = getStatusMeta(site.status);
+              return (
+                <StatusBadge tone={meta.tone} icon={meta.icon}>
+                  {site.status}
+                </StatusBadge>
+              );
+            })()}
           </div>
 
           {/* Observações */}
