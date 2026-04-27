@@ -259,12 +259,14 @@ export const AuthForm = () => {
             <TabsList className="grid w-full grid-cols-2 bg-muted/40 p-1 h-11 rounded-xl">
               <TabsTrigger
                 value="signin"
+                data-testid="tab-signin"
                 className="rounded-lg data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-md transition-all"
               >
                 Entrar
               </TabsTrigger>
               <TabsTrigger
                 value="signup"
+                data-testid="tab-signup"
                 className="rounded-lg data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-md transition-all"
               >
                 Cadastrar
@@ -279,6 +281,7 @@ export const AuthForm = () => {
                   variant="outline"
                   onClick={handleGoogleSignIn}
                   disabled={isLoading}
+                  data-testid="login-google"
                   className="w-full h-11 rounded-xl border-border bg-card hover:bg-muted/50 font-medium"
                 >
                   <svg className="w-4 h-4 mr-2" viewBox="0 0 24 24">
@@ -297,41 +300,58 @@ export const AuthForm = () => {
                     <span className="bg-background px-2 text-muted-foreground">ou</span>
                   </div>
                 </div>
-              <form onSubmit={handleSignIn} className="space-y-5">
+              <form
+                id="login-form"
+                name="login"
+                aria-label="Login"
+                autoComplete="on"
+                data-testid="login-form"
+                onSubmit={handleSignIn}
+                className="space-y-5"
+              >
                 <div className="space-y-2">
-                  <Label htmlFor="email" className="text-foreground text-sm font-medium">Email</Label>
+                  <Label htmlFor="login-email" className="text-foreground text-sm font-medium">Email</Label>
                   <div className="relative">
                     <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                     <Input
-                      id="email"
+                      id="login-email"
                       name="email"
                       type="email"
                       placeholder="seu@email.com"
                       value={formData.email}
                       onChange={handleInputChange}
                       required
+                      autoComplete="email"
+                      inputMode="email"
+                      aria-label="Email"
+                      data-testid="login-email"
                       className="pl-10 h-11 bg-card border-border focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all"
                     />
                   </div>
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="password" className="text-foreground text-sm font-medium">Senha</Label>
+                  <Label htmlFor="login-password" className="text-foreground text-sm font-medium">Senha</Label>
                   <div className="relative">
                     <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                     <Input
-                      id="password"
+                      id="login-password"
                       name="password"
                       type={showPassword ? 'text' : 'password'}
                       placeholder="Digite sua senha"
                       value={formData.password}
                       onChange={handleInputChange}
                       required
+                      autoComplete="current-password"
+                      aria-label="Senha"
+                      data-testid="login-password"
                       className="pl-10 pr-10 h-11 bg-card border-border focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all"
                     />
                     <button
                       type="button"
                       onClick={() => setShowPassword(!showPassword)}
+                      aria-label={showPassword ? 'Ocultar senha' : 'Mostrar senha'}
+                      data-testid="login-toggle-password"
                       className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
                     >
                       {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
@@ -341,6 +361,9 @@ export const AuthForm = () => {
 
                 <Button
                   type="submit"
+                  id="login-submit"
+                  data-testid="login-submit"
+                  aria-label="Entrar"
                   className="w-full h-11 bg-primary hover:bg-primary/90 text-primary-foreground font-semibold rounded-xl shadow-lg shadow-primary/20 transition-all hover:shadow-xl hover:shadow-primary/30"
                   disabled={isLoading}
                 >
@@ -350,6 +373,7 @@ export const AuthForm = () => {
                 <div className="text-center">
                   <button
                     type="button"
+                    data-testid="login-forgot"
                     onClick={() => {
                       setForgotEmail(formData.email);
                       setForgotSent(false);
