@@ -87,6 +87,7 @@ export function AppSidebar() {
             <SidebarMenu>
               {navigation.map((item) => {
                 const isActive = location.pathname === item.url;
+                const slug = item.url.replace(/^\//, '') || 'home';
                 return (
                   <SidebarMenuItem key={item.title}>
                     <SidebarMenuButton
@@ -99,7 +100,11 @@ export function AppSidebar() {
                           : 'text-muted-foreground hover:text-foreground hover:bg-muted/50'
                       }`}
                     >
-                      <button className="flex items-center gap-3 w-full">
+                      <button
+                        data-testid={`nav-${slug}`}
+                        aria-label={item.title}
+                        className="flex items-center gap-3 w-full"
+                      >
                         <item.icon className={`w-4 h-4 ${isActive ? 'text-primary' : ''}`} />
                         <span className="font-medium text-sm">{item.title}</span>
                       </button>
@@ -183,6 +188,7 @@ export function AppSidebar() {
             onClick={handleSignOut}
             variant="ghost"
             size="sm"
+            data-testid="nav-logout"
             className="w-full justify-start gap-2 text-muted-foreground hover:text-destructive hover:bg-destructive/10"
           >
             <LogOut className="w-4 h-4" />

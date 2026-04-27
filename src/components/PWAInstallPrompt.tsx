@@ -26,6 +26,24 @@ export const PWAInstallPrompt = () => {
   const isMobile = useIsMobile();
 
   useEffect(() => {
+    // Bypass for automation / headless / explicit opt-out
+    try {
+      const params = new URLSearchParams(window.location.search);
+      const isAutomation =
+        (navigator as any).webdriver === true ||
+        /HeadlessChrome|Playwright|puppeteer/i.test(navigator.userAgent) ||
+        params.has('automation') ||
+        params.has('noPwa') ||
+        localStorage.getItem('pwa-prompt-disabled') === '1';
+      if (isAutomation) {
+        if (params.has('automation') || params.has('noPwa')) {
+          try { localStorage.setItem('pwa-prompt-disabled', '1'); } catch {}
+        }
+        setShowPrompt(false);
+        return;
+      }
+    } catch {}
+
     // Check if app is already installed
     if (window.matchMedia && window.matchMedia('(display-mode: standalone)').matches) {
       setIsInstalled(true);
@@ -111,7 +129,7 @@ export const PWAInstallPrompt = () => {
   if (isIOSSafari && !deferredPrompt) {
     return (
       <div className="fixed bottom-4 left-4 right-4 z-50 md:left-auto md:right-4 md:max-w-sm">
-        <Card className="shadow-lg border-2 border-primary/20">
+        <Card data-testid="pwa-install-card" className="shadow-lg border-2 border-primary/20">
           <CardHeader className="pb-2">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
@@ -122,6 +140,8 @@ export const PWAInstallPrompt = () => {
                 variant="ghost" 
                 size="sm" 
                 onClick={handleDismiss}
+                data-testid="pwa-install-close"
+                aria-label="Fechar"
                 className="h-6 w-6 p-0"
               >
                 <X className="h-4 w-4" />
@@ -149,7 +169,7 @@ export const PWAInstallPrompt = () => {
 
   return (
     <div className="fixed bottom-4 left-4 right-4 z-50 md:left-auto md:right-4 md:max-w-sm">
-      <Card className="shadow-lg border-2 border-primary/20 bg-gradient-to-r from-background to-background/95">
+      <Card data-testid="pwa-install-card" className="shadow-lg border-2 border-primary/20 bg-gradient-to-r from-background to-background/95">
         <CardHeader className="pb-2">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
@@ -160,6 +180,8 @@ export const PWAInstallPrompt = () => {
               variant="ghost" 
               size="sm" 
               onClick={handleDismiss}
+              data-testid="pwa-install-close"
+              aria-label="Fechar"
               className="h-6 w-6 p-0"
             >
               <X className="h-4 w-4" />
@@ -173,6 +195,7 @@ export const PWAInstallPrompt = () => {
           <div className="flex gap-2">
             <Button 
               onClick={handleInstallClick} 
+              data-testid="pwa-install-accept"
               className="flex-1 bg-primary hover:bg-primary/90"
               disabled={!deferredPrompt}
             >
@@ -182,6 +205,7 @@ export const PWAInstallPrompt = () => {
             <Button 
               variant="outline" 
               onClick={handleDismiss}
+              data-testid="pwa-install-defer"
               className="px-3"
             >
               Depois

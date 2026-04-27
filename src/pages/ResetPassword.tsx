@@ -111,24 +111,33 @@ export const ResetPassword = () => {
           <p className="text-sm text-muted-foreground">Escolha uma senha forte para sua conta</p>
         </div>
 
-        <form onSubmit={handleReset} className="space-y-5 bg-card border border-border rounded-2xl p-6 shadow-xl">
+        <form
+          id="reset-password-form"
+          data-testid="reset-password-form"
+          onSubmit={handleReset}
+          className="space-y-5 bg-card border border-border rounded-2xl p-6 shadow-xl"
+        >
           <div className="space-y-2">
-            <Label htmlFor="password" className="text-sm font-medium">Nova senha</Label>
+            <Label htmlFor="reset-password-new" className="text-sm font-medium">Nova senha</Label>
             <div className="relative">
               <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
               <Input
-                id="password"
+                id="reset-password-new"
+                name="password"
                 type={showPassword ? 'text' : 'password'}
                 placeholder="Mínimo 6 caracteres"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
                 minLength={6}
+                autoComplete="new-password"
+                data-testid="reset-password-new"
                 className="pl-10 pr-10 h-11 bg-background border-border focus:border-primary focus:ring-2 focus:ring-primary/20"
               />
               <button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
+                aria-label={showPassword ? 'Ocultar senha' : 'Mostrar senha'}
                 className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
               >
                 {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
@@ -137,17 +146,20 @@ export const ResetPassword = () => {
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="confirm" className="text-sm font-medium">Confirmar nova senha</Label>
+            <Label htmlFor="reset-password-confirm" className="text-sm font-medium">Confirmar nova senha</Label>
             <div className="relative">
               <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
               <Input
-                id="confirm"
+                id="reset-password-confirm"
+                name="confirm"
                 type={showPassword ? 'text' : 'password'}
                 placeholder="Repita a senha"
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
                 required
                 minLength={6}
+                autoComplete="new-password"
+                data-testid="reset-password-confirm"
                 className="pl-10 h-11 bg-background border-border focus:border-primary focus:ring-2 focus:ring-primary/20"
               />
             </div>
@@ -156,6 +168,8 @@ export const ResetPassword = () => {
           <Button
             type="submit"
             disabled={isLoading}
+            id="reset-password-submit"
+            data-testid="reset-password-submit"
             className="w-full h-11 bg-primary hover:bg-primary/90 text-primary-foreground font-semibold rounded-xl shadow-lg shadow-primary/20"
           >
             {isLoading ? 'Salvando...' : 'Redefinir senha'}

@@ -70,10 +70,13 @@ export const MobileNavigation = () => {
         >
           {menuItems.map((item) => {
             const isActive = location.pathname === item.path;
+            const slug = item.path === '/' ? 'home' : item.path.replace(/^\//, '');
             return (
               <NavLink
                 key={item.name}
                 to={item.path}
+                data-testid={`nav-${slug}`}
+                aria-label={item.name}
                 className="flex flex-col items-center justify-center gap-1 flex-shrink-0 w-[20%] min-w-[20%] px-1 py-1.5"
               >
                 <div className={`w-9 h-9 rounded-full flex items-center justify-center transition-all duration-200 ${
