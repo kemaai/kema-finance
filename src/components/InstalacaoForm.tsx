@@ -93,7 +93,7 @@ export const InstalacaoForm: React.FC<InstalacaoFormProps> = ({
     }));
   };
 
-  const metragem = formData.valor_total / 24;
+  const metragem = formData.valor_total ? Math.round((formData.valor_total / 24) * 100) / 100 : '';
 
   return (
     <Card className="card-tech w-full max-w-2xl mx-auto">
@@ -179,11 +179,14 @@ export const InstalacaoForm: React.FC<InstalacaoFormProps> = ({
             <Input
               id="metragem"
               type="number"
-              step="0.1"
+              step="0.01"
               min="0"
-              placeholder="0.0"
+              placeholder=""
               value={metragem}
-              onChange={(e) => handleInputChange('valor_total', (parseFloat(e.target.value) || 0) * 24)}
+              onChange={(e) => {
+                const v = e.target.value;
+                handleInputChange('valor_total', v === '' ? 0 : (parseFloat(v) || 0) * 24);
+              }}
               required
               className="w-full"
             />
