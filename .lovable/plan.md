@@ -1,99 +1,70 @@
-## Objetivo
+# Destaque visual para cards de "Pedido Recebido"
 
-Tornar a tela de login e a navegação totalmente compatíveis com automação por browser tools / Playwright, sem alterar regras de negócio, autenticação, banco ou integrações. Apenas ajustes não-destrutivos de acessibilidade/seletores.
+## Problema
+Atualmente, quando o checkbox "Pedido Recebido" é marcado, apenas a pequena faixa do checkbox fica verde. O resto do card (#12957 vs #13322 na imagem) continua visualmente idêntico aos demais, dificultando identificar rapidamente quais pedidos já foram pagos/recebidos — especialmente porque o badge de status "Concluído" também é verde.
 
----
+## Solução
+Aplicar um destaque verde envolvendo o card **inteiro** quando `pedido_recebido === true`, mantendo todos os dados perfeitamente legíveis (sem cobrir conteúdo, sem reduzir contraste).
 
-## Mudanças
+### Comportamento visual proposto
+Quando `pedido_recebido` for `true`, o card terá:
 
-### 1. `src/components/AuthForm.tsx` — Seletores estáveis no login
+1. **Borda verde brilhante em todo o perímetro** (em vez da borda padrão `border-border`) — substitui também a borda lateral laranja (`border-l-orange-500`) por verde, deixando claro o "estado pago".
+2. **Fundo levemente esverdeado** usando uma camada translúcida (`bg-emerald-500/5` no claro, `bg-emerald-500/10` no escuro) — sutil o suficiente para não competir com o texto.
+3. **Glow/ring verde externo** (`ring-2 ring-emerald-500/40` + `shadow-[0_0_20px_rgba(16,185,129,0.15)]`) que cria o efeito de "halo" ao redor do card, separando-o visualmente dos demais.
+4. **Hover preserva o destaque verde** (em vez de virar laranja), reforçando o estado.
 
-No formulário de **Sign In** (já é `<form>` nativo com `onSubmit` — submit por Enter já funciona):
+A faixa interna do checkbox "Pedido Recebido" continua existindo, mas agora reforça o estado em vez de ser o único indicador.
 
-- Adicionar ao `<form>`:
-  - `id="login-form"`, `data-testid="login-form"`, `name="login"`, `aria-label="Login"`, `noValidate={false}`, `autoComplete="on"`
-- No campo de email (`Input` que renderiza `<input>` HTML real):
-  - Manter `id="email"` e adicionar:
-    - `data-testid="login-email"` 
-    - `autoComplete="email"`
-    - `inputMode="email"`
-    - `aria-label="Email"`
-  - Adicionar **também** um wrapper invisível? Não — basta adicionar um segundo seletor. Como o requisito pede `id="login-email"` e o id atual `email` é usado pelo `<Label htmlFor>`, vamos:
-    - Trocar `id="email"` por `id="login-email"` e atualizar `<Label htmlFor="login-email">`.
-- No campo de senha:
-  - Trocar `id="password"` por `id="login-password"` e atualizar `<Label htmlFor="login-password">`.
-  - Adicionar `data-testid="login-password"`, `autoComplete="current-password"`, `aria-label="Senha"`.
-- No botão "Entrar na conta" (já é `<button type="submit">` via componente `Button`):
-  - Adicionar `id="login-submit"`, `data-testid="login-submit"`, `aria-label="Entrar"`.
-- Botão "Esqueci minha senha": adicionar `data-testid="login-forgot"`.
-- Botão Google: adicionar `data-testid="login-google"`.
-- Tabs Entrar/Cadastrar: adicionar `data-testid="tab-signin"` / `data-testid="tab-signup"` para automação poder garantir que está na aba certa.
-
-Os componentes `Input` e `Button` do shadcn já são wrappers finos que renderizam `<input>` e `<button>` nativos — **não há componentes não-HTML**, então o requisito 4 já é atendido.
-
-### 2. `src/components/PWAInstallPrompt.tsx` — Banner não intrusivo / desativável
-
-Adicionar três mecanismos de bypass (não-destrutivos):
-
-1. **Auto-skip em automação**: no início do `useEffect`, detectar e não exibir o prompt quando:
-   - `navigator.webdriver === true` (Playwright/Selenium), **ou**
-   - `window.matchMedia('(hover: none)')` falso + UA contém `HeadlessChrome`, **ou**
-   - URL contém `?automation=1` ou `?noPwa=1`, **ou**
-   - `localStorage.getItem('pwa-prompt-disabled') === '1'`.
-   - Em qualquer desses casos: `setShowPrompt(false)` e early-return (não registrar listeners de prompt).
-2. **Persistência do desativar**: quando usuário fecha (X), além de `pwa-prompt-dismissed`, também aceitar via querystring `?noPwa=1` para sessões automatizadas.
-3. **Seletores estáveis** no card: `data-testid="pwa-install-card"`, botão fechar `data-testid="pwa-install-close"`, botão instalar `data-testid="pwa-install-accept"`. Isso permite ao agente fechar o banner caso apareça.
-
-Nada do fluxo PWA real é removido — usuários normais continuam vendo o prompt como hoje.
-
-### 3. `src/pages/ResetPassword.tsx` (verificar e adicionar testids)
-
-Adicionar `id`/`data-testid` nos campos de nova senha (`reset-password-new`, `reset-password-confirm`, `reset-password-submit`) para o agente também poder operar fluxo de recovery, se necessário.
-
-### 4. Navegação — seletores estáveis nos itens da sidebar
-
-Em `src/components/AppSidebar.tsx` e `src/components/MobileNavigation.tsx`:
-- Adicionar `data-testid={`nav-${slug}`}` em cada link de menu (ex.: `nav-dashboard`, `nav-despesas`, `nav-clientes`, `nav-servicos`, `nav-instalacoes`, `nav-dividas`, `nav-relatorios`, `nav-agente`, `nav-perfil`).
-- Garante que o agente possa navegar de forma robusta após login.
-
-### 5. Acesso operacional seguro (requisito 6)
-
-**Não** criar rota especial bypass-auth (seria risco de segurança). Em vez disso:
-- Documentar (via comentário no topo de `AuthForm.tsx`) o contrato de seletores acima.
-- Adicionar suporte ao querystring `?automation=1` que apenas **desativa o PWA prompt** e força `localStorage` `pwa-prompt-disabled=1` — o agente continua usando login normal com email/senha de uma conta dedicada criada manualmente pelo usuário (recomendado).
-
-Não há criação de usuário, role, nem alteração de RLS — autenticação permanece intacta.
-
-### 6. Itens já OK (apenas confirmar, sem mudança)
-
-- Submit por Enter: `<form onSubmit={handleSignIn}>` já permite (requisito 5 ✅).
-- `<input>` e `<button>` nativos: shadcn `Input`/`Button` renderizam tags nativas (requisito 4 ✅).
-- Compatibilidade headless Chrome/Playwright: nenhum bloqueio existente além do PWA prompt, que será resolvido no item 2 (requisito 8 ✅).
-
----
-
-## Arquivos afetados
-
-- `src/components/AuthForm.tsx` — ids + data-testids no form de login (e reset)
-- `src/components/PWAInstallPrompt.tsx` — bypass para webdriver/headless/querystring/localStorage + testids
-- `src/pages/ResetPassword.tsx` — testids
-- `src/components/AppSidebar.tsx` — `data-testid` nos itens de menu
-- `src/components/MobileNavigation.tsx` — `data-testid` nos itens de menu
-
-## Não alterado
-
-- `useAuth`, Supabase client, RLS, edge functions, regras de negócio, fluxo visual, design tokens, rotas existentes.
-
-## Contrato de seletores final (para o agente)
+### Comparação visual (ASCII)
 
 ```text
-Login form:        [data-testid="login-form"]
-Email input:       #login-email  |  [data-testid="login-email"]
-Password input:    #login-password  |  [data-testid="login-password"]
-Submit button:     #login-submit  |  [data-testid="login-submit"]
-Forgot link:       [data-testid="login-forgot"]
-Google button:     [data-testid="login-google"]
-PWA prompt close:  [data-testid="pwa-install-close"]
-Bypass PWA:        ?automation=1  ou  localStorage.pwa-prompt-disabled = "1"
-Nav items:         [data-testid="nav-<slug>"]  (dashboard, despesas, clientes, ...)
+ANTES (recebido)              DEPOIS (recebido)
+┌────────────────────┐        ╔════════════════════╗  ← ring verde + glow
+│▌ #13322  Concluído │        ║▌ #13322  Concluído ║
+│  Bianca            │        ║  Bianca            ║  ← fundo verde sutil
+│ ┌────────────────┐ │        ║ ┌────────────────┐ ║
+│ │✓ Pedido Receb. │ │        ║ │✓ Pedido Receb. │ ║
+│ └────────────────┘ │        ║ └────────────────┘ ║
+│  R$ 2071,20        │        ║  R$ 2071,20        ║
+└────────────────────┘        ╚════════════════════╝
+(idêntico aos outros)         (claramente diferente)
 ```
+
+Cards **não recebidos** mantêm exatamente o visual atual (borda lateral laranja, fundo padrão), preservando consistência com o restante do sistema.
+
+## Detalhes técnicos
+
+**Arquivo único alterado:** `src/components/InstalacaoCard.tsx`
+
+Alterar a `className` do container raiz (atualmente):
+```tsx
+className="card-tech rounded-xl overflow-hidden border border-border border-l-4 border-l-orange-500 hover:border-primary/50 hover:border-l-orange-400 transition-all duration-300"
+```
+
+Para uma versão condicional baseada em `instalacao.pedido_recebido`, usando `cn()` de `@/lib/utils`:
+
+```tsx
+import { cn } from '@/lib/utils';
+
+<div
+  className={cn(
+    "card-tech rounded-xl overflow-hidden border border-l-4 transition-all duration-300",
+    instalacao.pedido_recebido
+      ? "border-emerald-500/60 border-l-emerald-500 bg-emerald-500/5 dark:bg-emerald-500/10 ring-2 ring-emerald-500/40 shadow-[0_0_20px_rgba(16,185,129,0.15)] hover:ring-emerald-500/60 hover:border-emerald-400"
+      : "border-border border-l-orange-500 hover:border-primary/50 hover:border-l-orange-400"
+  )}
+>
+```
+
+### Notas
+- Usa a paleta `emerald-500` já presente no `StatusBadge` (`success` tone), mantendo consistência.
+- Opacidade baixa no fundo (`/5` e `/10`) garante que texto branco/orange (R$ 2071,20) permaneça totalmente legível.
+- `ring` é externo (não consome espaço interno), então layout/dados não se deslocam.
+- Não toca em regra de negócio, hooks, banco, ou no `InstalacaoForm`.
+- Não altera o card no estado "não recebido".
+
+## Fora do escopo
+- Mudanças no badge de status "Concluído".
+- Mudanças no formulário de instalação.
+- Animação de transição ao marcar/desmarcar (pode ser adicionada depois se desejado).
