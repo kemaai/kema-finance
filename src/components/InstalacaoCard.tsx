@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Scissors, Edit, Trash2, ChevronDown, ChevronUp, Calendar, DollarSign, MapPin } from 'lucide-react';
 import { Checkbox } from '@/components/ui/checkbox';
 import { StatusBadge, getStatusMeta } from '@/components/ui/status-badge';
-import { parseLocalDate } from '@/lib/utils';
+import { parseLocalDate, cn } from '@/lib/utils';
 
 interface Instalacao {
   id: string;
@@ -31,7 +31,14 @@ export const InstalacaoCard: React.FC<InstalacaoCardProps> = ({ instalacao, onEd
   const statusMeta = getStatusMeta(instalacao.status);
 
   return (
-    <div className="card-tech rounded-xl overflow-hidden border border-border border-l-4 border-l-orange-500 hover:border-primary/50 hover:border-l-orange-400 transition-all duration-300">
+    <div
+      className={cn(
+        "card-tech rounded-xl overflow-hidden border border-l-4 transition-all duration-300",
+        instalacao.pedido_recebido
+          ? "border-emerald-500/60 border-l-emerald-500 bg-emerald-500/5 dark:bg-emerald-500/10 ring-2 ring-emerald-500/40 shadow-[0_0_20px_rgba(16,185,129,0.15)] hover:ring-emerald-500/60 hover:border-emerald-400"
+          : "border-border border-l-orange-500 hover:border-primary/50 hover:border-l-orange-400"
+      )}
+    >
       {/* Card Header */}
       <div className="p-4">
         <div className="flex items-start justify-between mb-3">
