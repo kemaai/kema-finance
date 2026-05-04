@@ -5,6 +5,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { AnexosUpload } from '@/components/AnexosUpload';
 
 interface Instalacao {
   id: string;
@@ -26,13 +27,17 @@ interface InstalacaoFormProps {
   onSubmit: (instalacao: Instalacao | Omit<Instalacao, 'id' | 'created_at' | 'updated_at' | 'user_id'>) => void;
   onCancel: () => void;
   isLoading?: boolean;
+  pendingFiles?: File[];
+  onPendingFilesChange?: (files: File[]) => void;
 }
 
 export const InstalacaoForm: React.FC<InstalacaoFormProps> = ({
   instalacao,
   onSubmit,
   onCancel,
-  isLoading = false
+  isLoading = false,
+  pendingFiles = [],
+  onPendingFilesChange,
 }) => {
   const [formData, setFormData] = useState({
     numero_pedido: '',
@@ -209,6 +214,15 @@ export const InstalacaoForm: React.FC<InstalacaoFormProps> = ({
               <option value="Concluído">Concluído</option>
               <option value="Cancelado">Cancelado</option>
             </select>
+          </div>
+
+          <div className="space-y-2">
+            <Label>Anexos</Label>
+            <AnexosUpload
+              instalacaoId={instalacao?.id ?? null}
+              pendingFiles={pendingFiles}
+              onPendingFilesChange={onPendingFilesChange}
+            />
           </div>
 
           <div className="flex flex-col sm:flex-row gap-2 pt-4">

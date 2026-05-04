@@ -9,6 +9,7 @@ import { QuinzenaFilter } from '@/components/QuinzenaFilter';
 import { Button } from '@/components/ui/button';
 import { Plus } from 'lucide-react';
 import { toast } from 'sonner';
+import { ALLOWED_MIME_TYPES, MAX_FILE_SIZE } from '@/hooks/useInstalacaoAnexos';
 
 interface Instalacao {
   id: string;
@@ -28,6 +29,7 @@ interface Instalacao {
 export const Instalacoes = () => {
   const [showForm, setShowForm] = useState(false);
   const [editingInstalacao, setEditingInstalacao] = useState<Instalacao | null>(null);
+  const [pendingFiles, setPendingFiles] = useState<File[]>([]);
   const { user } = useAuth();
   const queryClient = useQueryClient();
 
@@ -99,8 +101,40 @@ export const Instalacoes = () => {
       console.log('Instalacao created successfully:', data);
       return data;
     },
-    onSuccess: () => {
+    onSuccess: async (data) => {
       toast.success('Instalação criada com sucesso!');
+      // Sobe arquivos pendentes (se houver) vinculando à nova instalação
+      if (pendingFiles.length > 0 && user && data?.id) {
+        try {
+          for (const file of pendingFiles) {
+            if (!ALLOWED_MIME_TYPES.includes(file.type)) continue;
+            if (file.size > MAX_FILE_SIZE) continue;
+            const safeName = file.name.replace(/[^a-zA-Z0-9._-]/g, '_').slice(0, 120);
+            const path = `${user.id}/${data.id}/${crypto.randomUUID()}-${safeName}`;
+            const { error: upErr } = await supabase.storage
+              .from('instalacao-anexos')
+              .upload(path, file, { contentType: file.type, upsert: false });
+            if (upErr) throw upErr;
+            const { error: insErr } = await supabase.from('instalacao_anexos').insert({
+              instalacao_id: data.id,
+              user_id: user.id,
+              file_name: file.name,
+              file_path: path,
+              mime_type: file.type,
+              file_size: file.size,
+            });
+            if (insErr) {
+              await supabase.storage.from('instalacao-anexos').remove([path]);
+              throw insErr;
+            }
+          }
+          toast.success('Anexos enviados!');
+          queryClient.invalidateQueries({ queryKey: ['instalacao-anexos', data.id] });
+        } catch {
+          toast.error('Erro ao enviar alguns anexos');
+        }
+      }
+      setPendingFiles([]);
       queryClient.invalidateQueries({ queryKey: ['instalacoes'] });
       setShowForm(false);
     },
@@ -300,8 +334,11 @@ export const Instalacoes = () => {
             onCancel={() => {
               setShowForm(false);
               setEditingInstalacao(null);
+              setPendingFiles([]);
             }}
             isLoading={createInstalacaoMutation.isPending || updateInstalacaoMutation.isPending}
+            pendingFiles={pendingFiles}
+            onPendingFilesChange={setPendingFiles}
           />
         </div>
       )}

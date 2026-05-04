@@ -1,8 +1,10 @@
 import React, { useState } from 'react';
-import { Scissors, Edit, Trash2, ChevronDown, ChevronUp, Calendar, DollarSign, MapPin } from 'lucide-react';
+import { Scissors, Edit, Trash2, ChevronDown, ChevronUp, Calendar, DollarSign, MapPin, Paperclip } from 'lucide-react';
 import { Checkbox } from '@/components/ui/checkbox';
 import { StatusBadge, getStatusMeta } from '@/components/ui/status-badge';
 import { parseLocalDate, cn } from '@/lib/utils';
+import { AnexosUpload } from '@/components/AnexosUpload';
+import { useInstalacaoAnexos } from '@/hooks/useInstalacaoAnexos';
 
 interface Instalacao {
   id: string;
@@ -29,6 +31,7 @@ interface InstalacaoCardProps {
 export const InstalacaoCard: React.FC<InstalacaoCardProps> = ({ instalacao, onEdit, onDelete, onTogglePedidoRecebido }) => {
   const [isExpanded, setIsExpanded] = useState(false);
   const statusMeta = getStatusMeta(instalacao.status);
+  const { anexos } = useInstalacaoAnexos(isExpanded ? instalacao.id : null);
 
   return (
     <div
@@ -134,6 +137,16 @@ export const InstalacaoCard: React.FC<InstalacaoCardProps> = ({ instalacao, onEd
                 <span className="text-muted-foreground">Valor por m²:</span>
                 <p className="font-medium text-foreground">R$ 24,00</p>
               </div>
+            </div>
+
+            <div className="pt-2 border-t border-border/60">
+              <div className="flex items-center gap-2 mb-2">
+                <Paperclip className="w-4 h-4 text-primary" />
+                <span className="text-sm font-medium text-foreground">
+                  Anexos {anexos.length > 0 && `(${anexos.length})`}
+                </span>
+              </div>
+              <AnexosUpload instalacaoId={instalacao.id} />
             </div>
           </div>
         </div>
