@@ -46,11 +46,11 @@ export const useQuinzenaFilter = (instalacoes: Instalacao[]) => {
       return true;
     });
 
-    // Ordenar por data de instalação (mais antiga primeiro)
+    // Ordenar por data de instalação (mais recente primeiro)
     return filtered.sort((a, b) => {
       const dateA = parseLocalDate(a.data_instalacao).getTime();
       const dateB = parseLocalDate(b.data_instalacao).getTime();
-      return dateA - dateB;
+      return dateB - dateA;
     });
   }, [instalacoes, selectedMonth, selectedQuinzena]);
 
