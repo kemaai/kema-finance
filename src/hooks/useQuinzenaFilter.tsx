@@ -23,7 +23,7 @@ export const useQuinzenaFilter = (instalacoes: Instalacao[]) => {
   const filteredInstalacoes = useMemo(() => {
     if (!instalacoes || instalacoes.length === 0) return [];
 
-    return instalacoes.filter((instalacao) => {
+    const filtered = instalacoes.filter((instalacao) => {
       const dataInstalacao = parseLocalDate(instalacao.data_instalacao);
       
       // Filtrar por mês e ano
@@ -44,6 +44,13 @@ export const useQuinzenaFilter = (instalacoes: Instalacao[]) => {
       }
       
       return true;
+    });
+
+    // Ordenar por data de instalação (mais antiga primeiro)
+    return filtered.sort((a, b) => {
+      const dateA = parseLocalDate(a.data_instalacao).getTime();
+      const dateB = parseLocalDate(b.data_instalacao).getTime();
+      return dateA - dateB;
     });
   }, [instalacoes, selectedMonth, selectedQuinzena]);
 
