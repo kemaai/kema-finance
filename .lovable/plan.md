@@ -1,70 +1,70 @@
-# Destaque visual para cards de "Pedido Recebido"
+## Objetivo
 
-## Problema
-Atualmente, quando o checkbox "Pedido Recebido" é marcado, apenas a pequena faixa do checkbox fica verde. O resto do card (#12957 vs #13322 na imagem) continua visualmente idêntico aos demais, dificultando identificar rapidamente quais pedidos já foram pagos/recebidos — especialmente porque o badge de status "Concluído" também é verde.
+Permitir anexar arquivos (imagens, PDF, planilhas, documentos Word) a cada instalação, com possibilidade de visualizar e compartilhar os anexos.
 
-## Solução
-Aplicar um destaque verde envolvendo o card **inteiro** quando `pedido_recebido === true`, mantendo todos os dados perfeitamente legíveis (sem cobrir conteúdo, sem reduzir contraste).
+## Visão geral
 
-### Comportamento visual proposto
-Quando `pedido_recebido` for `true`, o card terá:
-
-1. **Borda verde brilhante em todo o perímetro** (em vez da borda padrão `border-border`) — substitui também a borda lateral laranja (`border-l-orange-500`) por verde, deixando claro o "estado pago".
-2. **Fundo levemente esverdeado** usando uma camada translúcida (`bg-emerald-500/5` no claro, `bg-emerald-500/10` no escuro) — sutil o suficiente para não competir com o texto.
-3. **Glow/ring verde externo** (`ring-2 ring-emerald-500/40` + `shadow-[0_0_20px_rgba(16,185,129,0.15)]`) que cria o efeito de "halo" ao redor do card, separando-o visualmente dos demais.
-4. **Hover preserva o destaque verde** (em vez de virar laranja), reforçando o estado.
-
-A faixa interna do checkbox "Pedido Recebido" continua existindo, mas agora reforça o estado em vez de ser o único indicador.
-
-### Comparação visual (ASCII)
-
-```text
-ANTES (recebido)              DEPOIS (recebido)
-┌────────────────────┐        ╔════════════════════╗  ← ring verde + glow
-│▌ #13322  Concluído │        ║▌ #13322  Concluído ║
-│  Bianca            │        ║  Bianca            ║  ← fundo verde sutil
-│ ┌────────────────┐ │        ║ ┌────────────────┐ ║
-│ │✓ Pedido Receb. │ │        ║ │✓ Pedido Receb. │ ║
-│ └────────────────┘ │        ║ └────────────────┘ ║
-│  R$ 2071,20        │        ║  R$ 2071,20        ║
-└────────────────────┘        ╚════════════════════╝
-(idêntico aos outros)         (claramente diferente)
-```
-
-Cards **não recebidos** mantêm exatamente o visual atual (borda lateral laranja, fundo padrão), preservando consistência com o restante do sistema.
+1. **Storage** — criar bucket privado `instalacao-anexos` no Supabase com RLS por usuário.
+2. **Banco** — criar tabela `instalacao_anexos` para registrar metadados (nome, tipo, tamanho, path).
+3. **Formulário (`InstalacaoForm.tsx`)** — adicionar área de upload (multi-arquivo, drag & drop) com validação de formato e tamanho. Lista anexos já existentes (em modo edição) com opção de remover.
+4. **Card (`InstalacaoCard.tsx`)** — na seção expandida, listar anexos com ações: **Visualizar** (abre em nova aba via signed URL) e **Compartilhar** (Web Share API + fallback de copiar link).
 
 ## Detalhes técnicos
 
-**Arquivo único alterado:** `src/components/InstalacaoCard.tsx`
+### Storage bucket
+- `id: 'instalacao-anexos'`, **privado** (não público — documentos podem ter dados sensíveis).
+- Acesso via **signed URLs** (expiração curta para visualizar; mais longa para compartilhar — ex. 7 dias).
+- Estrutura de pastas: `{user_id}/{instalacao_id}/{uuid}-{nome_arquivo}`.
 
-Alterar a `className` do container raiz (atualmente):
-```tsx
-className="card-tech rounded-xl overflow-hidden border border-border border-l-4 border-l-orange-500 hover:border-primary/50 hover:border-l-orange-400 transition-all duration-300"
+### RLS no storage.objects
+Políticas restringindo SELECT/INSERT/UPDATE/DELETE ao próprio usuário, validando que o primeiro segmento do path é igual ao `auth.uid()`.
+
+### Tabela `instalacao_anexos`
+```text
+id              uuid PK
+instalacao_id   uuid (referencia logicamente instalacoes.id)
+user_id         uuid
+file_name       text          -- nome original
+file_path       text          -- caminho no bucket
+mime_type       text
+file_size       bigint
+created_at      timestamptz default now()
 ```
+RLS padrão: usuário só vê/edita os próprios (`auth.uid() = user_id`), seguindo o padrão do projeto (memória `Row Level Security`).
 
-Para uma versão condicional baseada em `instalacao.pedido_recebido`, usando `cn()` de `@/lib/utils`:
+### Formatos aceitos
+- Imagens: `image/jpeg`, `image/png`, `image/webp`, `image/gif`
+- PDF: `application/pdf`
+- Planilhas: `.xlsx`, `.xls`, `.csv`
+- Documentos: `.doc`, `.docx`
+- Limite: 10 MB por arquivo (validação no client + via política).
 
-```tsx
-import { cn } from '@/lib/utils';
+### Mudanças no formulário
+- Componente `<AnexosUpload>` com input `<input type="file" multiple accept="...">`.
+- Em modo "novo": acumula arquivos em estado local; faz upload **após** criar a instalação (precisa do `instalacao.id`).
+- Em modo "edição": faz upload imediato vinculando ao `instalacao_id` existente.
+- Mostra progresso e thumbnails (imagens) / ícone por tipo (PDF, planilha, doc).
 
-<div
-  className={cn(
-    "card-tech rounded-xl overflow-hidden border border-l-4 transition-all duration-300",
-    instalacao.pedido_recebido
-      ? "border-emerald-500/60 border-l-emerald-500 bg-emerald-500/5 dark:bg-emerald-500/10 ring-2 ring-emerald-500/40 shadow-[0_0_20px_rgba(16,185,129,0.15)] hover:ring-emerald-500/60 hover:border-emerald-400"
-      : "border-border border-l-orange-500 hover:border-primary/50 hover:border-l-orange-400"
-  )}
->
-```
+### Visualização e compartilhamento (no card expandido)
+- Botão **Visualizar**: gera signed URL (60s) e `window.open` em nova aba. Imagens e PDF abrem inline; planilhas/doc fazem download.
+- Botão **Compartilhar**: gera signed URL (7 dias) e:
+  - Se `navigator.share` disponível (mobile) → abre share sheet nativo com link.
+  - Senão → copia o link para a área de transferência com toast de confirmação.
+- Botão **Remover** (ícone lixeira) com confirmação.
 
-### Notas
-- Usa a paleta `emerald-500` já presente no `StatusBadge` (`success` tone), mantendo consistência.
-- Opacidade baixa no fundo (`/5` e `/10`) garante que texto branco/orange (R$ 2071,20) permaneça totalmente legível.
-- `ring` é externo (não consome espaço interno), então layout/dados não se deslocam.
-- Não toca em regra de negócio, hooks, banco, ou no `InstalacaoForm`.
-- Não altera o card no estado "não recebido".
+### Hook auxiliar
+Criar `useInstalacaoAnexos(instalacaoId)` para listar/uploadar/remover anexos via React Query, mantendo padrão do projeto.
 
-## Fora do escopo
-- Mudanças no badge de status "Concluído".
-- Mudanças no formulário de instalação.
-- Animação de transição ao marcar/desmarcar (pode ser adicionada depois se desejado).
+## Arquivos afetados
+- **Nova migração**: tabela `instalacao_anexos`, bucket `instalacao-anexos`, políticas RLS.
+- **Novo**: `src/components/AnexosUpload.tsx` (input + lista de anexos com ações).
+- **Novo**: `src/hooks/useInstalacaoAnexos.tsx`.
+- **Editar**: `src/components/InstalacaoForm.tsx` — incluir `<AnexosUpload>` e disparar upload pendente após criação.
+- **Editar**: `src/components/InstalacaoCard.tsx` — exibir anexos na seção expandida com Visualizar/Compartilhar/Remover.
+- **Editar**: `src/pages/Instalacoes.tsx` — após `createInstalacaoMutation.onSuccess`, repassar o novo `id` ao form para concluir uploads pendentes.
+
+## Considerações de segurança
+- Bucket privado + signed URLs (nunca expor URLs públicas).
+- Validação de MIME type e tamanho no client antes do upload.
+- RLS garante isolamento por usuário tanto na tabela quanto no storage.
+- Toast genérico em erros (sem vazar detalhes), conforme padrão do projeto.
