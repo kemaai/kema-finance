@@ -46,11 +46,15 @@ export const useQuinzenaFilter = (instalacoes: Instalacao[]) => {
       return true;
     });
 
-    // Ordenar por data de instalação (mais recente primeiro)
+    // Ordenar por data de instalação (mais recente primeiro);
+    // dentro da mesma data, "pedido recebido" vem antes dos demais.
     return filtered.sort((a, b) => {
       const dateA = parseLocalDate(a.data_instalacao).getTime();
       const dateB = parseLocalDate(b.data_instalacao).getTime();
-      return dateB - dateA;
+      if (dateA !== dateB) return dateB - dateA;
+      const recA = a.pedido_recebido ? 1 : 0;
+      const recB = b.pedido_recebido ? 1 : 0;
+      return recB - recA;
     });
   }, [instalacoes, selectedMonth, selectedQuinzena]);
 
