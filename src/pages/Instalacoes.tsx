@@ -33,13 +33,10 @@ export const Instalacoes = () => {
   const { user } = useAuth();
   const queryClient = useQueryClient();
 
-  console.log('User authenticated:', !!user);
-  console.log('User ID:', user?.id);
 
   const { data: instalacoes = [], isLoading } = useQuery({
     queryKey: ['instalacoes'],
     queryFn: async () => {
-      console.log('Fetching instalacoes for user:', user?.id);
       const { data, error } = await supabase
         .from('instalacoes')
         .select('*')
@@ -50,7 +47,6 @@ export const Instalacoes = () => {
         throw error;
       }
       
-      console.log('Instalacoes fetched:', data);
       return (data || []).map((instalacao: any) => ({
         ...instalacao,
         pedido_recebido: instalacao.pedido_recebido ?? false
@@ -76,8 +72,6 @@ export const Instalacoes = () => {
         throw new Error('Usuário não autenticado');
       }
 
-      console.log('Creating instalacao with data:', instalacaoData);
-      console.log('User ID for creation:', user.id);
 
       const dataToInsert = {
         ...instalacaoData,
@@ -85,7 +79,6 @@ export const Instalacoes = () => {
         valor_total: Number(instalacaoData.valor_total), // Garantir que é número
       };
 
-      console.log('Data being inserted:', dataToInsert);
 
       const { data, error } = await supabase
         .from('instalacoes')
@@ -98,7 +91,6 @@ export const Instalacoes = () => {
         throw error;
       }
 
-      console.log('Instalacao created successfully:', data);
       return data;
     },
     onSuccess: async (data) => {
@@ -150,7 +142,6 @@ export const Instalacoes = () => {
         throw new Error('Usuário não autenticado');
       }
 
-      console.log('Updating instalacao with data:', instalacaoData);
 
       const { data, error } = await supabase
         .from('instalacoes')
@@ -173,7 +164,6 @@ export const Instalacoes = () => {
         throw error;
       }
 
-      console.log('Instalacao updated successfully:', data);
       return data;
     },
     onSuccess: () => {
@@ -193,7 +183,6 @@ export const Instalacoes = () => {
         throw new Error('Usuário não autenticado');
       }
 
-      console.log('Deleting instalacao with id:', id);
 
       const { error } = await supabase
         .from('instalacoes')
@@ -206,7 +195,6 @@ export const Instalacoes = () => {
         throw error;
       }
 
-      console.log('Instalacao deleted successfully');
     },
     onSuccess: () => {
       toast.success('Instalação excluída com sucesso!');
@@ -219,17 +207,14 @@ export const Instalacoes = () => {
   });
 
   const handleCreateInstalacao = (instalacaoData: Omit<Instalacao, 'id' | 'created_at' | 'updated_at' | 'user_id'>) => {
-    console.log('Handle create instalacao called with:', instalacaoData);
     createInstalacaoMutation.mutate(instalacaoData);
   };
 
   const handleUpdateInstalacao = (instalacao: Instalacao) => {
-    console.log('Handle update instalacao called with:', instalacao);
     updateInstalacaoMutation.mutate(instalacao);
   };
 
   const handleDeleteInstalacao = (id: string) => {
-    console.log('Handle delete instalacao called with id:', id);
     if (confirm('Tem certeza que deseja excluir esta instalação?')) {
       deleteInstalacaoMutation.mutate(id);
     }

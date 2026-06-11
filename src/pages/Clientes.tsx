@@ -30,8 +30,6 @@ export const Clientes = () => {
   const { user } = useAuth();
   const queryClient = useQueryClient();
 
-  console.log('User authenticated:', !!user);
-  console.log('User ID:', user?.id);
 
   const { data: clientes = [], isLoading } = useQuery({
     queryKey: ['clientes'],
@@ -74,15 +72,12 @@ export const Clientes = () => {
         throw new Error('Usuário não autenticado');
       }
 
-      console.log('Creating cliente with data:', clienteData);
-      console.log('User ID for creation:', user.id);
 
       const dataToInsert = {
         ...clienteData,
         user_id: user.id,
       };
 
-      console.log('Data being inserted:', dataToInsert);
 
       const { data, error } = await supabase
         .from('clientes')
@@ -95,7 +90,6 @@ export const Clientes = () => {
         throw error;
       }
 
-      console.log('Cliente created successfully:', data);
       return data;
     },
     onSuccess: () => {
@@ -115,7 +109,6 @@ export const Clientes = () => {
         throw new Error('Usuário não autenticado');
       }
 
-      console.log('Updating cliente with data:', clienteData);
 
       const { data, error } = await supabase
         .from('clientes')
@@ -140,7 +133,6 @@ export const Clientes = () => {
         throw error;
       }
 
-      console.log('Cliente updated successfully:', data);
       return data;
     },
     onSuccess: () => {
@@ -160,7 +152,6 @@ export const Clientes = () => {
         throw new Error('Usuário não autenticado');
       }
 
-      console.log('Deleting cliente with id:', id);
 
       const { error } = await supabase
         .from('clientes')
@@ -173,7 +164,6 @@ export const Clientes = () => {
         throw error;
       }
 
-      console.log('Cliente deleted successfully');
     },
     onSuccess: () => {
       toast.success('Cliente excluído com sucesso!');
@@ -186,17 +176,14 @@ export const Clientes = () => {
   });
 
   const handleCreateCliente = (clienteData: Omit<Cliente, 'id' | 'created_at' | 'updated_at' | 'user_id'>) => {
-    console.log('Handle create cliente called with:', clienteData);
     createClienteMutation.mutate(clienteData);
   };
 
   const handleUpdateCliente = (cliente: Cliente) => {
-    console.log('Handle update cliente called with:', cliente);
     updateClienteMutation.mutate(cliente);
   };
 
   const handleDeleteCliente = (id: string) => {
-    console.log('Handle delete cliente called with id:', id);
     if (confirm('Tem certeza que deseja excluir este cliente?')) {
       deleteClienteMutation.mutate(id);
     }
