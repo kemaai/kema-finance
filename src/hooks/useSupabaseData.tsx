@@ -121,24 +121,17 @@ export const useSites = () => {
   return useQuery({
     queryKey: ['sites'],
     queryFn: async (): Promise<Site[]> => {
-      if (!user) {
-        console.log('No user found, returning empty array');
-        return [];
-      }
+      if (!user) return [];
 
-      console.log('Fetching sites for user:', user.id);
-      
       const { data, error } = await supabase
         .from('sites')
         .select('*')
         .order('created_at', { ascending: false });
 
       if (error) {
-        console.error('Error fetching sites:', error);
         throw error;
       }
 
-      console.log('Sites fetched:', data);
       return data || [];
     },
     enabled: !!user,
@@ -151,24 +144,17 @@ export const useClientes = () => {
   return useQuery({
     queryKey: ['clientes'],
     queryFn: async (): Promise<Cliente[]> => {
-      if (!user) {
-        console.log('No user found, returning empty array');
-        return [];
-      }
+      if (!user) return [];
 
-      console.log('Fetching clientes for user:', user.id);
-      
       const { data, error } = await supabase
         .from('clientes')
         .select('*')
         .order('created_at', { ascending: false });
 
       if (error) {
-        console.error('Error fetching clientes:', error);
         throw error;
       }
 
-      console.log('Clientes fetched:', data);
       return data || [];
     },
     enabled: !!user,
@@ -181,24 +167,17 @@ export const useInstalacoes = () => {
   return useQuery({
     queryKey: ['instalacoes'],
     queryFn: async (): Promise<Instalacao[]> => {
-      if (!user) {
-        console.log('No user found, returning empty array');
-        return [];
-      }
+      if (!user) return [];
 
-      console.log('Fetching instalacoes for user:', user.id);
-      
       const { data, error } = await supabase
         .from('instalacoes')
         .select('*')
         .order('created_at', { ascending: false });
 
       if (error) {
-        console.error('Error fetching instalacoes:', error);
         throw error;
       }
 
-      console.log('Instalacoes fetched:', data);
       return data || [];
     },
     enabled: !!user,
@@ -232,24 +211,17 @@ export const useEmprestimos = () => {
   return useQuery({
     queryKey: ['emprestimos'],
     queryFn: async (): Promise<Emprestimo[]> => {
-      if (!user) {
-        console.log('No user found, returning empty array');
-        return [];
-      }
+      if (!user) return [];
 
-      console.log('Fetching emprestimos for user:', user.id);
-      
       const { data, error } = await supabase
         .from('emprestimos')
         .select('*')
         .order('created_at', { ascending: false });
 
       if (error) {
-        console.error('Error fetching emprestimos:', error);
         throw error;
       }
 
-      console.log('Emprestimos fetched:', data);
       return data || [];
     },
     enabled: !!user,
@@ -262,24 +234,17 @@ export const usePagamentosEmprestimo = () => {
   return useQuery({
     queryKey: ['pagamentos_emprestimo'],
     queryFn: async (): Promise<PagamentoEmprestimo[]> => {
-      if (!user) {
-        console.log('No user found, returning empty array');
-        return [];
-      }
+      if (!user) return [];
 
-      console.log('Fetching pagamentos_emprestimo for user:', user.id);
-      
       const { data, error } = await supabase
         .from('pagamentos_emprestimo')
         .select('*')
         .order('data_pagamento', { ascending: false });
 
       if (error) {
-        console.error('Error fetching pagamentos_emprestimo:', error);
         throw error;
       }
 
-      console.log('Pagamentos emprestimo fetched:', data);
       return data || [];
     },
     enabled: !!user,
@@ -292,24 +257,17 @@ export const useDividasNegativadas = () => {
   return useQuery({
     queryKey: ['dividas_negativadas'],
     queryFn: async (): Promise<DividaNegativada[]> => {
-      if (!user) {
-        console.log('No user found, returning empty array');
-        return [];
-      }
+      if (!user) return [];
 
-      console.log('Fetching dividas_negativadas for user:', user.id);
-      
       const { data, error } = await supabase
         .from('dividas_negativadas')
         .select('*')
         .order('created_at', { ascending: false });
 
       if (error) {
-        console.error('Error fetching dividas_negativadas:', error);
         throw error;
       }
 
-      console.log('Dividas negativadas fetched:', data);
       return data || [];
     },
     enabled: !!user,
