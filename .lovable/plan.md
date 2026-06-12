@@ -1,70 +1,95 @@
-## Objetivo
+# Auditoria do KemaFinance — Bugs, Segurança e Melhorias
 
-Permitir anexar arquivos (imagens, PDF, planilhas, documentos Word) a cada instalação, com possibilidade de visualizar e compartilhar os anexos.
+## 1. Estado atual (resultado da varredura)
 
-## Visão geral
+**Segurança automatizada — TUDO LIMPO no código:**
+- `agent_security`: 0 findings
+- `connector_security_scan` (Wiz): 0 findings
+- `supabase` / `supabase_lov`: 0 findings
+- `npm audit`: 0 vulnerabilidades altas/críticas
 
-1. **Storage** — criar bucket privado `instalacao-anexos` no Supabase com RLS por usuário.
-2. **Banco** — criar tabela `instalacao_anexos` para registrar metadados (nome, tipo, tamanho, path).
-3. **Formulário (`InstalacaoForm.tsx`)** — adicionar área de upload (multi-arquivo, drag & drop) com validação de formato e tamanho. Lista anexos já existentes (em modo edição) com opção de remover.
-4. **Card (`InstalacaoCard.tsx`)** — na seção expandida, listar anexos com ações: **Visualizar** (abre em nova aba via signed URL) e **Compartilhar** (Web Share API + fallback de copiar link).
+**3 alertas do Supabase Linter — requerem ação manual no dashboard (não há como corrigir por código):**
+1. OTP com expiração acima do recomendado
+2. Proteção contra senhas vazadas desabilitada
+3. Versão do Postgres com patches de segurança disponíveis
 
-## Detalhes técnicos
+**Boas práticas já implementadas (confirmadas):**
+- RLS em todas as tabelas com `.eq('user_id', user.id)` defensivo no client
+- Mascaramento de CPF/CNPJ na UI
+- `console.*` desabilitado em produção
+- Validação de uploads (MIME + tamanho) em `useInstalacaoAnexos`
+- Edge function `kema-finance-ai` com JWT, limite de mensagens e sanitização
+- PWA com Service Worker, manifest e prompt de instalação
+- SEO básico (sitemap, JSON-LD, OG/Twitter, canonical)
 
-### Storage bucket
-- `id: 'instalacao-anexos'`, **privado** (não público — documentos podem ter dados sensíveis).
-- Acesso via **signed URLs** (expiração curta para visualizar; mais longa para compartilhar — ex. 7 dias).
-- Estrutura de pastas: `{user_id}/{instalacao_id}/{uuid}-{nome_arquivo}`.
+## 2. Correções propostas (Bugs e pequenas falhas)
 
-### RLS no storage.objects
-Políticas restringindo SELECT/INSERT/UPDATE/DELETE ao próprio usuário, validando que o primeiro segmento do path é igual ao `auth.uid()`.
+### B1. `verify_jwt = false` em `kema-finance-ai`
+`supabase/config.toml` declara `verify_jwt = false`, mas a função já valida o JWT internamente via `supabase.auth.getClaims`. Está seguro, mas inconsistente — vou ligar `verify_jwt = true` para defesa em profundidade (o gateway rejeita requests não autenticadas antes mesmo de chegarem na função).
 
-### Tabela `instalacao_anexos`
-```text
-id              uuid PK
-instalacao_id   uuid (referencia logicamente instalacoes.id)
-user_id         uuid
-file_name       text          -- nome original
-file_path       text          -- caminho no bucket
-mime_type       text
-file_size       bigint
-created_at      timestamptz default now()
-```
-RLS padrão: usuário só vê/edita os próprios (`auth.uid() = user_id`), seguindo o padrão do projeto (memória `Row Level Security`).
+### B2. 35 chamadas `console.*` espalhadas
+Já são silenciadas em produção via `main.tsx`, mas algumas estão em handlers de erro úteis. Vou padronizar:
+- manter `console.error` somente onde realmente ajuda debug
+- remover `console.log` de fluxos normais (Servicos, Sites, Perfil, AnexosUpload, etc.)
 
-### Formatos aceitos
-- Imagens: `image/jpeg`, `image/png`, `image/webp`, `image/gif`
-- PDF: `application/pdf`
-- Planilhas: `.xlsx`, `.xls`, `.csv`
-- Documentos: `.doc`, `.docx`
-- Limite: 10 MB por arquivo (validação no client + via política).
+### B3. Rota órfã `/sites`
+`Sites.tsx` ainda existe no projeto, mas a rota `/sites` está como `<Navigate to="/servicos">`. Vou remover o arquivo `src/pages/Sites.tsx` (código morto).
 
-### Mudanças no formulário
-- Componente `<AnexosUpload>` com input `<input type="file" multiple accept="...">`.
-- Em modo "novo": acumula arquivos em estado local; faz upload **após** criar a instalação (precisa do `instalacao.id`).
-- Em modo "edição": faz upload imediato vinculando ao `instalacao_id` existente.
-- Mostra progresso e thumbnails (imagens) / ícone por tipo (PDF, planilha, doc).
+### B4. Cleanup de listener no `useAuth`
+Funciona, mas o `getUser()` inicial roda em paralelo com `onAuthStateChange`, podendo gerar 2 fetches do profile na inicialização. Vou usar apenas `onAuthStateChange` + `getSession` síncrono inicial.
 
-### Visualização e compartilhamento (no card expandido)
-- Botão **Visualizar**: gera signed URL (60s) e `window.open` em nova aba. Imagens e PDF abrem inline; planilhas/doc fazem download.
-- Botão **Compartilhar**: gera signed URL (7 dias) e:
-  - Se `navigator.share` disponível (mobile) → abre share sheet nativo com link.
-  - Senão → copia o link para a área de transferência com toast de confirmação.
-- Botão **Remover** (ícone lixeira) com confirmação.
+### B5. Validação Zod em formulários sensíveis
+Atualmente `ClienteForm`, `InstalacaoForm`, `DespesaForm` validam campo a campo. Vou centralizar em `src/lib/validations.ts` (já existe) usando schemas Zod com limites de tamanho — protege contra payloads abusivos antes de bater no Supabase.
 
-### Hook auxiliar
-Criar `useInstalacaoAnexos(instalacaoId)` para listar/uploadar/remover anexos via React Query, mantendo padrão do projeto.
+### B6. Anexos de instalação — link de compartilhamento
+O `AnexosUpload` gera signed URL com expiração curta. Vou conferir a expiração e adicionar opção de gerar link com TTL configurável (15min / 1h / 24h) para compartilhamento seguro.
 
-## Arquivos afetados
-- **Nova migração**: tabela `instalacao_anexos`, bucket `instalacao-anexos`, políticas RLS.
-- **Novo**: `src/components/AnexosUpload.tsx` (input + lista de anexos com ações).
-- **Novo**: `src/hooks/useInstalacaoAnexos.tsx`.
-- **Editar**: `src/components/InstalacaoForm.tsx` — incluir `<AnexosUpload>` e disparar upload pendente após criação.
-- **Editar**: `src/components/InstalacaoCard.tsx` — exibir anexos na seção expandida com Visualizar/Compartilhar/Remover.
-- **Editar**: `src/pages/Instalacoes.tsx` — após `createInstalacaoMutation.onSuccess`, repassar o novo `id` ao form para concluir uploads pendentes.
+## 3. Melhorias recomendadas (opcional — confirmar quais aplicar)
 
-## Considerações de segurança
-- Bucket privado + signed URLs (nunca expor URLs públicas).
-- Validação de MIME type e tamanho no client antes do upload.
-- RLS garante isolamento por usuário tanto na tabela quanto no storage.
-- Toast genérico em erros (sem vazar detalhes), conforme padrão do projeto.
+### M1. Per-route SEO com `react-helmet-async`
+Mesmo com tudo autenticado, ajuda em compartilhamentos internos.
+
+### M2. Lazy-loading das páginas (React.lazy + Suspense)
+Bundle inicial cai significativamente; melhora LCP e PWA.
+
+### M3. Error Boundary global
+Hoje um erro de render quebra a tela inteira. Adicionar `<ErrorBoundary>` com fallback amigável.
+
+### M4. Skeleton loaders padronizados
+Substituir spinners genéricos por skeletons nos cards do Dashboard / listagens.
+
+### M5. Exportação CSV/PDF dos relatórios
+A página `Relatorios` já tem TXT — adicionar CSV e PDF (jspdf) para envio a contador/cliente.
+
+### M6. Backup automático (export periódico)
+Botão "Exportar tudo" no Perfil → baixa um ZIP com JSON de todas as tabelas do usuário.
+
+### M7. Notificações de vencimento (PWA push)
+Service Worker + Notifications API para avisar despesas/instalações vencendo.
+
+### M8. Confirmação 2FA opcional no login
+Supabase Auth suporta TOTP — flag por usuário no perfil.
+
+### M9. Auditoria/log de ações sensíveis
+Tabela `audit_log` (user_id, action, entity, payload, created_at) preenchida via trigger nas operações de UPDATE/DELETE em emprestimos, dividas_negativadas, instalacoes.
+
+### M10. Testes automatizados
+Hoje há 0 testes. Sugiro Vitest + Testing Library cobrindo:
+- cálculo de M² (`valor_total / 24`)
+- filtros de quinzena
+- score financeiro do agente IA
+
+## 4. Itens que exigem ação sua no dashboard Supabase
+- Ativar **Leaked Password Protection** em Auth → Providers
+- Reduzir **OTP expiry** (recomendado ≤ 3600s)
+- **Upgrade do Postgres** em Settings → Infrastructure
+
+## 5. O que vou implementar ao aprovar este plano
+
+Por padrão (correções essenciais — baixo risco):
+**B1, B2, B3, B4, B5, B6**
+
+Por padrão (melhorias de alto valor / baixo esforço):
+**M2 (lazy loading), M3 (Error Boundary), M5 (export CSV/PDF nos relatórios)**
+
+Os demais itens (M1, M4, M6, M7, M8, M9, M10) só executo se você marcar quais quer. Me diga quais incluir ou se prefere outra combinação.

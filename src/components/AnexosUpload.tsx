@@ -2,6 +2,14 @@ import React, { useRef, useState } from 'react';
 import { Upload, FileText, FileSpreadsheet, FileImage, File as FileIcon, Trash2, Eye, Share2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+import {
   useInstalacaoAnexos,
   ACCEPT_ATTR,
   ALLOWED_MIME_TYPES,
@@ -30,6 +38,13 @@ const formatSize = (bytes: number) => {
   if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
   return `${(bytes / 1024 / 1024).toFixed(1)} MB`;
 };
+
+const TTL_OPTIONS: { label: string; seconds: number }[] = [
+  { label: '15 minutos', seconds: 60 * 15 },
+  { label: '1 hora', seconds: 60 * 60 },
+  { label: '24 horas', seconds: 60 * 60 * 24 },
+  { label: '7 dias', seconds: 60 * 60 * 24 * 7 },
+];
 
 export const AnexosUpload: React.FC<AnexosUploadProps> = ({
   instalacaoId,
@@ -83,10 +98,10 @@ export const AnexosUpload: React.FC<AnexosUploadProps> = ({
     }
   };
 
-  const handleShare = async (anexo: InstalacaoAnexo) => {
+  const handleShare = async (anexo: InstalacaoAnexo, ttlSeconds: number, ttlLabel: string) => {
     setSharingId(anexo.id);
     try {
-      const url = await getSignedUrl(anexo.file_path, 60 * 60 * 24 * 7); // 7 dias
+      const url = await getSignedUrl(anexo.file_path, ttlSeconds);
       const shareData = {
         title: anexo.file_name,
         text: `Anexo: ${anexo.file_name}`,
@@ -101,7 +116,7 @@ export const AnexosUpload: React.FC<AnexosUploadProps> = ({
         }
       }
       await navigator.clipboard.writeText(url);
-      toast.success('Link copiado! Válido por 7 dias.');
+      toast.success(`Link copiado! Válido por ${ttlLabel}.`);
     } catch {
       toast.error('Não foi possível compartilhar');
     } finally {
@@ -198,16 +213,31 @@ export const AnexosUpload: React.FC<AnexosUploadProps> = ({
                     >
                       <Eye className="w-4 h-4" />
                     </button>
-                    <button
-                      type="button"
-                      onClick={() => handleShare(a)}
-                      disabled={sharingId === a.id}
-                      className="p-1.5 text-primary hover:bg-primary/10 rounded disabled:opacity-50"
-                      aria-label="Compartilhar"
-                      title="Compartilhar"
-                    >
-                      <Share2 className="w-4 h-4" />
-                    </button>
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <button
+                          type="button"
+                          disabled={sharingId === a.id}
+                          className="p-1.5 text-primary hover:bg-primary/10 rounded disabled:opacity-50"
+                          aria-label="Compartilhar"
+                          title="Compartilhar"
+                        >
+                          <Share2 className="w-4 h-4" />
+                        </button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end">
+                        <DropdownMenuLabel>Validade do link</DropdownMenuLabel>
+                        <DropdownMenuSeparator />
+                        {TTL_OPTIONS.map((opt) => (
+                          <DropdownMenuItem
+                            key={opt.seconds}
+                            onClick={() => handleShare(a, opt.seconds, opt.label)}
+                          >
+                            {opt.label}
+                          </DropdownMenuItem>
+                        ))}
+                      </DropdownMenuContent>
+                    </DropdownMenu>
                     <button
                       type="button"
                       onClick={() => {

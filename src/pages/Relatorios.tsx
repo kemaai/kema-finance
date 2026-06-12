@@ -8,6 +8,14 @@ import { useServicos, useClientes, useInstalacoes, useDespesas, useEmprestimos, 
 import { RelatorioFilter } from '../components/RelatorioFilter';
 import { RelatorioChart } from '../components/RelatorioChart';
 import { getWeekNumber, getPeriodoDatas, formatPeriodo, isDateInPeriod, getHistoricoPeriodos } from '@/lib/dateUtils';
+import { exportReportCSV, exportReportPDF, type ReportSection } from '@/lib/reportExport';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+import { ChevronDown } from 'lucide-react';
 
 export const Relatorios = () => {
   const { data: servicos = [], isLoading: sitesLoading } = useServicos();
@@ -394,6 +402,75 @@ export const Relatorios = () => {
     URL.revokeObjectURL(url);
   };
 
+  // ===== Export estruturado (CSV / PDF) — somente "Geral" =====
+  const buildGeralSections = (): ReportSection[] => {
+    const fmt = (n: number) => `R$ ${n.toFixed(2)}`;
+    return [
+      {
+        title: 'Receitas',
+        rows: [
+          ['Serviços', fmt(metricas.receitaServicos)],
+          ['Instalações', fmt(metricas.receitaInstalacoes)],
+          ['Total Receitas', fmt(metricas.receitaTotal)],
+        ],
+      },
+      {
+        title: 'Instalações',
+        rows: [
+          ['Total', metricas.totalInstalacoes],
+          ['Concluídas', metricas.instalacoesConcluidas],
+          ['Metragem Total (M²)', metricas.metragemTotal.toFixed(2)],
+        ],
+      },
+      {
+        title: 'Despesas',
+        rows: [
+          ['Total', fmt(metricas.totalDespesas)],
+          ['Pagas', fmt(metricas.despesasPagas)],
+          ['Pendentes', fmt(metricas.despesasPendentes)],
+        ],
+      },
+      {
+        title: 'Dívidas & Empréstimos',
+        rows: [
+          ['Empréstimos restantes', fmt(metricas.totalEmprestimos)],
+          ['Pagamentos no período', fmt(metricas.totalPagoNoPeriodo)],
+          ['Dívidas pendentes', fmt(metricas.totalDividas)],
+          ['Dívidas quitadas no período', fmt(metricas.valorDividasPagasNoPeriodo)],
+        ],
+      },
+      {
+        title: 'Resumo',
+        rows: [
+          ['Clientes novos no período', metricas.clientesNovos],
+          ['Total de clientes', metricas.totalClientesGeral],
+          ['Saldo Líquido', fmt(metricas.saldoLiquido)],
+        ],
+      },
+    ];
+  };
+
+  const exportarGeralEstruturado = (format: 'csv' | 'pdf') => {
+    const periodoLabel = formatPeriodo(periodoRelatorio, semanaEscolhida, mesEscolhido, anoEscolhido);
+    const periodoNomeArquivo = periodoRelatorio === 'semanal'
+      ? `semana${semanaEscolhida}-${anoEscolhido}`
+      : periodoRelatorio === 'mensal'
+        ? `${nomesMeses[mesEscolhido].toLowerCase()}-${anoEscolhido}`
+        : `anual-${anoEscolhido}`;
+    const filename = `relatorio-geral-${periodoNomeArquivo}`;
+    const sections = buildGeralSections();
+    if (format === 'csv') {
+      exportReportCSV(filename, sections);
+    } else {
+      exportReportPDF(
+        filename,
+        'Relatório Geral KemaFinance',
+        `${periodoLabel} • Gerado em ${hoje.toLocaleDateString('pt-BR')}`,
+        sections,
+      );
+    }
+  };
+
   if (isLoading) {
     return (
       <div className="p-3 md:p-6 pb-20 md:pb-6">
@@ -414,13 +491,26 @@ export const Relatorios = () => {
             Análises {periodoRelatorio === 'semanal' ? 'semanais' : periodoRelatorio === 'mensal' ? 'mensais' : 'anuais'} de todos os dados
           </p>
         </div>
-        <button 
-          onClick={() => exportarRelatorio('geral')}
-          className="btn-tech px-4 py-2 rounded-lg flex items-center justify-center gap-2 transition-colors w-full md:w-auto"
-        >
-          <Download className="w-4 h-4" />
-          Exportar Geral
-        </button>
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <button className="btn-tech px-4 py-2 rounded-lg flex items-center justify-center gap-2 transition-colors w-full md:w-auto">
+              <Download className="w-4 h-4" />
+              Exportar Geral
+              <ChevronDown className="w-4 h-4 opacity-70" />
+            </button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end">
+            <DropdownMenuItem onClick={() => exportarRelatorio('geral')}>
+              TXT (texto)
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => exportarGeralEstruturado('csv')}>
+              CSV (Excel)
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => exportarGeralEstruturado('pdf')}>
+              PDF
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
       </div>
 
       {/* Componente de Filtros */}
