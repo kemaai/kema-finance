@@ -182,6 +182,7 @@ export const Dashboard = () => {
             <button
               onClick={handleRefresh}
               disabled={isRefreshing}
+              aria-label="Atualizar dados do painel"
               className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-muted/60 hover:bg-muted border border-border text-xs text-muted-foreground hover:text-foreground transition-all self-start sm:self-auto"
             >
               <RefreshCw className={`w-3.5 h-3.5 ${isRefreshing ? 'animate-spin' : ''}`} />

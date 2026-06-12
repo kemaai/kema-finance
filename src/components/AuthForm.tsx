@@ -132,7 +132,7 @@ export const AuthForm = () => {
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_80%_80%,hsl(var(--accent)/0.1),transparent_50%)]" />
 
         <div className="relative z-10 flex items-center gap-3">
-          <img src={kemaIcon} alt="KemaFinance" width={48} height={48} className="w-12 h-12 object-contain" />
+          <img src={kemaIcon} alt="Logo KemaFinance" width={48} height={48} className="w-12 h-12 object-contain" />
           <span className="text-xl font-bold text-foreground tracking-tight">KemaFinance</span>
         </div>
 
@@ -175,7 +175,7 @@ export const AuthForm = () => {
         <div className="w-full max-w-md space-y-8">
           {/* Mobile branding */}
           <div className="lg:hidden text-center space-y-3">
-            <img src={kemaIcon} alt="KemaFinance" width={72} height={72} className="w-18 h-18 mx-auto object-contain" />
+            <img src={kemaIcon} alt="Logo KemaFinance" width={72} height={72} className="w-18 h-18 mx-auto object-contain" />
             <h1 className="text-2xl font-bold text-foreground">KemaFinance</h1>
             <p className="text-sm text-muted-foreground">Sistema de Gestão Inteligente</p>
           </div>
@@ -467,6 +467,7 @@ export const AuthForm = () => {
                     <button
                       type="button"
                       onClick={() => setShowPassword(!showPassword)}
+                      aria-label={showPassword ? 'Ocultar senha' : 'Mostrar senha'}
                       className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
                     >
                       {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
