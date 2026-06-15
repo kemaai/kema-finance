@@ -5,6 +5,7 @@ import { StatusBadge, getStatusMeta } from '@/components/ui/status-badge';
 import { parseLocalDate, cn } from '@/lib/utils';
 import { AnexosUpload } from '@/components/AnexosUpload';
 import { useInstalacaoAnexos } from '@/hooks/useInstalacaoAnexos';
+import { useM2Price } from '@/hooks/useM2Price';
 
 interface Instalacao {
   id: string;
@@ -30,6 +31,7 @@ interface InstalacaoCardProps {
 
 export const InstalacaoCard: React.FC<InstalacaoCardProps> = ({ instalacao, onEdit, onDelete, onTogglePedidoRecebido }) => {
   const [isExpanded, setIsExpanded] = useState(false);
+  const { price: m2Price } = useM2Price();
   const statusMeta = getStatusMeta(instalacao.status);
   const { anexos } = useInstalacaoAnexos(isExpanded ? instalacao.id : null);
 
@@ -131,11 +133,11 @@ export const InstalacaoCard: React.FC<InstalacaoCardProps> = ({ instalacao, onEd
             <div className="grid grid-cols-2 gap-3 text-sm">
               <div>
                 <span className="text-muted-foreground">Metragem Estimada:</span>
-                <p className="font-medium text-foreground">{(instalacao.valor_total / 20).toFixed(1)} m²</p>
+                <p className="font-medium text-foreground">{(instalacao.valor_total / m2Price).toFixed(1)} m²</p>
               </div>
               <div>
                 <span className="text-muted-foreground">Valor por m²:</span>
-                <p className="font-medium text-foreground">R$ 20,00</p>
+                <p className="font-medium text-foreground">R$ {m2Price.toFixed(2)}</p>
               </div>
             </div>
 
