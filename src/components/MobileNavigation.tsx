@@ -9,7 +9,8 @@ import {
   FileText,
   CreditCard,
   Brain,
-  User
+  User,
+  Settings
 } from 'lucide-react';
 
 const menuItems = [
@@ -22,6 +23,7 @@ const menuItems = [
   { name: 'Relatórios', icon: FileText, path: '/relatorios' },
   { name: 'KemaAI', icon: Brain, path: '/agente' },
   { name: 'Perfil', icon: User, path: '/perfil' },
+  { name: 'Config', icon: Settings, path: '/configuracoes' },
 ];
 
 export const MobileNavigation = () => {
