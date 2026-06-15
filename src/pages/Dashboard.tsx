@@ -14,6 +14,7 @@ type PeriodoFiltro = 'semanal' | 'quinzenal' | 'mensal';
 
 export const Dashboard = () => {
   const { profile, user } = useAuth();
+  const { price: m2Price } = useM2Price();
   const queryClient = useQueryClient();
   const { data: servicos = [], isLoading: servicosLoading, dataUpdatedAt: servicosUpdatedAt } = useServicos();
   const { data: clientes = [], isLoading: clientesLoading, dataUpdatedAt: clientesUpdatedAt } = useClientes();
@@ -95,7 +96,7 @@ export const Dashboard = () => {
   });
 
   const receitaPeriodoInstalacoes = instalacoesDoPeriodo.reduce((total, instalacao) => total + Number(instalacao.valor_total), 0);
-  const totalM2Periodo = instalacoesDoPeriodo.reduce((total, instalacao) => total + Number(instalacao.valor_total) / 20, 0);
+  const totalM2Periodo = instalacoesDoPeriodo.reduce((total, instalacao) => total + Number(instalacao.valor_total) / m2Price, 0);
   const receitaTotal = receitaMensalServicos + receitaPeriodoInstalacoes;
 
   const clientesAtivos = clientes.length;
