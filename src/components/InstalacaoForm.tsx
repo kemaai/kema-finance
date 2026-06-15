@@ -98,7 +98,7 @@ export const InstalacaoForm: React.FC<InstalacaoFormProps> = ({
     }));
   };
 
-  const metragem = formData.valor_total ? Math.round((formData.valor_total / 24) * 100) / 100 : '';
+  const metragem = formData.valor_total ? Math.round((formData.valor_total / 20) * 100) / 100 : '';
 
   return (
     <Card className="card-tech w-full max-w-2xl mx-auto">
@@ -190,13 +190,13 @@ export const InstalacaoForm: React.FC<InstalacaoFormProps> = ({
               value={metragem}
               onChange={(e) => {
                 const v = e.target.value;
-                handleInputChange('valor_total', v === '' ? 0 : (parseFloat(v) || 0) * 24);
+                handleInputChange('valor_total', v === '' ? 0 : (parseFloat(v) || 0) * 20);
               }}
               required
               className="w-full"
             />
             <p className="text-xs text-muted-foreground">
-              Valor: R$ {formData.valor_total.toFixed(2)} (R$ 24,00 por m²)
+              Valor: R$ {formData.valor_total.toFixed(2)} (R$ 20,00 por m²)
             </p>
           </div>
 
