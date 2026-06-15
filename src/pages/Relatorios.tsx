@@ -118,7 +118,7 @@ export const Relatorios = () => {
     const receitaInstalacoes = instalacoesConcluidas.reduce((total, instalacao) => total + instalacao.valor_total, 0);
     
     // Metragem total (valor / 20 = M²)
-    const metragemTotal = instalacoesConcluidas.reduce((total, instalacao) => total + (instalacao.valor_total / 20), 0);
+    const metragemTotal = instalacoesConcluidas.reduce((total, instalacao) => total + (instalacao.valor_total / m2Price), 0);
 
     // Despesas
     const totalDespesas = dadosFiltrados.despesas.reduce((total, despesa) => total + despesa.valor, 0);
