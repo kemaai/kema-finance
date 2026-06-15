@@ -16,8 +16,10 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { ChevronDown } from 'lucide-react';
+import { useM2Price } from '@/hooks/useM2Price';
 
 export const Relatorios = () => {
+  const { price: m2Price } = useM2Price();
   const { data: servicos = [], isLoading: sitesLoading } = useServicos();
   const { data: clientes = [], isLoading: clientesLoading } = useClientes();
   const { data: instalacoes = [], isLoading: instalacoesLoading } = useInstalacoes();
