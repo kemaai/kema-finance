@@ -20,6 +20,7 @@ const Agente = lazy(() => import("./pages/Agente").then(m => ({ default: m.Agent
 const Login = lazy(() => import("./pages/Login").then(m => ({ default: m.Login })));
 const ResetPassword = lazy(() => import("./pages/ResetPassword").then(m => ({ default: m.ResetPassword })));
 const Perfil = lazy(() => import("./pages/Perfil"));
+const Configuracoes = lazy(() => import("./pages/Configuracoes"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 
 const queryClient = new QueryClient();
@@ -140,6 +141,16 @@ function App() {
                   <ProtectedRoute>
                     <Layout>
                       <Perfil />
+                    </Layout>
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/configuracoes"
+                element={
+                  <ProtectedRoute>
+                    <Layout>
+                      <Configuracoes />
                     </Layout>
                   </ProtectedRoute>
                 }
