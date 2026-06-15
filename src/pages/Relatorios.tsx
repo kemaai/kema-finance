@@ -117,7 +117,7 @@ export const Relatorios = () => {
     const instalacoesConcluidas = dadosFiltrados.instalacoes.filter(inst => inst.status === 'Concluído');
     const receitaInstalacoes = instalacoesConcluidas.reduce((total, instalacao) => total + instalacao.valor_total, 0);
     
-    // Metragem total (valor / 20 = M²)
+    // Metragem total (valor / m²Price = M²)
     const metragemTotal = instalacoesConcluidas.reduce((total, instalacao) => total + (instalacao.valor_total / m2Price), 0);
 
     // Despesas
@@ -719,7 +719,7 @@ export const Relatorios = () => {
                   Instalações e Metragem
                 </CardTitle>
                 <CardDescription className="text-xs md:text-sm text-muted-foreground">
-                  Receita vs Metragem instalada (M² = valor/20)
+                  Receita vs Metragem instalada (M² = valor / R$ {m2Price.toFixed(2)})
                 </CardDescription>
               </CardHeader>
               <CardContent className="h-80">
