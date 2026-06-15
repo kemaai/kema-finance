@@ -6,6 +6,7 @@ import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { AnexosUpload } from '@/components/AnexosUpload';
+import { useM2Price } from '@/hooks/useM2Price';
 
 interface Instalacao {
   id: string;
