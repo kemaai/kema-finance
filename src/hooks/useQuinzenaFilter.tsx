@@ -1,5 +1,6 @@
 import { useState, useMemo } from 'react';
 import { parseLocalDate } from '@/lib/utils';
+import { useM2Price } from '@/hooks/useM2Price';
 
 interface Instalacao {
   id: string;
@@ -17,6 +18,7 @@ interface Instalacao {
 }
 
 export const useQuinzenaFilter = (instalacoes: Instalacao[]) => {
+  const { price: m2Price } = useM2Price();
   const [selectedMonth, setSelectedMonth] = useState(new Date());
   const [selectedQuinzena, setSelectedQuinzena] = useState<'primeira' | 'segunda' | 'todas'>('todas');
 
@@ -66,9 +68,9 @@ export const useQuinzenaFilter = (instalacoes: Instalacao[]) => {
 
   const totalMetrosQuadrados = useMemo(() => {
     return filteredInstalacoes.reduce((total, instalacao) => {
-      return total + (Number(instalacao.valor_total || 0) / 20);
+      return total + (Number(instalacao.valor_total || 0) / m2Price);
     }, 0);
-  }, [filteredInstalacoes]);
+  }, [filteredInstalacoes, m2Price]);
 
   const totalMetrosQuadradosMes = useMemo(() => {
     if (!instalacoes || instalacoes.length === 0) return 0;
@@ -81,9 +83,9 @@ export const useQuinzenaFilter = (instalacoes: Instalacao[]) => {
     });
     
     return instalacoesMes.reduce((total, instalacao) => {
-      return total + (Number(instalacao.valor_total || 0) / 20);
+      return total + (Number(instalacao.valor_total || 0) / m2Price);
     }, 0);
-  }, [instalacoes, selectedMonth]);
+  }, [instalacoes, selectedMonth, m2Price]);
 
   return {
     selectedMonth,

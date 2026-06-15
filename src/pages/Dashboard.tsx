@@ -5,6 +5,7 @@ import { RevenueChart } from '../components/RevenueChart';
 import { KemaAIWidget } from '../components/KemaAIWidget';
 import { useServicos, useClientes, useInstalacoes, useDespesas } from '../hooks/useSupabaseData';
 import { useAuth } from '../hooks/useAuth';
+import { useM2Price } from '../hooks/useM2Price';
 import { parseLocalDate } from '../lib/utils';
 import { useQueryClient } from '@tanstack/react-query';
 import { DollarSign, Briefcase, Scissors, Users, TrendingUp, Calendar, Bell, CheckCircle, Sparkles, CreditCard, AlertTriangle, RefreshCw, Clock, CalendarDays } from 'lucide-react';
@@ -13,6 +14,7 @@ type PeriodoFiltro = 'semanal' | 'quinzenal' | 'mensal';
 
 export const Dashboard = () => {
   const { profile, user } = useAuth();
+  const { price: m2Price } = useM2Price();
   const queryClient = useQueryClient();
   const { data: servicos = [], isLoading: servicosLoading, dataUpdatedAt: servicosUpdatedAt } = useServicos();
   const { data: clientes = [], isLoading: clientesLoading, dataUpdatedAt: clientesUpdatedAt } = useClientes();
@@ -94,7 +96,7 @@ export const Dashboard = () => {
   });
 
   const receitaPeriodoInstalacoes = instalacoesDoPeriodo.reduce((total, instalacao) => total + Number(instalacao.valor_total), 0);
-  const totalM2Periodo = instalacoesDoPeriodo.reduce((total, instalacao) => total + Number(instalacao.valor_total) / 20, 0);
+  const totalM2Periodo = instalacoesDoPeriodo.reduce((total, instalacao) => total + Number(instalacao.valor_total) / m2Price, 0);
   const receitaTotal = receitaMensalServicos + receitaPeriodoInstalacoes;
 
   const clientesAtivos = clientes.length;

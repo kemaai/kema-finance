@@ -6,6 +6,7 @@ import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { AnexosUpload } from '@/components/AnexosUpload';
+import { useM2Price } from '@/hooks/useM2Price';
 
 interface Instalacao {
   id: string;
@@ -39,6 +40,7 @@ export const InstalacaoForm: React.FC<InstalacaoFormProps> = ({
   pendingFiles = [],
   onPendingFilesChange,
 }) => {
+  const { price: m2Price } = useM2Price();
   const [formData, setFormData] = useState({
     numero_pedido: '',
     data_instalacao: '',
@@ -98,7 +100,7 @@ export const InstalacaoForm: React.FC<InstalacaoFormProps> = ({
     }));
   };
 
-  const metragem = formData.valor_total ? Math.round((formData.valor_total / 20) * 100) / 100 : '';
+  const metragem = formData.valor_total ? Math.round((formData.valor_total / m2Price) * 100) / 100 : '';
 
   return (
     <Card className="card-tech w-full max-w-2xl mx-auto">
@@ -190,13 +192,13 @@ export const InstalacaoForm: React.FC<InstalacaoFormProps> = ({
               value={metragem}
               onChange={(e) => {
                 const v = e.target.value;
-                handleInputChange('valor_total', v === '' ? 0 : (parseFloat(v) || 0) * 20);
+                handleInputChange('valor_total', v === '' ? 0 : (parseFloat(v) || 0) * m2Price);
               }}
               required
               className="w-full"
             />
             <p className="text-xs text-muted-foreground">
-              Valor: R$ {formData.valor_total.toFixed(2)} (R$ 20,00 por m²)
+              Valor: R$ {formData.valor_total.toFixed(2)} (R$ {m2Price.toFixed(2)} por m²)
             </p>
           </div>
 
