@@ -5,6 +5,7 @@ import { RevenueChart } from '../components/RevenueChart';
 import { KemaAIWidget } from '../components/KemaAIWidget';
 import { useServicos, useClientes, useInstalacoes, useDespesas } from '../hooks/useSupabaseData';
 import { useAuth } from '../hooks/useAuth';
+import { useM2Price } from '../hooks/useM2Price';
 import { parseLocalDate } from '../lib/utils';
 import { useQueryClient } from '@tanstack/react-query';
 import { DollarSign, Briefcase, Scissors, Users, TrendingUp, Calendar, Bell, CheckCircle, Sparkles, CreditCard, AlertTriangle, RefreshCw, Clock, CalendarDays } from 'lucide-react';
