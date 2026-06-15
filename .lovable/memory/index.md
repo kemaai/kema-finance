@@ -5,7 +5,7 @@ Updated: now
 
 ## Core
 Premium dark theme: Deep Navy bg (#080B1A), Indigo surfaces (#111631), Orange accents (#F97316). Minimal, no logo images.
-Calculate M² constantly as `valor_total / 24`. Always use this specific ratio.
+Calculate M² constantly as `valor_total / 20`. Always use this specific ratio.
 Use `parseLocalDate` in src/lib/utils.ts for 'YYYY-MM-DD' dates to prevent timezone day-shifting errors.
 Dashboard revenue/sites must only include 'Ativo' status with due date in the current month.
 All client-side write/delete operations MUST explicitly include `.eq('user_id', user.id)`.
