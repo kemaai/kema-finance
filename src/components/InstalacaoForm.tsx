@@ -19,6 +19,7 @@ interface Instalacao {
   valor_total: number;
   status: string;
   pedido_recebido: boolean;
+  valor_m2?: number | null;
   created_at: string;
   updated_at: string;
 }
@@ -40,7 +41,7 @@ export const InstalacaoForm: React.FC<InstalacaoFormProps> = ({
   pendingFiles = [],
   onPendingFilesChange,
 }) => {
-  const { price: m2Price } = useM2Price();
+  const { price: globalM2Price } = useM2Price();
   const [formData, setFormData] = useState({
     numero_pedido: '',
     data_instalacao: '',
@@ -49,7 +50,8 @@ export const InstalacaoForm: React.FC<InstalacaoFormProps> = ({
     endereco: '',
     valor_total: 0,
     status: 'Agendado',
-    pedido_recebido: false
+    pedido_recebido: false,
+    valor_m2: globalM2Price,
   });
 
   useEffect(() => {
@@ -62,7 +64,8 @@ export const InstalacaoForm: React.FC<InstalacaoFormProps> = ({
         endereco: instalacao.endereco || '',
         valor_total: instalacao.valor_total || 0,
         status: instalacao.status || 'Agendado',
-        pedido_recebido: instalacao.pedido_recebido || false
+        pedido_recebido: instalacao.pedido_recebido || false,
+        valor_m2: Number(instalacao.valor_m2 ?? globalM2Price),
       });
     } else {
       setFormData({
@@ -73,10 +76,11 @@ export const InstalacaoForm: React.FC<InstalacaoFormProps> = ({
         endereco: '',
         valor_total: 0,
         status: 'Agendado',
-        pedido_recebido: false
+        pedido_recebido: false,
+        valor_m2: globalM2Price,
       });
     }
-  }, [instalacao]);
+  }, [instalacao, globalM2Price]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -100,7 +104,8 @@ export const InstalacaoForm: React.FC<InstalacaoFormProps> = ({
     }));
   };
 
-  const metragem = formData.valor_total ? Math.round((formData.valor_total / m2Price) * 100) / 100 : '';
+  const effectiveM2 = formData.valor_m2 && formData.valor_m2 > 0 ? formData.valor_m2 : globalM2Price;
+  const metragem = formData.valor_total ? Math.round((formData.valor_total / effectiveM2) * 100) / 100 : '';
 
   return (
     <Card className="card-tech w-full max-w-2xl mx-auto">
@@ -182,6 +187,37 @@ export const InstalacaoForm: React.FC<InstalacaoFormProps> = ({
           </div>
 
           <div className="space-y-2">
+            <Label htmlFor="valor_m2">Valor por m² (R$)</Label>
+            <Input
+              id="valor_m2"
+              type="number"
+              step="0.01"
+              min="0"
+              placeholder={`Padrão: R$ ${globalM2Price.toFixed(2)}`}
+              value={formData.valor_m2 ?? ''}
+              onChange={(e) => {
+                const v = e.target.value;
+                const newPrice = v === '' ? 0 : parseFloat(v) || 0;
+                setFormData((prev) => {
+                  const currentMetragem =
+                    prev.valor_total && effectiveM2 > 0 ? prev.valor_total / effectiveM2 : 0;
+                  return {
+                    ...prev,
+                    valor_m2: newPrice,
+                    valor_total: currentMetragem > 0 && newPrice > 0
+                      ? Math.round(currentMetragem * newPrice * 100) / 100
+                      : prev.valor_total,
+                  };
+                });
+              }}
+              className="w-full"
+            />
+            <p className="text-xs text-muted-foreground">
+              Personalize o valor do m² apenas para este pedido. Padrão global: R$ {globalM2Price.toFixed(2)}
+            </p>
+          </div>
+
+          <div className="space-y-2">
             <Label htmlFor="metragem">Metragem (m²)</Label>
             <Input
               id="metragem"
@@ -192,13 +228,13 @@ export const InstalacaoForm: React.FC<InstalacaoFormProps> = ({
               value={metragem}
               onChange={(e) => {
                 const v = e.target.value;
-                handleInputChange('valor_total', v === '' ? 0 : (parseFloat(v) || 0) * m2Price);
+                handleInputChange('valor_total', v === '' ? 0 : (parseFloat(v) || 0) * effectiveM2);
               }}
               required
               className="w-full"
             />
             <p className="text-xs text-muted-foreground">
-              Valor: R$ {formData.valor_total.toFixed(2)} (R$ {m2Price.toFixed(2)} por m²)
+              Valor: R$ {formData.valor_total.toFixed(2)} (R$ {effectiveM2.toFixed(2)} por m²)
             </p>
           </div>
 

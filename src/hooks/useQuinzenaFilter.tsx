@@ -13,6 +13,7 @@ interface Instalacao {
   valor_total: number;
   status: string;
   pedido_recebido: boolean;
+  valor_m2?: number | null;
   created_at: string;
   updated_at: string;
 }
@@ -68,7 +69,8 @@ export const useQuinzenaFilter = (instalacoes: Instalacao[]) => {
 
   const totalMetrosQuadrados = useMemo(() => {
     return filteredInstalacoes.reduce((total, instalacao) => {
-      return total + (Number(instalacao.valor_total || 0) / m2Price);
+      const p = Number(instalacao.valor_m2) > 0 ? Number(instalacao.valor_m2) : m2Price;
+      return total + (Number(instalacao.valor_total || 0) / p);
     }, 0);
   }, [filteredInstalacoes, m2Price]);
 
@@ -83,7 +85,8 @@ export const useQuinzenaFilter = (instalacoes: Instalacao[]) => {
     });
     
     return instalacoesMes.reduce((total, instalacao) => {
-      return total + (Number(instalacao.valor_total || 0) / m2Price);
+      const p = Number(instalacao.valor_m2) > 0 ? Number(instalacao.valor_m2) : m2Price;
+      return total + (Number(instalacao.valor_total || 0) / p);
     }, 0);
   }, [instalacoes, selectedMonth, m2Price]);
 

@@ -22,6 +22,7 @@ interface Instalacao {
   valor_total: number;
   status: string;
   pedido_recebido: boolean;
+  valor_m2?: number | null;
   created_at: string;
   updated_at: string;
 }
@@ -77,6 +78,7 @@ export const Instalacoes = () => {
         ...instalacaoData,
         user_id: user.id,
         valor_total: Number(instalacaoData.valor_total), // Garantir que é número
+        valor_m2: instalacaoData.valor_m2 != null ? Number(instalacaoData.valor_m2) : null,
       };
 
 
@@ -153,6 +155,7 @@ export const Instalacoes = () => {
           data_instalacao: instalacaoData.data_instalacao,
           valor_total: Number(instalacaoData.valor_total),
           status: instalacaoData.status,
+          valor_m2: instalacaoData.valor_m2 != null ? Number(instalacaoData.valor_m2) : null,
         })
         .eq('id', instalacaoData.id)
         .eq('user_id', user.id) // Garantir que só atualiza próprios dados
