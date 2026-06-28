@@ -18,6 +18,7 @@ interface Instalacao {
   valor_total: number;
   status: string;
   pedido_recebido: boolean;
+  valor_m2?: number | null;
   created_at: string;
   updated_at: string;
 }
@@ -31,7 +32,8 @@ interface InstalacaoCardProps {
 
 export const InstalacaoCard: React.FC<InstalacaoCardProps> = ({ instalacao, onEdit, onDelete, onTogglePedidoRecebido }) => {
   const [isExpanded, setIsExpanded] = useState(false);
-  const { price: m2Price } = useM2Price();
+  const { price: globalM2Price } = useM2Price();
+  const m2Price = instalacao.valor_m2 && Number(instalacao.valor_m2) > 0 ? Number(instalacao.valor_m2) : globalM2Price;
   const statusMeta = getStatusMeta(instalacao.status);
   const { anexos } = useInstalacaoAnexos(isExpanded ? instalacao.id : null);
 
