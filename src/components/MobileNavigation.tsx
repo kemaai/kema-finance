@@ -83,7 +83,7 @@ export const MobileNavigation = () => {
               >
                 <div className={`w-10 h-9 rounded-2xl flex items-center justify-center transition-all duration-300 ${
                   isActive
-                    ? 'grad-blue text-white scale-105 shadow-soft'
+                    ? 'bg-primary text-primary-foreground'
                     : 'text-muted-foreground group-active:scale-95 group-hover:text-foreground group-hover:bg-muted'
                 }`}>
                   <item.icon className="w-[18px] h-[18px]" strokeWidth={isActive ? 2.4 : 2} />

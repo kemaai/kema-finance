@@ -68,7 +68,7 @@ export function AppSidebar() {
     <Sidebar className="border-r border-sidebar-border bg-sidebar">
       <SidebarHeader className="p-5">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 icon-tile grad-blue flex items-center justify-center">
+          <div className="w-10 h-10 icon-tile bg-primary text-primary-foreground flex items-center justify-center">
             <img
               src={kemaIcon}
               alt="KemaFinance"
@@ -102,7 +102,7 @@ export function AppSidebar() {
                       onClick={() => navigate(item.url)}
                       className={`relative flex items-center gap-3 w-full px-3 py-2.5 rounded-xl transition-all duration-200 ${
                         isActive
-                          ? 'grad-blue text-white font-semibold shadow-soft'
+                          ? 'bg-primary text-primary-foreground font-semibold'
                           : 'text-muted-foreground hover:text-foreground hover:bg-muted'
                       }`}
                     >

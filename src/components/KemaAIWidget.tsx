@@ -14,11 +14,8 @@ export const KemaAIWidget = () => {
     return 'text-green-500';
   };
 
-  const getScoreGradient = () => {
-    if (diagnostico.scoreFinanceiro <= 39) return 'from-red-500 to-red-600';
-    if (diagnostico.scoreFinanceiro <= 69) return 'from-amber-500 to-amber-600';
-    return 'from-green-500 to-green-600';
-  };
+  const scoreHex =
+    diagnostico.scoreFinanceiro <= 39 ? '#EF4444' : diagnostico.scoreFinanceiro <= 69 ? '#F59E0B' : '#0E9F6E';
 
   const alertaPrincipal = alertas.find(a => a.tipo === 'critico') || alertas.find(a => a.tipo === 'atencao') || alertas[0];
 
@@ -44,9 +41,14 @@ export const KemaAIWidget = () => {
       className="card-tech p-4 md:p-5 cursor-pointer group transition-all duration-300"
     >
       <div className="flex items-center justify-between mb-4">
-        <div>
-          <h3 className="text-base font-semibold text-foreground">KemaFinance AI</h3>
-          <p className="text-xs text-muted-foreground hidden sm:block">Análise financeira inteligente</p>
+        <div className="flex items-center gap-2.5">
+          <div className="icon-tile w-9 h-9 grad-violet">
+            <Brain className="w-[18px] h-[18px]" strokeWidth={2.2} />
+          </div>
+          <div>
+            <h3 className="font-display text-base font-bold text-foreground">KemaFinance AI</h3>
+            <p className="text-xs text-muted-foreground hidden sm:block">Score de saúde financeira</p>
+          </div>
         </div>
         <div className="flex items-center gap-2 text-muted-foreground group-hover:text-primary transition-colors">
           <span className="text-xs hidden sm:inline">Ver análise</span>
@@ -54,19 +56,25 @@ export const KemaAIWidget = () => {
         </div>
       </div>
 
-      <div className="grid grid-cols-2 gap-4 mb-4">
-        <div className="space-y-2">
-          <div className="flex items-center justify-between">
-            <span className="text-xs text-muted-foreground">Score</span>
-            <span className={`text-xl font-bold ${getScoreColor()}`}>{diagnostico.scoreFinanceiro}</span>
+      <div className="flex items-center gap-4 mb-4">
+        <div
+          className="relative w-[92px] h-[92px] rounded-full flex-shrink-0"
+          style={{
+            background: `conic-gradient(${scoreHex} ${diagnostico.scoreFinanceiro * 3.6}deg, hsl(var(--muted)) 0deg)`,
+          }}
+          aria-label={`Score financeiro ${diagnostico.scoreFinanceiro} de 100`}
+        >
+          <div className="absolute inset-[9px] rounded-full bg-card flex flex-col items-center justify-center">
+            <span className={`num text-2xl font-bold ${getScoreColor()}`}>{diagnostico.scoreFinanceiro}</span>
+            <span className="text-[9px] uppercase tracking-wider text-muted-foreground">de 100</span>
           </div>
-          <Progress value={diagnostico.scoreFinanceiro} className="h-1.5 bg-muted" />
         </div>
-        <div className="flex flex-col items-end justify-center">
+        <div className="flex flex-col gap-1.5 min-w-0 flex-1">
           <div className="flex items-center gap-2">
             <span className="text-xl">{diagnostico.classificacaoEmoji}</span>
             <span className={`text-sm font-semibold ${getScoreColor()}`}>{diagnostico.classificacaoLabel}</span>
           </div>
+          <Progress value={diagnostico.scoreFinanceiro} className="h-1.5 bg-muted" />
           <span className="text-xs">
             {diagnostico.saldoReal >= 0 ? (
               <span className="flex items-center gap-1 text-green-500">
