@@ -65,27 +65,32 @@ export function AppSidebar() {
   }, [isDarkMode]);
 
   return (
-    <Sidebar className="border-r border-border bg-sidebar">
-      <SidebarHeader className="p-5 border-b border-border">
+    <Sidebar className="border-r border-sidebar-border bg-sidebar">
+      <SidebarHeader className="p-5">
         <div className="flex items-center gap-3">
-          <img
-            src={kemaIcon}
-            alt="KemaFinance"
-            width={36}
-            height={36}
-            className="w-9 h-9 object-contain"
-          />
-          <h1 className="text-lg font-bold text-foreground">KemaFinance</h1>
+          <div className="w-10 h-10 rounded-2xl bg-primary/12 border border-primary/25 flex items-center justify-center shadow-glow-primary">
+            <img
+              src={kemaIcon}
+              alt="KemaFinance"
+              width={24}
+              height={24}
+              className="w-6 h-6 object-contain"
+            />
+          </div>
+          <div className="leading-tight">
+            <h1 className="font-display text-base font-bold text-foreground">KemaFinance</h1>
+            <p className="text-[10px] uppercase tracking-[0.18em] text-muted-foreground">Gestão financeira</p>
+          </div>
         </div>
       </SidebarHeader>
 
       <SidebarContent className="px-3 py-2">
         <SidebarGroup>
-          <SidebarGroupLabel className="text-muted-foreground text-[11px] uppercase tracking-wider px-2 mb-1">
+          <SidebarGroupLabel className="text-muted-foreground/70 text-[10px] font-semibold uppercase tracking-[0.18em] px-2 mb-1.5">
             Menu
           </SidebarGroupLabel>
           <SidebarGroupContent>
-            <SidebarMenu>
+            <SidebarMenu className="gap-1">
               {navigation.map((item) => {
                 const isActive = location.pathname === item.url;
                 const slug = item.url.replace(/^\//, '') || 'home';
@@ -95,10 +100,10 @@ export function AppSidebar() {
                       asChild
                       isActive={isActive}
                       onClick={() => navigate(item.url)}
-                      className={`flex items-center gap-3 w-full px-3 py-2.5 rounded-lg transition-all duration-200 ${
+                      className={`relative flex items-center gap-3 w-full px-3 py-2.5 rounded-xl transition-all duration-200 ${
                         isActive
-                          ? 'bg-primary/15 text-primary border-l-2 border-primary'
-                          : 'text-muted-foreground hover:text-foreground hover:bg-muted/50'
+                          ? 'bg-primary text-primary-foreground shadow-glow-primary font-semibold'
+                          : 'text-muted-foreground hover:text-foreground hover:bg-muted/60'
                       }`}
                     >
                       <button
@@ -106,8 +111,8 @@ export function AppSidebar() {
                         aria-label={item.title}
                         className="flex items-center gap-3 w-full"
                       >
-                        <item.icon className={`w-4 h-4 ${isActive ? 'text-primary' : ''}`} />
-                        <span className="font-medium text-sm">{item.title}</span>
+                        <item.icon className="w-[18px] h-[18px]" strokeWidth={isActive ? 2.4 : 2} />
+                        <span className="text-sm">{item.title}</span>
                       </button>
                     </SidebarMenuButton>
                   </SidebarMenuItem>
@@ -117,21 +122,21 @@ export function AppSidebar() {
           </SidebarGroupContent>
         </SidebarGroup>
 
-        <SidebarGroup className="mt-4">
-          <SidebarGroupLabel className="text-muted-foreground text-[11px] uppercase tracking-wider px-2 mb-1">
+        <SidebarGroup className="mt-5">
+          <SidebarGroupLabel className="text-muted-foreground/70 text-[10px] font-semibold uppercase tracking-[0.18em] px-2 mb-1.5">
             Ações Rápidas
           </SidebarGroupLabel>
           <SidebarGroupContent>
-            <SidebarMenu>
+            <SidebarMenu className="gap-0.5">
               {quickActions.map((item) => (
                 <SidebarMenuItem key={item.title}>
                   <SidebarMenuButton
                     asChild
                     onClick={() => navigate(item.url)}
-                    className="flex items-center gap-3 w-full px-3 py-2 rounded-lg text-muted-foreground hover:text-primary hover:bg-primary/10 transition-all duration-200"
+                    className="flex items-center gap-3 w-full px-3 py-2 rounded-xl text-muted-foreground hover:text-primary hover:bg-primary/10 transition-all duration-200"
                   >
                     <button className="flex items-center gap-3 w-full">
-                      <item.icon className="w-4 h-4" />
+                      <item.icon className="w-4 h-4 opacity-80" />
                       <span className="text-sm">{item.title}</span>
                     </button>
                   </SidebarMenuButton>
@@ -142,8 +147,8 @@ export function AppSidebar() {
         </SidebarGroup>
       </SidebarContent>
 
-      <SidebarFooter className="p-4 border-t border-border">
-        <div className="space-y-3">
+      <SidebarFooter className="p-3 border-t border-sidebar-border">
+        <div className="space-y-2">
           {(() => {
             const displayName = profile?.full_name || profile?.first_name || user?.email?.split('@')[0] || 'Usuário';
             const initials = displayName
@@ -156,27 +161,28 @@ export function AppSidebar() {
               <button
                 type="button"
                 onClick={() => navigate('/perfil')}
-                className="flex items-center gap-3 p-3 bg-muted/30 rounded-xl border border-border w-full text-left hover:bg-muted/50 hover:border-primary/40 transition-colors"
+                className="flex items-center gap-3 p-2.5 bg-muted/40 rounded-2xl border border-border/60 w-full text-left hover:bg-muted/70 hover:border-primary/40 transition-colors"
               >
-                <Avatar className="w-9 h-9">
+                <Avatar className="w-9 h-9 ring-2 ring-primary/25">
                   <AvatarImage src={profile?.avatar_url || undefined} alt={displayName} />
-                  <AvatarFallback className="bg-accent/20 text-accent text-xs">
+                  <AvatarFallback className="bg-primary/15 text-primary text-xs font-semibold">
                     {initials}
                   </AvatarFallback>
                 </Avatar>
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium text-foreground truncate">
+                  <p className="text-sm font-semibold text-foreground truncate">
                     {displayName}
                   </p>
+                  <p className="text-[11px] text-muted-foreground truncate">Ver perfil</p>
                 </div>
               </button>
             );
           })()}
           
-          <div className="flex items-center justify-between p-2.5 rounded-lg hover:bg-muted/30 transition-colors">
+          <div className="flex items-center justify-between px-2.5 py-2 rounded-xl hover:bg-muted/40 transition-colors">
             <div className="flex items-center gap-2">
               {isDarkMode ? <Moon className="w-4 h-4 text-accent" /> : <Sun className="w-4 h-4 text-amber-500" />}
-              <span className="text-sm text-foreground">Tema Escuro</span>
+              <span className="text-sm text-muted-foreground">Tema Escuro</span>
             </div>
             <Switch
               checked={isDarkMode}
@@ -190,7 +196,7 @@ export function AppSidebar() {
             variant="ghost"
             size="sm"
             data-testid="nav-logout"
-            className="w-full justify-start gap-2 text-muted-foreground hover:text-destructive hover:bg-destructive/10"
+            className="w-full justify-start gap-2 rounded-xl text-muted-foreground hover:text-destructive hover:bg-destructive/10"
           >
             <LogOut className="w-4 h-4" />
             Sair
