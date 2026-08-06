@@ -189,12 +189,7 @@ export const Dashboard = () => {
           <div className="flex items-start justify-between gap-3">
             <div className="flex items-center gap-3 min-w-0 animate-fade-up">
               <div className="hidden sm:flex w-14 h-14 rounded-full bg-primary text-primary-foreground items-center justify-center font-display text-lg font-bold flex-shrink-0">
-                {(profile?.full_name || profile?.first_name || 'Usuário')
-                  .split(' ')
-                  .map((p) => p[0])
-                  .slice(0, 2)
-                  .join('')
-                  .toUpperCase()}
+                {(profile?.first_name || 'Usuário').slice(0, 2).toUpperCase()}
               </div>
               <div className="min-w-0">
                 <h1 className="font-display text-2xl md:text-3xl font-bold text-foreground tracking-tight truncate">
