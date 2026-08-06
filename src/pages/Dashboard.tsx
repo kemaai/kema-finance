@@ -231,8 +231,8 @@ export const Dashboard = () => {
           </div>
         </div>
 
-        {/* Bento grid: featured KPI + secondary KPIs + chart */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 auto-rows-fr gap-3 md:gap-4">
+        {/* Top KPI row — full-gradient cards */}
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">
           <DashboardCard
             title="Receita Total"
             value={`R$ ${receitaTotal.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`}
@@ -240,7 +240,14 @@ export const Dashboard = () => {
             icon={DollarSign}
             variant="green"
             featured
-            className="col-span-2 lg:col-span-2 lg:row-span-2 flex justify-end flex-col"
+          />
+          <DashboardCard
+            title="Despesas"
+            value={`R$ ${totalDespesasMes.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`}
+            subValue={`Pendente: R$ ${totalDespesasPendentes.toFixed(0)}`}
+            icon={CreditCard}
+            variant="red"
+            featured
           />
           <DashboardCard
             title="Serviços do Mês"
@@ -248,27 +255,47 @@ export const Dashboard = () => {
             subValue={`Pago: R$ ${receitaServicosPagos.toFixed(0)}`}
             icon={Briefcase}
             variant="orange"
+            featured
           />
           <DashboardCard
             title="Instalações"
             value={instalacoesDoPeriodo.length.toString()}
             subValue={`${totalM2Periodo.toFixed(1)} m² ${labelPeriodo}`}
             icon={Scissors}
-            variant="teal"
+            variant="blue"
+            featured
           />
+        </div>
+
+        {/* Secondary KPIs — soft white cards */}
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">
           <DashboardCard
             title="Clientes"
             value={clientesAtivos.toString()}
             subValue={`${mediaServicos} serv./cliente`}
             icon={Users}
-            variant="blue"
+            variant="purple"
           />
           <DashboardCard
-            title="Despesas"
-            value={`R$ ${totalDespesasMes.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`}
-            subValue={`Pend: R$ ${totalDespesasPendentes.toFixed(0)}`}
-            icon={CreditCard}
-            variant="red"
+            title="Despesas Pagas"
+            value={`R$ ${totalDespesasPagas.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`}
+            subValue={`${despesasPagas.length} de ${despesasDoMes.length} no mês`}
+            icon={CheckCircle}
+            variant="green"
+          />
+          <DashboardCard
+            title="Serviços Pagos"
+            value={`R$ ${totalPagoServicosMes.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`}
+            subValue={`Pendente: R$ ${totalPendenteServicosMes.toFixed(0)}`}
+            icon={Briefcase}
+            variant="teal"
+          />
+          <DashboardCard
+            title="Metragem"
+            value={`${totalM2Periodo.toFixed(1)} m²`}
+            subValue={`Concluídas ${labelPeriodo}`}
+            icon={Scissors}
+            variant="blue"
           />
         </div>
 
