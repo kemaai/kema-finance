@@ -159,10 +159,24 @@ export const Dashboard = () => {
   if (servicosLoading || clientesLoading || instalacoesLoading || despesasLoading) {
     return (
       <div className="min-h-screen bg-background">
-        <div className="max-w-7xl mx-auto p-4 md:p-8">
-          <div className="text-center py-12">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
-            <p className="mt-4 text-muted-foreground">Carregando dados...</p>
+        <div className="max-w-7xl mx-auto p-4 md:p-8 space-y-6">
+          <div className="space-y-2">
+            <div className="h-6 w-56 rounded-lg bg-muted animate-pulse" />
+            <div className="h-4 w-72 rounded-lg bg-muted/70 animate-pulse" />
+          </div>
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">
+            {Array.from({ length: 5 }).map((_, i) => (
+              <div
+                key={i}
+                className={`card-tech h-32 animate-pulse bg-muted/40 ${i === 0 ? 'col-span-2 lg:row-span-2 lg:h-auto lg:min-h-[16rem]' : ''}`}
+              />
+            ))}
+          </div>
+          <div className="card-tech h-80 animate-pulse bg-muted/40" />
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+            {Array.from({ length: 3 }).map((_, i) => (
+              <div key={i} className="card-tech h-64 animate-pulse bg-muted/40" />
+            ))}
           </div>
         </div>
       </div>
@@ -170,22 +184,25 @@ export const Dashboard = () => {
   }
 
   return (
-    <div className="min-h-screen bg-background">
-      {/* Hero Section - Clean */}
+    <div className="min-h-screen bg-background bg-tech-particles">
+      {/* Header */}
       <div className="p-4 md:p-8 pb-2 md:pb-4">
         <div className="max-w-7xl mx-auto">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-            <div>
-              <p className="text-lg md:text-xl font-semibold text-foreground">
-                Olá, {profile?.first_name || 'Usuário'}! 👋
+          <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-3">
+            <div className="animate-fade-up">
+              <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-muted-foreground mb-1">
+                {new Date().toLocaleDateString('pt-BR', { weekday: 'long', day: '2-digit', month: 'long' })}
               </p>
-              <p className="text-sm text-muted-foreground">Aqui está o resumo do seu negócio</p>
+              <h1 className="font-display text-2xl md:text-3xl font-bold text-foreground">
+                Olá, {profile?.first_name || 'Usuário'}
+              </h1>
+              <p className="text-sm text-muted-foreground mt-0.5">Aqui está o resumo do seu negócio</p>
             </div>
             <button
               onClick={handleRefresh}
               disabled={isRefreshing}
               aria-label="Atualizar dados do painel"
-              className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-muted/60 hover:bg-muted border border-border text-xs text-muted-foreground hover:text-foreground transition-all self-start sm:self-auto"
+              className="flex items-center gap-2 px-3.5 py-2 rounded-full bg-card/70 backdrop-blur border border-border/70 text-xs font-medium text-muted-foreground hover:text-foreground hover:border-primary/40 transition-all self-start sm:self-auto shadow-elev-1"
             >
               <RefreshCw className={`w-3.5 h-3.5 ${isRefreshing ? 'animate-spin' : ''}`} />
               <Clock className="w-3 h-3" />
@@ -195,63 +212,63 @@ export const Dashboard = () => {
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-4 md:px-8 pb-8 space-y-6">
+      <div className="max-w-7xl mx-auto px-4 md:px-8 pb-8 space-y-5 md:space-y-6">
         {/* Period filter */}
-        <div className="flex items-center gap-2 flex-wrap">
+        <div className="flex items-center gap-2.5 flex-wrap">
           <CalendarDays className="w-4 h-4 text-muted-foreground" />
-          <span className="text-sm text-muted-foreground mr-1">Período:</span>
-          {(['semanal', 'quinzenal', 'mensal'] as PeriodoFiltro[]).map((p) => (
-            <button
-              key={p}
-              onClick={() => setPeriodoInstalacoes(p)}
-              className={`px-3 py-1 rounded-full text-xs font-medium transition-all ${
-                periodoInstalacoes === p
-                  ? 'bg-primary text-primary-foreground'
-                  : 'bg-muted text-muted-foreground hover:text-foreground border border-border'
-              }`}
-            >
-              {p === 'semanal' ? 'Semanal' : p === 'quinzenal' ? 'Quinzenal' : 'Mensal'}
-            </button>
-          ))}
+          <span className="text-xs font-medium text-muted-foreground mr-0.5">Período</span>
+          <div className="segmented">
+            {(['semanal', 'quinzenal', 'mensal'] as PeriodoFiltro[]).map((p) => (
+              <button
+                key={p}
+                onClick={() => setPeriodoInstalacoes(p)}
+                data-active={periodoInstalacoes === p}
+                className="segmented-item"
+              >
+                {p === 'semanal' ? 'Semanal' : p === 'quinzenal' ? 'Quinzenal' : 'Mensal'}
+              </button>
+            ))}
+          </div>
         </div>
 
-        {/* Cards grid - 2x2 on mobile */}
-        <div className="grid grid-cols-2 lg:grid-cols-5 gap-3 md:gap-4">
-          <DashboardCard 
-            title="Receita Total" 
-            value={`R$ ${receitaTotal.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`} 
-            subValue={`Serviços: R$ ${receitaMensalServicos.toFixed(0)} • Inst: R$ ${receitaPeriodoInstalacoes.toFixed(0)}`} 
-            icon={DollarSign} 
+        {/* Bento grid: featured KPI + secondary KPIs + chart */}
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">
+          <DashboardCard
+            title="Receita Total"
+            value={`R$ ${receitaTotal.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`}
+            subValue={`Serviços: R$ ${receitaMensalServicos.toFixed(0)} • Inst: R$ ${receitaPeriodoInstalacoes.toFixed(0)}`}
+            icon={DollarSign}
             variant="green"
+            featured
+            className="col-span-2 lg:col-span-2 lg:row-span-2 lg:flex lg:items-center"
           />
-          <DashboardCard 
-            title="Serviços do Mês" 
-            value={servicosCount.toString()} 
-            subValue={`Pago: R$ ${receitaServicosPagos.toFixed(0)}`} 
-            icon={Briefcase} 
+          <DashboardCard
+            title="Serviços do Mês"
+            value={servicosCount.toString()}
+            subValue={`Pago: R$ ${receitaServicosPagos.toFixed(0)}`}
+            icon={Briefcase}
             variant="orange"
           />
-          <DashboardCard 
-            title="Instalações" 
-            value={instalacoesDoPeriodo.length.toString()} 
-            subValue={`${totalM2Periodo.toFixed(1)} m² ${labelPeriodo}`} 
-            icon={Scissors} 
-            variant="orange"
+          <DashboardCard
+            title="Instalações"
+            value={instalacoesDoPeriodo.length.toString()}
+            subValue={`${totalM2Periodo.toFixed(1)} m² ${labelPeriodo}`}
+            icon={Scissors}
+            variant="teal"
           />
-          <DashboardCard 
-            title="Clientes" 
-            value={clientesAtivos.toString()} 
-            subValue={`${mediaServicos} serv./cliente`} 
-            icon={Users} 
+          <DashboardCard
+            title="Clientes"
+            value={clientesAtivos.toString()}
+            subValue={`${mediaServicos} serv./cliente`}
+            icon={Users}
             variant="blue"
           />
-          <DashboardCard 
-            title="Despesas" 
-            value={`R$ ${totalDespesasMes.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`} 
-            subValue={`Pend: R$ ${totalDespesasPendentes.toFixed(0)}`} 
-            icon={CreditCard} 
+          <DashboardCard
+            title="Despesas"
+            value={`R$ ${totalDespesasMes.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`}
+            subValue={`Pend: R$ ${totalDespesasPendentes.toFixed(0)}`}
+            icon={CreditCard}
             variant="red"
-            className="col-span-2 lg:col-span-1"
           />
         </div>
 
@@ -259,37 +276,37 @@ export const Dashboard = () => {
         <KemaAIWidget />
 
         {/* Revenue Chart */}
-        <div className="card-tech p-4 md:p-6">
-          <div className="flex items-center justify-between mb-4">
+        <div className="bento-block p-4 md:p-6">
+          <div className="flex items-start justify-between gap-3 mb-5">
             <div>
-              <h3 className="text-base md:text-lg font-semibold text-foreground">Performance de Receita</h3>
-              <p className="text-sm text-muted-foreground">Últimos meses</p>
+              <h2 className="font-display text-base md:text-lg font-bold text-foreground">Performance de Receita</h2>
+              <p className="text-xs md:text-sm text-muted-foreground">Últimos 6 meses</p>
             </div>
-            <div className="flex items-center gap-2 text-green-500">
-              <TrendingUp className="w-4 h-4" />
-              <span className="text-sm font-medium">+8.2%</span>
+            <div className="flex items-center gap-1.5 rounded-full bg-emerald-500/12 border border-emerald-500/25 px-2.5 py-1 text-emerald-600 dark:text-emerald-400">
+              <TrendingUp className="w-3.5 h-3.5" />
+              <span className="num text-xs font-semibold">+8.2%</span>
             </div>
           </div>
           <RevenueChart servicos={servicos} instalacoes={instalacoes} despesas={despesas} />
         </div>
 
         {/* Three columns */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-3 md:gap-4">
           {/* Vencimentos */}
-          <div className="card-tech p-4 md:p-5">
+          <div className="bento-block p-4 md:p-5">
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center gap-2.5">
-                <div className="w-9 h-9 bg-amber-500/15 rounded-xl flex items-center justify-center">
+                <div className="w-9 h-9 bg-amber-500/15 rounded-2xl flex items-center justify-center">
                   <Calendar className="w-4 h-4 text-amber-500" />
                 </div>
                 <div>
-                  <h3 className="text-sm font-semibold text-foreground">Serviços do Mês</h3>
+                  <h3 className="font-display text-sm font-bold text-foreground">Serviços do Mês</h3>
                   <p className="text-xs text-muted-foreground">Mês atual</p>
                 </div>
               </div>
               {totalServicosMes > 0 && (
-                <div className="w-5 h-5 bg-amber-500 rounded-full flex items-center justify-center">
-                  <span className="text-[10px] font-bold text-primary-foreground">{totalServicosMes}</span>
+                <div className="min-w-[22px] h-[22px] px-1.5 bg-amber-500 rounded-full flex items-center justify-center">
+                  <span className="num text-[10px] font-bold text-primary-foreground">{totalServicosMes}</span>
                 </div>
               )}
             </div>
@@ -385,20 +402,20 @@ export const Dashboard = () => {
           </div>
 
           {/* Despesas */}
-          <div className="card-tech p-4 md:p-5">
+          <div className="bento-block p-4 md:p-5">
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center gap-2.5">
-                <div className="w-9 h-9 bg-red-500/15 rounded-xl flex items-center justify-center">
+                <div className="w-9 h-9 bg-red-500/15 rounded-2xl flex items-center justify-center">
                   <AlertTriangle className="w-4 h-4 text-red-500" />
                 </div>
                 <div>
-                  <h3 className="text-sm font-semibold text-foreground">Despesas Próximas</h3>
+                  <h3 className="font-display text-sm font-bold text-foreground">Despesas Próximas</h3>
                   <p className="text-xs text-muted-foreground">Mês atual</p>
                 </div>
               </div>
               {totalDespesasNaoPagasMes > 0 && (
-                <div className="w-5 h-5 bg-red-500 rounded-full flex items-center justify-center">
-                  <span className="text-[10px] font-bold text-primary-foreground">{totalDespesasNaoPagasMes}</span>
+                <div className="min-w-[22px] h-[22px] px-1.5 bg-red-500 rounded-full flex items-center justify-center">
+                  <span className="num text-[10px] font-bold text-primary-foreground">{totalDespesasNaoPagasMes}</span>
                 </div>
               )}
             </div>
@@ -450,20 +467,20 @@ export const Dashboard = () => {
           </div>
 
           {/* Instalações */}
-          <div className="card-tech p-4 md:p-5">
+          <div className="bento-block p-4 md:p-5">
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center gap-2.5">
-                <div className="w-9 h-9 bg-blue-500/15 rounded-xl flex items-center justify-center">
+                <div className="w-9 h-9 bg-blue-500/15 rounded-2xl flex items-center justify-center">
                   <Scissors className="w-4 h-4 text-blue-500" />
                 </div>
                 <div>
-                  <h3 className="text-sm font-semibold text-foreground">Instalações</h3>
+                  <h3 className="font-display text-sm font-bold text-foreground">Instalações</h3>
                   <p className="text-xs text-muted-foreground">Mês atual</p>
                 </div>
               </div>
               {totalInstalacoesMes > 0 && (
-                <div className="w-5 h-5 bg-blue-500 rounded-full flex items-center justify-center">
-                  <span className="text-[10px] font-bold text-primary-foreground">{totalInstalacoesMes}</span>
+                <div className="min-w-[22px] h-[22px] px-1.5 bg-blue-500 rounded-full flex items-center justify-center">
+                  <span className="num text-[10px] font-bold text-primary-foreground">{totalInstalacoesMes}</span>
                 </div>
               )}
             </div>

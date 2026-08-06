@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { 
-  LineChart, Line, BarChart, Bar, PieChart, Pie, Cell,
+  AreaChart, Area, LineChart, Line, BarChart, Bar, PieChart, Pie, Cell,
   XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend
 } from 'recharts';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -41,18 +41,40 @@ interface RevenueChartProps {
 const CustomTooltip = ({ active, payload, label }: any) => {
   if (active && payload && payload.length) {
     return (
-      <div className="bg-card border border-border rounded-lg p-3 shadow-lg">
-        <p className="text-primary font-medium mb-2 text-sm">{label}</p>
-        {payload.map((entry: any, index: number) => (
-          <p key={index} className="text-xs" style={{ color: entry.color }}>
-            {entry.name}: R$ {Number(entry.value).toFixed(2)}
-          </p>
-        ))}
+      <div className="rounded-xl border border-border bg-popover/95 backdrop-blur-md p-3 shadow-elev-2 min-w-[170px]">
+        <p className="font-display text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-2">{label}</p>
+        <div className="space-y-1.5">
+          {payload.map((entry: any, index: number) => (
+            <div key={index} className="flex items-center justify-between gap-4">
+              <span className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                <span className="h-2 w-2 rounded-full" style={{ backgroundColor: entry.color }} />
+                {entry.name}
+              </span>
+              <span className="num text-xs font-semibold text-foreground">
+                {Number(entry.value).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
+              </span>
+            </div>
+          ))}
+        </div>
       </div>
     );
   }
   return null;
 };
+
+const axisProps = {
+  stroke: 'hsl(var(--muted-foreground))',
+  fontSize: 11,
+  tickLine: false as const,
+  axisLine: false as const,
+};
+
+const compactBRL = (v: number) =>
+  Math.abs(v) >= 1000 ? `R$ ${(v / 1000).toFixed(1)}k` : `R$ ${v}`;
+
+const renderLegend = (value: string) => (
+  <span className="text-xs font-medium text-muted-foreground">{value}</span>
+);
 
 export const RevenueChart: React.FC<RevenueChartProps> = ({ servicos = [], instalacoes = [], despesas = [] }) => {
   const [activeTab, setActiveTab] = useState('linha');
@@ -113,51 +135,71 @@ export const RevenueChart: React.FC<RevenueChartProps> = ({ servicos = [], insta
 
   return (
     <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-      <TabsList className="grid w-full max-w-md grid-cols-3 mb-4 bg-muted/50 border border-border">
-        <TabsTrigger value="linha" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground text-xs">Linha</TabsTrigger>
-        <TabsTrigger value="pizza" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground text-xs">Pizza</TabsTrigger>
-        <TabsTrigger value="barra" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground text-xs">Barra</TabsTrigger>
+      <TabsList className="inline-flex h-auto w-auto gap-1 rounded-full border border-border/60 bg-muted/40 p-1 mb-5">
+        <TabsTrigger value="linha" className="rounded-full px-4 py-1.5 text-xs font-semibold data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-glow-primary">Área</TabsTrigger>
+        <TabsTrigger value="pizza" className="rounded-full px-4 py-1.5 text-xs font-semibold data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-glow-primary">Pizza</TabsTrigger>
+        <TabsTrigger value="barra" className="rounded-full px-4 py-1.5 text-xs font-semibold data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-glow-primary">Barra</TabsTrigger>
       </TabsList>
 
-      <TabsContent value="linha" className="h-72">
+      <TabsContent value="linha" className="h-72 md:h-80">
         <ResponsiveContainer width="100%" height="100%">
-          <LineChart data={data}>
-            <CartesianGrid strokeDasharray="3 3" stroke="currentColor" opacity={0.06} />
-            <XAxis dataKey="month" stroke="currentColor" fontSize={11} tickLine={false} opacity={0.4} />
-            <YAxis stroke="currentColor" fontSize={11} tickFormatter={(v) => `R$ ${v}`} tickLine={false} opacity={0.4} />
+          <AreaChart data={data} margin={{ top: 8, right: 8, left: -12, bottom: 0 }}>
+            <defs>
+              {(['servicos', 'instalacoes', 'despesas'] as const).map((k) => (
+                <linearGradient key={k} id={`grad-${k}`} x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stopColor={COLORS[k]} stopOpacity={0.35} />
+                  <stop offset="100%" stopColor={COLORS[k]} stopOpacity={0} />
+                </linearGradient>
+              ))}
+            </defs>
+            <CartesianGrid vertical={false} stroke="hsl(var(--chart-grid))" strokeOpacity={0.2} />
+            <XAxis dataKey="month" {...axisProps} dy={6} />
+            <YAxis {...axisProps} width={64} tickFormatter={compactBRL} />
             <Tooltip content={<CustomTooltip />} />
-            <Legend formatter={(value) => <span className="text-foreground text-xs">{value}</span>} />
-            <Line type="monotone" dataKey="servicos" stroke={COLORS.servicos} strokeWidth={2.5} name="Serviços" dot={{ fill: COLORS.servicos, r: 3 }} />
-            <Line type="monotone" dataKey="instalacoes" stroke={COLORS.instalacoes} strokeWidth={2.5} name="Instalações" dot={{ fill: COLORS.instalacoes, r: 3 }} />
-            <Line type="monotone" dataKey="despesas" stroke={COLORS.despesas} strokeWidth={2.5} name="Despesas" dot={{ fill: COLORS.despesas, r: 3 }} />
-            <Line type="monotone" dataKey="saldo" stroke={COLORS.saldo} strokeWidth={2.5} strokeDasharray="6 4" name="Saldo Líquido" dot={{ fill: COLORS.saldo, r: 3 }} />
-          </LineChart>
+            <Legend iconType="circle" iconSize={8} formatter={renderLegend} wrapperStyle={{ paddingTop: 12 }} />
+            <Area type="monotone" dataKey="servicos" stroke={COLORS.servicos} strokeWidth={2} fill="url(#grad-servicos)" name="Serviços" activeDot={{ r: 4, strokeWidth: 0 }} dot={false} />
+            <Area type="monotone" dataKey="instalacoes" stroke={COLORS.instalacoes} strokeWidth={2} fill="url(#grad-instalacoes)" name="Instalações" activeDot={{ r: 4, strokeWidth: 0 }} dot={false} />
+            <Area type="monotone" dataKey="despesas" stroke={COLORS.despesas} strokeWidth={2} fill="url(#grad-despesas)" name="Despesas" activeDot={{ r: 4, strokeWidth: 0 }} dot={false} />
+            <Line type="monotone" dataKey="saldo" stroke={COLORS.saldo} strokeWidth={2} strokeDasharray="6 4" name="Saldo Líquido" dot={false} activeDot={{ r: 4, strokeWidth: 0 }} />
+          </AreaChart>
         </ResponsiveContainer>
       </TabsContent>
 
-      <TabsContent value="pizza" className="h-72">
+      <TabsContent value="pizza" className="h-72 md:h-80">
         <ResponsiveContainer width="100%" height="100%">
           <PieChart>
-            <Pie data={pieData} cx="50%" cy="50%" labelLine={false} label={({ name, value }) => `${name}: R$ ${Number(value).toFixed(0)}`} outerRadius={90} dataKey="value">
-              {pieData.map((_, index) => <Cell key={`cell-${index}`} fill={pieColors[index]} />)}
+            <Pie
+              data={pieData}
+              cx="50%"
+              cy="50%"
+              labelLine={false}
+              label={({ name, value }) => `${name}: R$ ${Number(value).toFixed(0)}`}
+              innerRadius={58}
+              outerRadius={92}
+              paddingAngle={3}
+              dataKey="value"
+            >
+              {pieData.map((_, index) => (
+                <Cell key={`cell-${index}`} fill={pieColors[index]} stroke="hsl(var(--surface-1))" strokeWidth={3} />
+              ))}
             </Pie>
-            <Tooltip formatter={(v) => `R$ ${Number(v).toFixed(2)}`} contentStyle={{ backgroundColor: 'hsl(var(--card))', border: '1px solid hsl(var(--border))', borderRadius: '8px', color: 'hsl(var(--foreground))' }} />
-            <Legend formatter={(value) => <span className="text-foreground text-xs">{value}</span>} />
+            <Tooltip content={<CustomTooltip />} />
+            <Legend iconType="circle" iconSize={8} formatter={renderLegend} wrapperStyle={{ paddingTop: 12 }} />
           </PieChart>
         </ResponsiveContainer>
       </TabsContent>
 
-      <TabsContent value="barra" className="h-72">
+      <TabsContent value="barra" className="h-72 md:h-80">
         <ResponsiveContainer width="100%" height="100%">
-          <BarChart data={data}>
-            <CartesianGrid strokeDasharray="3 3" stroke="currentColor" opacity={0.06} />
-            <XAxis dataKey="month" stroke="currentColor" fontSize={11} tickLine={false} opacity={0.4} />
-            <YAxis stroke="currentColor" fontSize={11} tickFormatter={(v) => `R$ ${v}`} tickLine={false} opacity={0.4} />
-            <Tooltip content={<CustomTooltip />} />
-            <Legend formatter={(value) => <span className="text-foreground text-xs">{value}</span>} />
-            <Bar dataKey="servicos" fill={COLORS.servicos} name="Serviços" radius={[6, 6, 0, 0]} />
-            <Bar dataKey="instalacoes" fill={COLORS.instalacoes} name="Instalações" radius={[6, 6, 0, 0]} />
-            <Bar dataKey="despesas" fill={COLORS.despesas} name="Despesas" radius={[6, 6, 0, 0]} />
+          <BarChart data={data} margin={{ top: 8, right: 8, left: -12, bottom: 0 }} barGap={4}>
+            <CartesianGrid vertical={false} stroke="hsl(var(--chart-grid))" strokeOpacity={0.2} />
+            <XAxis dataKey="month" {...axisProps} dy={6} />
+            <YAxis {...axisProps} width={64} tickFormatter={compactBRL} />
+            <Tooltip content={<CustomTooltip />} cursor={{ fill: 'hsl(var(--muted-foreground))', fillOpacity: 0.06 }} />
+            <Legend iconType="circle" iconSize={8} formatter={renderLegend} wrapperStyle={{ paddingTop: 12 }} />
+            <Bar dataKey="servicos" fill={COLORS.servicos} name="Serviços" radius={[8, 8, 0, 0]} maxBarSize={22} />
+            <Bar dataKey="instalacoes" fill={COLORS.instalacoes} name="Instalações" radius={[8, 8, 0, 0]} maxBarSize={22} />
+            <Bar dataKey="despesas" fill={COLORS.despesas} name="Despesas" radius={[8, 8, 0, 0]} maxBarSize={22} />
           </BarChart>
         </ResponsiveContainer>
       </TabsContent>
