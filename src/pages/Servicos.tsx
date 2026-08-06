@@ -132,7 +132,7 @@ export const Servicos = () => {
       </div>
 
       <div className="card-tech">
-        <div className="p-3 md:p-4 border-b border-orange-500/20">
+        <div className="p-3 md:p-4 border-b border-border">
           <SiteMonthFilter
             selectedMonth={selectedMonth}
             onPreviousMonth={goToPreviousMonth}

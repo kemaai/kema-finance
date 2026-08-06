@@ -283,28 +283,28 @@ export const RelatorioChart: React.FC<RelatorioChartProps> = ({
   if (showTabs) {
     return (
       <Tabs value={activeTab} onValueChange={(val) => setActiveTab(val as typeof tipo)} className="w-full h-full">
-        <TabsList className="grid w-full max-w-md grid-cols-4 mb-4 bg-stone-900/50 border border-orange-500/30">
+        <TabsList className="grid w-full max-w-md grid-cols-4 mb-4 bg-stone-900/50 border border-border">
           <TabsTrigger 
             value="linha" 
-            className="text-xs data-[state=active]:bg-orange-500 data-[state=active]:text-white"
+            className="text-xs data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
           >
             Linha
           </TabsTrigger>
           <TabsTrigger 
             value="barra"
-            className="text-xs data-[state=active]:bg-orange-500 data-[state=active]:text-white"
+            className="text-xs data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
           >
             Barra
           </TabsTrigger>
           <TabsTrigger 
             value="area"
-            className="text-xs data-[state=active]:bg-orange-500 data-[state=active]:text-white"
+            className="text-xs data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
           >
             Área
           </TabsTrigger>
           <TabsTrigger 
             value="combinado"
-            className="text-xs data-[state=active]:bg-orange-500 data-[state=active]:text-white"
+            className="text-xs data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
           >
             Combinado
           </TabsTrigger>

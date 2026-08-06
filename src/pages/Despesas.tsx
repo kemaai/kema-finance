@@ -337,7 +337,7 @@ export default function Despesas() {
         </Button>
         
         {despesasDoMes.length === 0 && (
-          <Button variant="outline" onClick={criarContasDoMes} className="border-orange-500/30 hover:bg-orange-500/10">
+          <Button variant="outline" onClick={criarContasDoMes} className="border-border hover:bg-muted">
             Criar Contas do Mês
           </Button>
         )}
