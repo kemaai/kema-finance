@@ -45,11 +45,11 @@ export function Agente() {
         <div className="relative p-6 md:p-12 pb-8 md:pb-16">
           <div className="max-w-7xl mx-auto">
             <div className="flex items-center gap-4">
-              <div className="w-14 h-14 bg-gradient-to-br from-primary to-accent rounded-2xl flex items-center justify-center glow-orange-sm">
-                <Brain className="w-8 h-8 text-white" />
+              <div className="w-14 h-14 icon-tile grad-violet">
+                <Brain className="w-7 h-7" strokeWidth={2.2} />
               </div>
               <div>
-                <h1 className="text-2xl md:text-3xl font-bold text-gradient-orange flex items-center gap-2">
+                <h1 className="page-title flex items-center gap-2">
                   KemaFinance AI
                   <Sparkles className="w-6 h-6 text-primary" />
                 </h1>
