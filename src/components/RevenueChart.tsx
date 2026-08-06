@@ -7,10 +7,10 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { parseLocalDate } from '@/lib/utils';
 
 const COLORS = {
-  servicos: '#7C4DF0',    // violet accent
-  instalacoes: '#2563EB', // electric blue accent
-  despesas: '#F5326B',    // pink accent
-  saldo: '#22B573',       // green accent
+  servicos: '#7C5CF0',    // violet
+  instalacoes: '#3B82F6', // blue
+  despesas: '#EF4444',    // red
+  saldo: '#0E9F6E',       // green
 };
 
 interface Servico {
@@ -150,33 +150,25 @@ export const RevenueChart: React.FC<RevenueChartProps> = ({ servicos = [], insta
 
   return (
     <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-      <TabsList className="inline-flex h-auto w-auto gap-1 rounded-full bg-surface-3 p-1 mb-5">
-        <TabsTrigger value="linha" className="rounded-full px-4 py-1.5 text-xs font-semibold data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">Área</TabsTrigger>
+      <TabsList className="inline-flex h-auto w-auto gap-1 rounded-full bg-muted border border-border p-1 mb-5">
+        <TabsTrigger value="linha" className="rounded-full px-4 py-1.5 text-xs font-semibold data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">Linha</TabsTrigger>
         <TabsTrigger value="pizza" className="rounded-full px-4 py-1.5 text-xs font-semibold data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">Pizza</TabsTrigger>
         <TabsTrigger value="barra" className="rounded-full px-4 py-1.5 text-xs font-semibold data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">Barra</TabsTrigger>
       </TabsList>
 
       <TabsContent value="linha" className="h-72 md:h-80">
         <ResponsiveContainer width="100%" height="100%">
-          <AreaChart data={data} margin={{ top: 8, right: 8, left: -12, bottom: 0 }}>
-            <defs>
-              {(['servicos', 'instalacoes', 'despesas'] as const).map((k) => (
-                <linearGradient key={k} id={`grad-${k}`} x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stopColor={COLORS[k]} stopOpacity={0.22} />
-                  <stop offset="100%" stopColor={COLORS[k]} stopOpacity={0} />
-                </linearGradient>
-              ))}
-            </defs>
-            <CartesianGrid vertical={false} stroke="hsl(var(--chart-grid))" strokeOpacity={0.5} strokeDasharray="2 8" />
+          <LineChart data={data} margin={{ top: 8, right: 8, left: -12, bottom: 0 }}>
+            <CartesianGrid vertical={false} stroke="hsl(var(--chart-grid))" strokeDasharray="3 6" />
             <XAxis dataKey="month" {...axisProps} dy={6} />
             <YAxis {...axisProps} width={64} tickFormatter={compactBRL} />
             <Tooltip content={<CustomTooltip />} />
             <Legend iconType="circle" iconSize={8} formatter={renderLegend} wrapperStyle={{ paddingTop: 12 }} />
-            <Area type="monotone" dataKey="servicos" stroke={COLORS.servicos} strokeWidth={2} fill="url(#grad-servicos)" name="Serviços" activeDot={{ r: 4, strokeWidth: 2, stroke: '#fff' }} dot={false} />
-            <Area type="monotone" dataKey="instalacoes" stroke={COLORS.instalacoes} strokeWidth={2} fill="url(#grad-instalacoes)" name="Instalações" activeDot={{ r: 4, strokeWidth: 2, stroke: '#fff' }} dot={false} />
-            <Area type="monotone" dataKey="despesas" stroke={COLORS.despesas} strokeWidth={2} fill="url(#grad-despesas)" name="Despesas" activeDot={{ r: 4, strokeWidth: 2, stroke: '#fff' }} dot={false} />
-            <Line type="monotone" dataKey="saldo" stroke={COLORS.saldo} strokeWidth={2} strokeDasharray="6 5" name="Saldo Líquido" dot={false} activeDot={{ r: 4, strokeWidth: 2, stroke: '#fff' }} />
-          </AreaChart>
+            <Line type="monotone" dataKey="servicos" stroke={COLORS.servicos} strokeWidth={2} name="Serviços" dot={{ r: 3, strokeWidth: 0, fill: COLORS.servicos }} activeDot={{ r: 5 }} />
+            <Line type="monotone" dataKey="instalacoes" stroke={COLORS.instalacoes} strokeWidth={2} name="Instalações" dot={{ r: 3, strokeWidth: 0, fill: COLORS.instalacoes }} activeDot={{ r: 5 }} />
+            <Line type="monotone" dataKey="despesas" stroke={COLORS.despesas} strokeWidth={2} name="Despesas" dot={{ r: 3, strokeWidth: 0, fill: COLORS.despesas }} activeDot={{ r: 5 }} />
+            <Line type="monotone" dataKey="saldo" stroke={COLORS.saldo} strokeWidth={2} strokeDasharray="6 5" name="Saldo Líquido" dot={false} activeDot={{ r: 5 }} />
+          </LineChart>
         </ResponsiveContainer>
       </TabsContent>
 
