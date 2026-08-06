@@ -339,15 +339,15 @@ export const Dashboard = () => {
             </div>
             {totalServicosMes > 0 && (
               <div className="grid grid-cols-3 gap-1.5 mb-3">
-                <div className="p-2 rounded-lg bg-green-500/10 border border-green-500/20 text-center">
+                <div className="p-2.5 rounded-2xl bg-surface-2 border border-border/60 text-center">
                   <div className="text-[9px] uppercase tracking-wider text-green-500 font-semibold">Pago</div>
                   <div className="text-xs font-bold text-green-500 truncate">R$ {totalPagoServicosMes.toFixed(0)}</div>
                 </div>
-                <div className="p-2 rounded-lg bg-amber-500/10 border border-amber-500/20 text-center">
+                <div className="p-2.5 rounded-2xl bg-surface-2 border border-border/60 text-center">
                   <div className="text-[9px] uppercase tracking-wider text-amber-500 font-semibold">Pendente</div>
                   <div className="text-xs font-bold text-amber-500 truncate">R$ {totalPendenteServicosMes.toFixed(0)}</div>
                 </div>
-                <div className="p-2 rounded-lg bg-red-500/10 border border-red-500/20 text-center">
+                <div className="p-2.5 rounded-2xl bg-surface-2 border border-border/60 text-center">
                   <div className="text-[9px] uppercase tracking-wider text-red-500 font-semibold">Vencido</div>
                   <div className="text-xs font-bold text-red-500 truncate">R$ {totalVencidoServicosMes.toFixed(0)}</div>
                 </div>
@@ -368,7 +368,7 @@ export const Dashboard = () => {
                         <span className="text-[10px] font-bold uppercase tracking-wider text-green-500">Pagas ({servicosPagosMes.length})</span>
                       </div>
                       {servicosPagosMes.map(servico => (
-                        <div key={servico.id} className="flex items-center justify-between p-3 bg-green-500/10 rounded-lg border border-green-500/20">
+                        <div key={servico.id} className="flex items-center justify-between p-3 bg-surface-2 rounded-2xl border border-border/60">
                           <div className="flex-1 min-w-0">
                             <div className="text-sm font-medium text-foreground truncate">{servico.cliente_nome}</div>
                             <div className="text-xs text-muted-foreground truncate">{servico.nome_servico}</div>
@@ -389,7 +389,7 @@ export const Dashboard = () => {
                         <span className="text-[10px] font-bold uppercase tracking-wider text-amber-500">Pendentes ({servicosPendentesMes.length})</span>
                       </div>
                       {servicosPendentesMes.map(servico => (
-                        <div key={servico.id} className="flex items-center justify-between p-3 bg-amber-500/10 rounded-lg border border-amber-500/20">
+                        <div key={servico.id} className="flex items-center justify-between p-3 bg-surface-2 rounded-2xl border border-border/60">
                           <div className="flex-1 min-w-0">
                             <div className="text-sm font-medium text-foreground truncate">{servico.cliente_nome}</div>
                             <div className="text-xs text-muted-foreground truncate">{servico.nome_servico}</div>
@@ -410,7 +410,7 @@ export const Dashboard = () => {
                         <span className="text-[10px] font-bold uppercase tracking-wider text-red-500">Não Pagas ({servicosVencidosMes.length})</span>
                       </div>
                       {servicosVencidosMes.map(servico => (
-                        <div key={servico.id} className="flex items-center justify-between p-3 bg-red-500/10 rounded-lg border border-red-500/20">
+                        <div key={servico.id} className="flex items-center justify-between p-3 bg-surface-2 rounded-2xl border border-border/60">
                           <div className="flex-1 min-w-0">
                             <div className="text-sm font-medium text-foreground truncate">{servico.cliente_nome}</div>
                             <div className="text-xs text-muted-foreground truncate">{servico.nome_servico}</div>
@@ -458,7 +458,7 @@ export const Dashboard = () => {
                     <div className="space-y-2">
                       <p className="text-[11px] font-semibold uppercase tracking-wide text-red-500">Vencidas ({despesasVencidasMes.length})</p>
                       {despesasVencidasMes.map(despesa => (
-                        <div key={despesa.id} className="flex items-center justify-between p-3 bg-red-500/10 rounded-lg border border-red-500/30">
+                        <div key={despesa.id} className="flex items-center justify-between p-3 bg-surface-2 rounded-2xl border border-border/60">
                           <div className="flex-1 min-w-0">
                             <div className="text-sm font-medium text-foreground truncate">{despesa.nome}</div>
                             {despesa.anotacao && <div className="text-xs text-muted-foreground truncate">{despesa.anotacao}</div>}
@@ -475,7 +475,7 @@ export const Dashboard = () => {
                     <div className="space-y-2">
                       <p className="text-[11px] font-semibold uppercase tracking-wide text-primary">A vencer ({despesasAVencerMes.length})</p>
                       {despesasAVencerMes.map(despesa => (
-                        <div key={despesa.id} className="flex items-center justify-between p-3 bg-primary/10 rounded-lg border border-primary/30">
+                        <div key={despesa.id} className="flex items-center justify-between p-3 bg-surface-2 rounded-2xl border border-border/60">
                           <div className="flex-1 min-w-0">
                             <div className="text-sm font-medium text-foreground truncate">{despesa.nome}</div>
                             {despesa.anotacao && <div className="text-xs text-muted-foreground truncate">{despesa.anotacao}</div>}
@@ -523,7 +523,7 @@ export const Dashboard = () => {
                     <div className="space-y-2">
                       <p className="text-[11px] font-semibold uppercase tracking-wide text-green-500">Pagas ({instalacoesPagasMes.length})</p>
                       {instalacoesPagasMes.map(instalacao => (
-                        <div key={instalacao.id} className="flex items-center justify-between p-3 bg-green-500/10 rounded-lg border border-green-500/30">
+                        <div key={instalacao.id} className="flex items-center justify-between p-3 bg-surface-2 rounded-2xl border border-border/60">
                           <div className="flex items-center gap-2 flex-1 min-w-0">
                             <CheckCircle className="w-4 h-4 text-green-500 flex-shrink-0" />
                             <div className="min-w-0 flex-1">
@@ -543,7 +543,7 @@ export const Dashboard = () => {
                     <div className="space-y-2">
                       <p className="text-[11px] font-semibold uppercase tracking-wide text-primary">Não pagas ({instalacoesNaoPagasMes.length})</p>
                       {instalacoesNaoPagasMes.map(instalacao => (
-                        <div key={instalacao.id} className="flex items-center justify-between p-3 bg-primary/10 rounded-lg border border-primary/30">
+                        <div key={instalacao.id} className="flex items-center justify-between p-3 bg-surface-2 rounded-2xl border border-border/60">
                           <div className="flex items-center gap-2 flex-1 min-w-0">
                             <Clock className="w-4 h-4 text-primary flex-shrink-0" />
                             <div className="min-w-0 flex-1">
