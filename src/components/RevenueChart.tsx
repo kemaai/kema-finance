@@ -166,27 +166,34 @@ export const RevenueChart: React.FC<RevenueChartProps> = ({ servicos = [], insta
       </TabsContent>
 
       <TabsContent value="pizza" className="h-72 md:h-80">
-        <ResponsiveContainer width="100%" height="100%">
-          <PieChart>
-            <Pie
-              data={pieData}
-              cx="50%"
-              cy="50%"
-              labelLine={false}
-              label={({ name, value }) => `${name}: R$ ${Number(value).toFixed(0)}`}
-              innerRadius={58}
-              outerRadius={92}
-              paddingAngle={3}
-              dataKey="value"
-            >
-              {pieData.map((_, index) => (
-                <Cell key={`cell-${index}`} fill={pieColors[index]} stroke="hsl(var(--surface-1))" strokeWidth={3} />
-              ))}
-            </Pie>
-            <Tooltip content={<CustomTooltip />} />
-            <Legend iconType="circle" iconSize={8} formatter={renderLegend} wrapperStyle={{ paddingTop: 12 }} />
-          </PieChart>
-        </ResponsiveContainer>
+        <div className="relative h-full w-full">
+          <ResponsiveContainer width="100%" height="100%">
+            <PieChart margin={{ top: 4, right: 4, bottom: 4, left: 4 }}>
+              <Pie
+                data={pieData}
+                cx="50%"
+                cy="45%"
+                labelLine={false}
+                label={renderPieLabel}
+                innerRadius="52%"
+                outerRadius="78%"
+                paddingAngle={3}
+                dataKey="value"
+                stroke="none"
+              >
+                {pieData.map((_, index) => (
+                  <Cell key={`cell-${index}`} fill={pieColors[index]} stroke="hsl(var(--surface-1))" strokeWidth={3} />
+                ))}
+              </Pie>
+              <Tooltip content={<CustomTooltip />} />
+              <Legend iconType="circle" iconSize={8} formatter={renderLegend} wrapperStyle={{ paddingTop: 8 }} />
+            </PieChart>
+          </ResponsiveContainer>
+          <div className="pointer-events-none absolute inset-x-0 top-[45%] -translate-y-1/2 flex flex-col items-center">
+            <span className="text-[10px] uppercase tracking-[0.16em] text-muted-foreground">Total</span>
+            <span className="num text-lg md:text-xl font-bold text-foreground">{compactBRL(pieTotal)}</span>
+          </div>
+        </div>
       </TabsContent>
 
       <TabsContent value="barra" className="h-72 md:h-80">

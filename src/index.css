@@ -271,9 +271,9 @@
     transform: translateY(-2px);
   }
 
-  /* Bento block: surface panel without hover lift */
+  /* Bento block: painel de superfície com profundidade, sem hover lift */
   .bento-block {
-    @apply card-tech;
+    @apply card-3d;
   }
   .bento-block:hover {
     transform: none;
