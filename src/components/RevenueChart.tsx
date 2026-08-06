@@ -146,6 +146,7 @@ export const RevenueChart: React.FC<RevenueChartProps> = ({ servicos = [], insta
     { name: 'Despesas', value: totalDespesas },
   ];
   const pieColors = [COLORS.servicos, COLORS.instalacoes, COLORS.despesas];
+  const pieTotal = pieData.reduce((sum, item) => sum + item.value, 0);
 
   return (
     <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
