@@ -314,6 +314,83 @@
     background: hsl(0 0% 100% / 0.22);
   }
 
+  /* --- Glass + 3D system --- */
+
+  /* Frosted glass panel */
+  .glass {
+    @apply rounded-3xl;
+    background: linear-gradient(160deg, hsl(var(--surface-1) / 0.92), hsl(var(--surface-1) / 0.72));
+    backdrop-filter: blur(18px) saturate(160%);
+    -webkit-backdrop-filter: blur(18px) saturate(160%);
+    border: 1px solid hsl(0 0% 100% / 0.55);
+    box-shadow:
+      inset 0 1px 0 hsl(0 0% 100% / 0.9),
+      var(--shadow-soft);
+  }
+  .dark .glass {
+    background: linear-gradient(160deg, hsl(240 6% 13% / 0.82), hsl(240 6% 8% / 0.68));
+    border-color: hsl(0 0% 100% / 0.08);
+    box-shadow:
+      inset 0 1px 0 hsl(0 0% 100% / 0.06),
+      var(--shadow-soft);
+  }
+
+  /* Dimensional gradient block: inner light, deep drop, glass sheen */
+  .block-3d {
+    @apply relative rounded-3xl overflow-hidden transition-all duration-300;
+    box-shadow:
+      inset 0 1px 0 hsl(0 0% 100% / 0.45),
+      inset 0 -14px 28px hsl(0 0% 0% / 0.16),
+      0 10px 22px -8px hsl(var(--shadow-tint, 220 40% 20%) / 0.45),
+      0 26px 50px -18px hsl(var(--shadow-tint, 220 40% 20%) / 0.5);
+  }
+  .block-3d::before {
+    content: '';
+    @apply pointer-events-none absolute inset-x-0 top-0 h-1/2;
+    background: linear-gradient(180deg, hsl(0 0% 100% / 0.22), transparent);
+  }
+  .block-3d::after {
+    content: '';
+    @apply pointer-events-none absolute -right-10 -top-16 h-44 w-44 rounded-full;
+    background: radial-gradient(circle, hsl(0 0% 100% / 0.3), transparent 65%);
+  }
+  .block-3d:hover {
+    transform: translateY(-3px);
+  }
+
+  /* Elevated glass surface card with depth */
+  .card-3d {
+    @apply relative rounded-3xl transition-all duration-300 overflow-hidden;
+    background: linear-gradient(165deg, hsl(var(--surface-1)), hsl(var(--surface-2)));
+    border: 1px solid hsl(var(--border) / 0.7);
+    box-shadow:
+      inset 0 1px 0 hsl(0 0% 100% / 0.8),
+      0 2px 6px hsl(215 30% 30% / 0.05),
+      0 18px 40px -20px hsl(215 30% 30% / 0.35);
+  }
+  .dark .card-3d {
+    background: linear-gradient(165deg, hsl(240 6% 12%), hsl(240 6% 8%));
+    border-color: hsl(0 0% 100% / 0.07);
+    box-shadow:
+      inset 0 1px 0 hsl(0 0% 100% / 0.05),
+      0 20px 44px -22px hsl(0 0% 0% / 0.9);
+  }
+  .card-3d:hover {
+    transform: translateY(-3px);
+    box-shadow:
+      inset 0 1px 0 hsl(0 0% 100% / 0.8),
+      0 26px 54px -20px hsl(215 30% 30% / 0.4);
+  }
+
+  /* Value text that never overflows its card */
+  .value-fit {
+    @apply block w-full leading-[1.05];
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: clip;
+  }
+
   /* Thin progress track */
   .track {
     @apply h-1.5 w-full rounded-full overflow-hidden;
