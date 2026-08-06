@@ -19,8 +19,8 @@ export default {
 		},
 		extend: {
 			fontFamily: {
-				sans: ['Manrope', 'ui-sans-serif', 'system-ui', 'sans-serif'],
-				display: ['Sora', 'ui-sans-serif', 'system-ui', 'sans-serif'],
+				sans: ['"DM Sans"', 'ui-sans-serif', 'system-ui', 'sans-serif'],
+				display: ['"Space Grotesk"', 'ui-sans-serif', 'system-ui', 'sans-serif'],
 			},
 			colors: {
 				border: 'hsl(var(--border))',
@@ -36,6 +36,22 @@ export default {
 				teal: {
 					DEFAULT: 'hsl(var(--teal))',
 					foreground: 'hsl(var(--teal-foreground))'
+				},
+				block: {
+					violet: 'hsl(var(--block-violet))',
+					'violet-foreground': 'hsl(var(--block-violet-fg))',
+					lime: 'hsl(var(--block-lime))',
+					'lime-foreground': 'hsl(var(--block-lime-fg))',
+					peach: 'hsl(var(--block-peach))',
+					'peach-foreground': 'hsl(var(--block-peach-fg))',
+					blue: 'hsl(var(--block-blue))',
+					'blue-foreground': 'hsl(var(--block-blue-fg))',
+					coral: 'hsl(var(--block-coral))',
+					'coral-foreground': 'hsl(var(--block-coral-fg))',
+					teal: 'hsl(var(--block-teal))',
+					'teal-foreground': 'hsl(var(--block-teal-fg))',
+					ink: 'hsl(var(--block-ink))',
+					'ink-foreground': 'hsl(var(--block-ink-fg))'
 				},
 				primary: {
 					DEFAULT: 'hsl(var(--primary))',
@@ -93,6 +109,10 @@ export default {
 					from: { opacity: '0', transform: 'translateY(8px)' },
 					to: { opacity: '1', transform: 'translateY(0)' }
 				},
+				'pop-in': {
+					from: { opacity: '0', transform: 'scale(0.96)' },
+					to: { opacity: '1', transform: 'scale(1)' }
+				},
 				'accordion-down': {
 					from: {
 						height: '0'
@@ -112,6 +132,7 @@ export default {
 			},
 			animation: {
 				'fade-up': 'fade-up 0.4s cubic-bezier(0.22, 1, 0.36, 1) both',
+				'pop-in': 'pop-in 0.35s cubic-bezier(0.22, 1, 0.36, 1) both',
 				'accordion-down': 'accordion-down 0.2s ease-out',
 				'accordion-up': 'accordion-up 0.2s ease-out'
 			}
