@@ -165,11 +165,8 @@ export const Dashboard = () => {
             <div className="h-4 w-72 rounded-lg bg-muted/70 animate-pulse" />
           </div>
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">
-            {Array.from({ length: 5 }).map((_, i) => (
-              <div
-                key={i}
-                className={`card-tech h-32 animate-pulse bg-muted/40 ${i === 0 ? 'col-span-2 lg:row-span-2 lg:h-auto lg:min-h-[16rem]' : ''}`}
-              />
+            {Array.from({ length: 8 }).map((_, i) => (
+              <div key={i} className="card-tech h-32 animate-pulse bg-muted/40" />
             ))}
           </div>
           <div className="card-tech h-80 animate-pulse bg-muted/40" />
@@ -202,7 +199,7 @@ export const Dashboard = () => {
               onClick={handleRefresh}
               disabled={isRefreshing}
               aria-label="Atualizar dados do painel"
-              className="flex items-center gap-2 px-3.5 py-2 rounded-full bg-surface-3 text-xs font-medium text-muted-foreground hover:text-foreground transition-all self-start sm:self-auto"
+              className="flex items-center gap-2 px-3.5 py-2 rounded-full bg-card shadow-soft text-xs font-medium text-muted-foreground hover:text-foreground transition-all self-start sm:self-auto"
             >
               <RefreshCw className={`w-3.5 h-3.5 ${isRefreshing ? 'animate-spin' : ''}`} />
               <Clock className="w-3 h-3" />
