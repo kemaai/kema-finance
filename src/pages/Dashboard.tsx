@@ -279,10 +279,10 @@ export const Dashboard = () => {
         <div className="bento-block p-4 md:p-6">
           <div className="flex items-start justify-between gap-3 mb-5">
             <div>
-              <h2 className="font-display text-base md:text-lg font-bold text-foreground">Performance de Receita</h2>
+              <h2 className="font-display text-lg md:text-2xl font-bold text-foreground tracking-tight">Performance de Receita</h2>
               <p className="text-xs md:text-sm text-muted-foreground">Últimos 6 meses</p>
             </div>
-            <div className="flex items-center gap-1.5 rounded-full bg-emerald-500/12 border border-emerald-500/25 px-2.5 py-1 text-emerald-600 dark:text-emerald-400">
+            <div className="flex items-center gap-1.5 rounded-full px-3 py-1.5 block-lime">
               <TrendingUp className="w-3.5 h-3.5" />
               <span className="num text-xs font-semibold">+8.2%</span>
             </div>
@@ -296,17 +296,17 @@ export const Dashboard = () => {
           <div className="bento-block p-4 md:p-5">
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center gap-2.5">
-                <div className="w-9 h-9 bg-amber-500/15 rounded-2xl flex items-center justify-center">
-                  <Calendar className="w-4 h-4 text-amber-500" />
+                <div className="w-9 h-9 rounded-2xl flex items-center justify-center block-peach">
+                  <Calendar className="w-4 h-4" />
                 </div>
                 <div>
-                  <h3 className="font-display text-sm font-bold text-foreground">Serviços do Mês</h3>
+                  <h3 className="font-display text-base font-bold text-foreground">Serviços do Mês</h3>
                   <p className="text-xs text-muted-foreground">Mês atual</p>
                 </div>
               </div>
               {totalServicosMes > 0 && (
-                <div className="min-w-[22px] h-[22px] px-1.5 bg-amber-500 rounded-full flex items-center justify-center">
-                  <span className="num text-[10px] font-bold text-primary-foreground">{totalServicosMes}</span>
+                <div className="min-w-[22px] h-[22px] px-1.5 rounded-full flex items-center justify-center block-peach">
+                  <span className="num text-[10px] font-bold">{totalServicosMes}</span>
                 </div>
               )}
             </div>
@@ -405,17 +405,17 @@ export const Dashboard = () => {
           <div className="bento-block p-4 md:p-5">
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center gap-2.5">
-                <div className="w-9 h-9 bg-red-500/15 rounded-2xl flex items-center justify-center">
-                  <AlertTriangle className="w-4 h-4 text-red-500" />
+                <div className="w-9 h-9 rounded-2xl flex items-center justify-center block-coral">
+                  <AlertTriangle className="w-4 h-4" />
                 </div>
                 <div>
-                  <h3 className="font-display text-sm font-bold text-foreground">Despesas Próximas</h3>
+                  <h3 className="font-display text-base font-bold text-foreground">Despesas Próximas</h3>
                   <p className="text-xs text-muted-foreground">Mês atual</p>
                 </div>
               </div>
               {totalDespesasNaoPagasMes > 0 && (
-                <div className="min-w-[22px] h-[22px] px-1.5 bg-red-500 rounded-full flex items-center justify-center">
-                  <span className="num text-[10px] font-bold text-primary-foreground">{totalDespesasNaoPagasMes}</span>
+                <div className="min-w-[22px] h-[22px] px-1.5 rounded-full flex items-center justify-center block-coral">
+                  <span className="num text-[10px] font-bold">{totalDespesasNaoPagasMes}</span>
                 </div>
               )}
             </div>
@@ -470,17 +470,17 @@ export const Dashboard = () => {
           <div className="bento-block p-4 md:p-5">
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center gap-2.5">
-                <div className="w-9 h-9 bg-blue-500/15 rounded-2xl flex items-center justify-center">
-                  <Scissors className="w-4 h-4 text-blue-500" />
+                <div className="w-9 h-9 rounded-2xl flex items-center justify-center block-blue">
+                  <Scissors className="w-4 h-4" />
                 </div>
                 <div>
-                  <h3 className="font-display text-sm font-bold text-foreground">Instalações</h3>
+                  <h3 className="font-display text-base font-bold text-foreground">Instalações</h3>
                   <p className="text-xs text-muted-foreground">Mês atual</p>
                 </div>
               </div>
               {totalInstalacoesMes > 0 && (
-                <div className="min-w-[22px] h-[22px] px-1.5 bg-blue-500 rounded-full flex items-center justify-center">
-                  <span className="num text-[10px] font-bold text-primary-foreground">{totalInstalacoesMes}</span>
+                <div className="min-w-[22px] h-[22px] px-1.5 rounded-full flex items-center justify-center block-blue">
+                  <span className="num text-[10px] font-bold">{totalInstalacoesMes}</span>
                 </div>
               )}
             </div>
