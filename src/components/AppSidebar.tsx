@@ -68,7 +68,7 @@ export function AppSidebar() {
     <Sidebar className="border-r border-sidebar-border bg-sidebar">
       <SidebarHeader className="p-5">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-2xl bg-block-ink flex items-center justify-center">
+          <div className="w-10 h-10 icon-tile grad-blue flex items-center justify-center">
             <img
               src={kemaIcon}
               alt="KemaFinance"
@@ -102,7 +102,7 @@ export function AppSidebar() {
                       onClick={() => navigate(item.url)}
                       className={`relative flex items-center gap-3 w-full px-3 py-2.5 rounded-xl transition-all duration-200 ${
                         isActive
-                          ? 'bg-block-ink text-block-ink-foreground font-semibold shadow-elev-1'
+                          ? 'grad-blue text-white font-semibold shadow-soft'
                           : 'text-muted-foreground hover:text-foreground hover:bg-muted'
                       }`}
                     >
@@ -165,7 +165,7 @@ export function AppSidebar() {
               >
                 <Avatar className="w-9 h-9 ring-2 ring-border">
                   <AvatarImage src={profile?.avatar_url || undefined} alt={displayName} />
-                  <AvatarFallback className="bg-block-violet text-block-violet-foreground text-xs font-semibold">
+                  <AvatarFallback className="grad-violet text-white text-xs font-semibold">
                     {initials}
                   </AvatarFallback>
                 </Avatar>
