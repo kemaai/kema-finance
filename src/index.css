@@ -54,26 +54,26 @@
     --teal: 168 70% 42%;
     --teal-foreground: 0 0% 100%;
 
-    /* Accent family (soft-UI gradients) */
-    --accent-pink: 344 92% 62%;
-    --accent-pink-from: 348 100% 71%;
-    --accent-pink-to: 338 84% 54%;
+    /* Accent family — vivid, high-chroma gradients */
+    --accent-pink: 342 100% 58%;
+    --accent-pink-from: 330 100% 66%;
+    --accent-pink-to: 356 100% 52%;
 
-    --accent-green: 152 62% 44%;
-    --accent-green-from: 148 66% 58%;
-    --accent-green-to: 158 72% 36%;
+    --accent-green: 158 88% 38%;
+    --accent-green-from: 152 90% 47%;
+    --accent-green-to: 172 96% 32%;
 
-    --accent-orange: 26 96% 58%;
-    --accent-orange-from: 36 100% 65%;
-    --accent-orange-to: 20 94% 55%;
+    --accent-orange: 22 100% 54%;
+    --accent-orange-from: 38 100% 58%;
+    --accent-orange-to: 8 100% 55%;
 
-    --accent-blue: 221 83% 53%;
-    --accent-blue-from: 203 96% 63%;
-    --accent-blue-to: 226 80% 52%;
+    --accent-blue: 224 100% 56%;
+    --accent-blue-from: 196 100% 55%;
+    --accent-blue-to: 244 95% 58%;
 
-    --accent-violet: 262 80% 62%;
-    --accent-violet-from: 258 92% 72%;
-    --accent-violet-to: 268 76% 54%;
+    --accent-violet: 268 95% 62%;
+    --accent-violet-from: 282 96% 66%;
+    --accent-violet-to: 254 92% 56%;
 
     /* Legacy block tokens mapped onto the accent family */
     --block-violet: var(--accent-violet);
