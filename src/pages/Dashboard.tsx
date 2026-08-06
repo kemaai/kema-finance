@@ -165,11 +165,8 @@ export const Dashboard = () => {
             <div className="h-4 w-72 rounded-lg bg-muted/70 animate-pulse" />
           </div>
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">
-            {Array.from({ length: 5 }).map((_, i) => (
-              <div
-                key={i}
-                className={`card-tech h-32 animate-pulse bg-muted/40 ${i === 0 ? 'col-span-2 lg:row-span-2 lg:h-auto lg:min-h-[16rem]' : ''}`}
-              />
+            {Array.from({ length: 8 }).map((_, i) => (
+              <div key={i} className="card-tech h-32 animate-pulse bg-muted/40" />
             ))}
           </div>
           <div className="card-tech h-80 animate-pulse bg-muted/40" />
@@ -202,7 +199,7 @@ export const Dashboard = () => {
               onClick={handleRefresh}
               disabled={isRefreshing}
               aria-label="Atualizar dados do painel"
-              className="flex items-center gap-2 px-3.5 py-2 rounded-full bg-surface-3 text-xs font-medium text-muted-foreground hover:text-foreground transition-all self-start sm:self-auto"
+              className="flex items-center gap-2 px-3.5 py-2 rounded-full bg-card shadow-soft text-xs font-medium text-muted-foreground hover:text-foreground transition-all self-start sm:self-auto"
             >
               <RefreshCw className={`w-3.5 h-3.5 ${isRefreshing ? 'animate-spin' : ''}`} />
               <Clock className="w-3 h-3" />
@@ -231,8 +228,8 @@ export const Dashboard = () => {
           </div>
         </div>
 
-        {/* Bento grid: featured KPI + secondary KPIs + chart */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 auto-rows-fr gap-3 md:gap-4">
+        {/* Top KPI row — full-gradient cards */}
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">
           <DashboardCard
             title="Receita Total"
             value={`R$ ${receitaTotal.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`}
@@ -240,7 +237,14 @@ export const Dashboard = () => {
             icon={DollarSign}
             variant="green"
             featured
-            className="col-span-2 lg:col-span-2 lg:row-span-2 flex justify-end flex-col"
+          />
+          <DashboardCard
+            title="Despesas"
+            value={`R$ ${totalDespesasMes.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`}
+            subValue={`Pendente: R$ ${totalDespesasPendentes.toFixed(0)}`}
+            icon={CreditCard}
+            variant="red"
+            featured
           />
           <DashboardCard
             title="Serviços do Mês"
@@ -248,27 +252,47 @@ export const Dashboard = () => {
             subValue={`Pago: R$ ${receitaServicosPagos.toFixed(0)}`}
             icon={Briefcase}
             variant="orange"
+            featured
           />
           <DashboardCard
             title="Instalações"
             value={instalacoesDoPeriodo.length.toString()}
             subValue={`${totalM2Periodo.toFixed(1)} m² ${labelPeriodo}`}
             icon={Scissors}
-            variant="teal"
+            variant="blue"
+            featured
           />
+        </div>
+
+        {/* Secondary KPIs — soft white cards */}
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">
           <DashboardCard
             title="Clientes"
             value={clientesAtivos.toString()}
             subValue={`${mediaServicos} serv./cliente`}
             icon={Users}
-            variant="blue"
+            variant="purple"
           />
           <DashboardCard
-            title="Despesas"
-            value={`R$ ${totalDespesasMes.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`}
-            subValue={`Pend: R$ ${totalDespesasPendentes.toFixed(0)}`}
-            icon={CreditCard}
-            variant="red"
+            title="Despesas Pagas"
+            value={`R$ ${totalDespesasPagas.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`}
+            subValue={`${despesasPagas.length} de ${despesasDoMes.length} no mês`}
+            icon={CheckCircle}
+            variant="green"
+          />
+          <DashboardCard
+            title="Serviços Pagos"
+            value={`R$ ${totalPagoServicosMes.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`}
+            subValue={`Pendente: R$ ${totalPendenteServicosMes.toFixed(0)}`}
+            icon={Briefcase}
+            variant="teal"
+          />
+          <DashboardCard
+            title="Metragem"
+            value={`${totalM2Periodo.toFixed(1)} m²`}
+            subValue={`Concluídas ${labelPeriodo}`}
+            icon={Scissors}
+            variant="blue"
           />
         </div>
 
@@ -312,15 +336,15 @@ export const Dashboard = () => {
             </div>
             {totalServicosMes > 0 && (
               <div className="grid grid-cols-3 gap-1.5 mb-3">
-                <div className="p-2 rounded-lg bg-green-500/10 border border-green-500/20 text-center">
+                <div className="p-2.5 rounded-2xl bg-surface-2 border border-border/60 text-center">
                   <div className="text-[9px] uppercase tracking-wider text-green-500 font-semibold">Pago</div>
                   <div className="text-xs font-bold text-green-500 truncate">R$ {totalPagoServicosMes.toFixed(0)}</div>
                 </div>
-                <div className="p-2 rounded-lg bg-amber-500/10 border border-amber-500/20 text-center">
+                <div className="p-2.5 rounded-2xl bg-surface-2 border border-border/60 text-center">
                   <div className="text-[9px] uppercase tracking-wider text-amber-500 font-semibold">Pendente</div>
                   <div className="text-xs font-bold text-amber-500 truncate">R$ {totalPendenteServicosMes.toFixed(0)}</div>
                 </div>
-                <div className="p-2 rounded-lg bg-red-500/10 border border-red-500/20 text-center">
+                <div className="p-2.5 rounded-2xl bg-surface-2 border border-border/60 text-center">
                   <div className="text-[9px] uppercase tracking-wider text-red-500 font-semibold">Vencido</div>
                   <div className="text-xs font-bold text-red-500 truncate">R$ {totalVencidoServicosMes.toFixed(0)}</div>
                 </div>
@@ -341,7 +365,7 @@ export const Dashboard = () => {
                         <span className="text-[10px] font-bold uppercase tracking-wider text-green-500">Pagas ({servicosPagosMes.length})</span>
                       </div>
                       {servicosPagosMes.map(servico => (
-                        <div key={servico.id} className="flex items-center justify-between p-3 bg-green-500/10 rounded-lg border border-green-500/20">
+                        <div key={servico.id} className="flex items-center justify-between p-3 bg-surface-2 rounded-2xl border border-border/60">
                           <div className="flex-1 min-w-0">
                             <div className="text-sm font-medium text-foreground truncate">{servico.cliente_nome}</div>
                             <div className="text-xs text-muted-foreground truncate">{servico.nome_servico}</div>
@@ -362,7 +386,7 @@ export const Dashboard = () => {
                         <span className="text-[10px] font-bold uppercase tracking-wider text-amber-500">Pendentes ({servicosPendentesMes.length})</span>
                       </div>
                       {servicosPendentesMes.map(servico => (
-                        <div key={servico.id} className="flex items-center justify-between p-3 bg-amber-500/10 rounded-lg border border-amber-500/20">
+                        <div key={servico.id} className="flex items-center justify-between p-3 bg-surface-2 rounded-2xl border border-border/60">
                           <div className="flex-1 min-w-0">
                             <div className="text-sm font-medium text-foreground truncate">{servico.cliente_nome}</div>
                             <div className="text-xs text-muted-foreground truncate">{servico.nome_servico}</div>
@@ -383,7 +407,7 @@ export const Dashboard = () => {
                         <span className="text-[10px] font-bold uppercase tracking-wider text-red-500">Não Pagas ({servicosVencidosMes.length})</span>
                       </div>
                       {servicosVencidosMes.map(servico => (
-                        <div key={servico.id} className="flex items-center justify-between p-3 bg-red-500/10 rounded-lg border border-red-500/20">
+                        <div key={servico.id} className="flex items-center justify-between p-3 bg-surface-2 rounded-2xl border border-border/60">
                           <div className="flex-1 min-w-0">
                             <div className="text-sm font-medium text-foreground truncate">{servico.cliente_nome}</div>
                             <div className="text-xs text-muted-foreground truncate">{servico.nome_servico}</div>
@@ -431,7 +455,7 @@ export const Dashboard = () => {
                     <div className="space-y-2">
                       <p className="text-[11px] font-semibold uppercase tracking-wide text-red-500">Vencidas ({despesasVencidasMes.length})</p>
                       {despesasVencidasMes.map(despesa => (
-                        <div key={despesa.id} className="flex items-center justify-between p-3 bg-red-500/10 rounded-lg border border-red-500/30">
+                        <div key={despesa.id} className="flex items-center justify-between p-3 bg-surface-2 rounded-2xl border border-border/60">
                           <div className="flex-1 min-w-0">
                             <div className="text-sm font-medium text-foreground truncate">{despesa.nome}</div>
                             {despesa.anotacao && <div className="text-xs text-muted-foreground truncate">{despesa.anotacao}</div>}
@@ -448,7 +472,7 @@ export const Dashboard = () => {
                     <div className="space-y-2">
                       <p className="text-[11px] font-semibold uppercase tracking-wide text-primary">A vencer ({despesasAVencerMes.length})</p>
                       {despesasAVencerMes.map(despesa => (
-                        <div key={despesa.id} className="flex items-center justify-between p-3 bg-primary/10 rounded-lg border border-primary/30">
+                        <div key={despesa.id} className="flex items-center justify-between p-3 bg-surface-2 rounded-2xl border border-border/60">
                           <div className="flex-1 min-w-0">
                             <div className="text-sm font-medium text-foreground truncate">{despesa.nome}</div>
                             {despesa.anotacao && <div className="text-xs text-muted-foreground truncate">{despesa.anotacao}</div>}
@@ -496,7 +520,7 @@ export const Dashboard = () => {
                     <div className="space-y-2">
                       <p className="text-[11px] font-semibold uppercase tracking-wide text-green-500">Pagas ({instalacoesPagasMes.length})</p>
                       {instalacoesPagasMes.map(instalacao => (
-                        <div key={instalacao.id} className="flex items-center justify-between p-3 bg-green-500/10 rounded-lg border border-green-500/30">
+                        <div key={instalacao.id} className="flex items-center justify-between p-3 bg-surface-2 rounded-2xl border border-border/60">
                           <div className="flex items-center gap-2 flex-1 min-w-0">
                             <CheckCircle className="w-4 h-4 text-green-500 flex-shrink-0" />
                             <div className="min-w-0 flex-1">
@@ -516,7 +540,7 @@ export const Dashboard = () => {
                     <div className="space-y-2">
                       <p className="text-[11px] font-semibold uppercase tracking-wide text-primary">Não pagas ({instalacoesNaoPagasMes.length})</p>
                       {instalacoesNaoPagasMes.map(instalacao => (
-                        <div key={instalacao.id} className="flex items-center justify-between p-3 bg-primary/10 rounded-lg border border-primary/30">
+                        <div key={instalacao.id} className="flex items-center justify-between p-3 bg-surface-2 rounded-2xl border border-border/60">
                           <div className="flex items-center gap-2 flex-1 min-w-0">
                             <Clock className="w-4 h-4 text-primary flex-shrink-0" />
                             <div className="min-w-0 flex-1">
