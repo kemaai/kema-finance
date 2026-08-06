@@ -53,7 +53,7 @@ export const MobileNavigation = () => {
 
   return (
     <div className="fixed bottom-0 left-0 right-0 z-50 md:hidden px-2 pb-[max(0.5rem,env(safe-area-inset-bottom))] pt-1">
-      <div className="relative rounded-3xl border border-border/70 bg-card/85 backdrop-blur-xl shadow-elev-2 overflow-hidden">
+      <div className="relative rounded-[1.75rem] border border-border bg-card/95 backdrop-blur-xl shadow-elev-2 overflow-hidden">
         {/* Left fade indicator */}
         <div
           className={`pointer-events-none absolute left-0 top-0 bottom-0 w-8 z-10 bg-gradient-to-r from-card to-transparent transition-opacity duration-200 ${
@@ -83,13 +83,13 @@ export const MobileNavigation = () => {
               >
                 <div className={`w-10 h-9 rounded-2xl flex items-center justify-center transition-all duration-300 ${
                   isActive
-                    ? 'bg-primary text-primary-foreground shadow-glow-primary scale-105'
-                    : 'text-muted-foreground group-active:scale-95 group-hover:text-foreground group-hover:bg-muted/60'
+                    ? 'bg-block-ink text-block-ink-foreground scale-105 shadow-elev-1'
+                    : 'text-muted-foreground group-active:scale-95 group-hover:text-foreground group-hover:bg-muted'
                 }`}>
                   <item.icon className="w-[18px] h-[18px]" strokeWidth={isActive ? 2.4 : 2} />
                 </div>
                 <span className={`text-[10px] whitespace-nowrap transition-colors ${
-                  isActive ? 'text-primary font-semibold' : 'text-muted-foreground font-medium'
+                  isActive ? 'text-foreground font-semibold' : 'text-muted-foreground font-medium'
                 }`}>{item.name}</span>
               </NavLink>
             );
