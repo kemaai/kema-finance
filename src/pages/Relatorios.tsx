@@ -488,7 +488,7 @@ export const Relatorios = () => {
     <div className="p-3 md:p-6 pb-20 md:pb-6">
       <div className="flex flex-col gap-3 md:gap-4 md:flex-row md:items-center justify-between mb-4 md:mb-6">
         <div>
-          <h1 className="text-xl md:text-2xl font-bold text-foreground">Relatórios</h1>
+          <h1 className="page-title">Relatórios</h1>
           <p className="text-sm md:text-base text-muted-foreground">
             Análises {periodoRelatorio === 'semanal' ? 'semanais' : periodoRelatorio === 'mensal' ? 'mensais' : 'anuais'} de todos os dados
           </p>

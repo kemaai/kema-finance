@@ -201,7 +201,7 @@ export default function Perfil() {
           <ArrowLeft className="w-5 h-5" />
         </Button>
         <div>
-          <h1 className="text-2xl font-bold text-foreground">Meu Perfil</h1>
+          <h1 className="page-title">Meu Perfil</h1>
           <p className="text-sm text-muted-foreground">Gerencie suas informações pessoais e segurança</p>
         </div>
       </div>

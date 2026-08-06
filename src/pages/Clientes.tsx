@@ -212,7 +212,7 @@ export const Clientes = () => {
   return (
     <div className="p-4 md:p-6 space-y-4 md:space-y-6">
       <div className="flex justify-between items-center">
-        <h1 className="text-xl md:text-2xl font-bold text-foreground">Clientes</h1>
+        <h1 className="page-title">Clientes</h1>
         <Button 
           onClick={() => setShowForm(true)} 
           className="btn-tech"

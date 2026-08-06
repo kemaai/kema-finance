@@ -50,7 +50,7 @@ const Configuracoes: React.FC = () => {
           <Settings className="w-5 h-5 text-primary" />
         </div>
         <div>
-          <h1 className="text-2xl font-bold text-foreground">Configurações</h1>
+          <h1 className="page-title">Configurações</h1>
           <p className="text-sm text-muted-foreground">
             Ajuste parâmetros do sistema sem precisar mexer no código.
           </p>

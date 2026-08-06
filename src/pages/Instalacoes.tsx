@@ -275,7 +275,7 @@ export const Instalacoes = () => {
   return (
     <div className="container mx-auto p-4 lg:p-6 space-y-4 lg:space-y-6">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-        <h1 className="text-2xl lg:text-3xl font-bold text-foreground">Instalações</h1>
+        <h1 className="page-title">Instalações</h1>
         <Button 
           onClick={() => setShowForm(true)} 
           className="btn-tech w-full sm:w-auto"
