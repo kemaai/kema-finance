@@ -1,95 +1,65 @@
-# Auditoria do KemaFinance — Bugs, Segurança e Melhorias
+# Redesign 2026 — Dashboard e Navegação
 
-## 1. Estado atual (resultado da varredura)
+Modernização completa do visual e da experiência, **sem alterar nenhuma funcionalidade, cálculo ou regra de negócio**. Todos os dados, filtros e ações continuam idênticos — muda a forma, não o conteúdo.
 
-**Segurança automatizada — TUDO LIMPO no código:**
-- `agent_security`: 0 findings
-- `connector_security_scan` (Wiz): 0 findings
-- `supabase` / `supabase_lov`: 0 findings
-- `npm audit`: 0 vulnerabilidades altas/críticas
+## Direção visual escolhida
 
-**3 alertas do Supabase Linter — requerem ação manual no dashboard (não há como corrigir por código):**
-1. OTP com expiração acima do recomendado
-2. Proteção contra senhas vazadas desabilitada
-3. Versão do Postgres com patches de segurança disponíveis
+- **Paleta**: Navy + Laranja refinada — fundo `#080B1A`, superfícies `#141A33`, acento primário laranja `#F97316`, acento secundário teal `#2D8A9E` (novo, usado em gráficos e estados informativos).
+- **Tipografia**: Sora nos títulos e números, Manrope no corpo. Números financeiros com espaçamento tabular para alinhamento em coluna.
+- **Layout**: Bento Grid — blocos de tamanhos diferentes, com hierarquia real em vez de uma grade uniforme de 5 cards iguais.
 
-**Boas práticas já implementadas (confirmadas):**
-- RLS em todas as tabelas com `.eq('user_id', user.id)` defensivo no client
-- Mascaramento de CPF/CNPJ na UI
-- `console.*` desabilitado em produção
-- Validação de uploads (MIME + tamanho) em `useInstalacaoAnexos`
-- Edge function `kema-finance-ai` com JWT, limite de mensagens e sanitização
-- PWA com Service Worker, manifest e prompt de instalação
-- SEO básico (sitemap, JSON-LD, OG/Twitter, canonical)
+## Gaps identificados no app atual
 
-## 2. Correções propostas (Bugs e pequenas falhas)
+1. Todos os KPIs têm o mesmo peso visual — nada indica o que é mais importante.
+2. Cards com muito contorno e pouca respiração; densidade alta no mobile (2x2 apertado).
+3. O gráfico de receita é a informação mais rica, mas ocupa um bloco visualmente igual aos demais.
+4. Sidebar sem hierarquia: todos os itens têm o mesmo tratamento, o item ativo é pouco evidente.
+5. Navegação mobile plana, sem destaque para a ação principal.
+6. Estados de carregamento genéricos (spinner) em vez de skeletons com a forma do conteúdo.
+7. Referências modernas (imagens anexadas) usam ícones coloridos em pastilha, microtipografia hierárquica e superfícies com profundidade suave — o app hoje usa borda plana.
 
-### B1. `verify_jwt = false` em `kema-finance-ai`
-`supabase/config.toml` declara `verify_jwt = false`, mas a função já valida o JWT internamente via `supabase.auth.getClaims`. Está seguro, mas inconsistente — vou ligar `verify_jwt = true` para defesa em profundidade (o gateway rejeita requests não autenticadas antes mesmo de chegarem na função).
+## O que será feito
 
-### B2. 35 chamadas `console.*` espalhadas
-Já são silenciadas em produção via `main.tsx`, mas algumas estão em handlers de erro úteis. Vou padronizar:
-- manter `console.error` somente onde realmente ajuda debug
-- remover `console.log` de fluxos normais (Servicos, Sites, Perfil, AnexosUpload, etc.)
+### 1. Fundação de design (tokens)
+- Novos tokens de cor em `src/index.css`: superfícies em camadas (`surface-1/2/3`), acento teal, tokens de gráfico, sombras suaves com profundidade e um gradiente de destaque.
+- Fontes Sora + Manrope carregadas via `index.html` e registradas em `tailwind.config.ts` (`font-display` / `font-sans`).
+- Raio de borda maior e escala de espaçamento mais generosa.
 
-### B3. Rota órfã `/sites`
-`Sites.tsx` ainda existe no projeto, mas a rota `/sites` está como `<Navigate to="/servicos">`. Vou remover o arquivo `src/pages/Sites.tsx` (código morto).
+### 2. Cards KPI
+Refatorar `DashboardCard.tsx` mantendo a API atual (`variant`, `icon`, `value`, `subValue`, `trend`):
+- Ícone em pastilha arredondada colorida (padrão da referência 1).
+- Valor em Sora, grande, tabular.
+- Indicador de tendência com seta e cor semântica.
+- Superfície com profundidade suave em vez de borda dura; hover com elevação leve.
+- Variante `featured` para o card de destaque no bento.
 
-### B4. Cleanup de listener no `useAuth`
-Funciona, mas o `getUser()` inicial roda em paralelo com `onAuthStateChange`, podendo gerar 2 fetches do profile na inicialização. Vou usar apenas `onAuthStateChange` + `getSession` síncrono inicial.
+### 3. Dashboard em Bento Grid
+Reorganizar `src/pages/Dashboard.tsx` (só marcação e classes — os cálculos ficam intocados):
+- Bloco hero de saldo/receita ocupando 2 colunas, com o gráfico integrado.
+- KPIs secundários em blocos menores ao redor.
+- Widgets (KemaAI, Serviços do Mês, Alertas, Ações Rápidas) redistribuídos como blocos do bento em vez de linha uniforme.
+- Cabeçalho redesenhado: saudação, data e botão de sincronizar como chip discreto.
+- Filtro de período como segmented control moderno.
+- Skeletons no lugar do spinner.
 
-### B5. Validação Zod em formulários sensíveis
-Atualmente `ClienteForm`, `InstalacaoForm`, `DespesaForm` validam campo a campo. Vou centralizar em `src/lib/validations.ts` (já existe) usando schemas Zod com limites de tamanho — protege contra payloads abusivos antes de bater no Supabase.
+### 4. Gráficos
+`RevenueChart.tsx` — mesmos dados e séries (Serviços, Instalações, Despesas, Saldo Líquido):
+- Áreas com gradiente, linhas mais finas, grid quase invisível.
+- Tooltip customizado com card escuro e valores formatados em BRL.
+- Legenda como chips clicáveis.
+- Eixos com tipografia menor e mais clara.
 
-### B6. Anexos de instalação — link de compartilhamento
-O `AnexosUpload` gera signed URL com expiração curta. Vou conferir a expiração e adicionar opção de gerar link com TTL configurável (15min / 1h / 24h) para compartilhamento seguro.
+### 5. Navegação
+- `AppSidebar.tsx`: item ativo com pílula sólida e barra de acento, ícones consistentes, grupos com rótulos discretos, rodapé de perfil redesenhado.
+- `MobileNavigation.tsx`: barra flutuante arredondada com indicador ativo animado e botão de ação central em destaque.
+- `Layout.tsx`: cabeçalho mobile mais leve, respeitando safe-area.
 
-## 3. Melhorias recomendadas (opcional — confirmar quais aplicar)
+## Fora do escopo desta entrega
+Telas internas (Clientes, Serviços, Instalações, Despesas, Dívidas, Relatórios, Agente) mantêm o layout atual — herdam apenas os novos tokens de cor e tipografia. Podem ser redesenhadas numa próxima etapa.
 
-### M1. Per-route SEO com `react-helmet-async`
-Mesmo com tudo autenticado, ajuda em compartilhamentos internos.
-
-### M2. Lazy-loading das páginas (React.lazy + Suspense)
-Bundle inicial cai significativamente; melhora LCP e PWA.
-
-### M3. Error Boundary global
-Hoje um erro de render quebra a tela inteira. Adicionar `<ErrorBoundary>` com fallback amigável.
-
-### M4. Skeleton loaders padronizados
-Substituir spinners genéricos por skeletons nos cards do Dashboard / listagens.
-
-### M5. Exportação CSV/PDF dos relatórios
-A página `Relatorios` já tem TXT — adicionar CSV e PDF (jspdf) para envio a contador/cliente.
-
-### M6. Backup automático (export periódico)
-Botão "Exportar tudo" no Perfil → baixa um ZIP com JSON de todas as tabelas do usuário.
-
-### M7. Notificações de vencimento (PWA push)
-Service Worker + Notifications API para avisar despesas/instalações vencendo.
-
-### M8. Confirmação 2FA opcional no login
-Supabase Auth suporta TOTP — flag por usuário no perfil.
-
-### M9. Auditoria/log de ações sensíveis
-Tabela `audit_log` (user_id, action, entity, payload, created_at) preenchida via trigger nas operações de UPDATE/DELETE em emprestimos, dividas_negativadas, instalacoes.
-
-### M10. Testes automatizados
-Hoje há 0 testes. Sugiro Vitest + Testing Library cobrindo:
-- cálculo de M² (`valor_total / 24`)
-- filtros de quinzena
-- score financeiro do agente IA
-
-## 4. Itens que exigem ação sua no dashboard Supabase
-- Ativar **Leaked Password Protection** em Auth → Providers
-- Reduzir **OTP expiry** (recomendado ≤ 3600s)
-- **Upgrade do Postgres** em Settings → Infrastructure
-
-## 5. O que vou implementar ao aprovar este plano
-
-Por padrão (correções essenciais — baixo risco):
-**B1, B2, B3, B4, B5, B6**
-
-Por padrão (melhorias de alto valor / baixo esforço):
-**M2 (lazy loading), M3 (Error Boundary), M5 (export CSV/PDF nos relatórios)**
-
-Os demais itens (M1, M4, M6, M7, M8, M9, M10) só executo se você marcar quais quer. Me diga quais incluir ou se prefere outra combinação.
+## Detalhes técnicos
+- Nenhuma mudança em hooks, queries Supabase, edge functions, RLS ou lógica de cálculo (incluindo `valor_total / valor_m2`).
+- Todas as cores via tokens semânticos; nenhuma cor literal em componentes.
+- Todos os `data-testid` e `id` de automação existentes preservados.
+- Modo claro e escuro validados; verificação de contraste nos pares texto/fundo.
+- Verificação final com typecheck e captura da tela em mobile e desktop.
