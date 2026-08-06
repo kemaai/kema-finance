@@ -19,8 +19,8 @@ export default {
 		},
 		extend: {
 			fontFamily: {
-				sans: ['"DM Sans"', 'ui-sans-serif', 'system-ui', 'sans-serif'],
-				display: ['"Space Grotesk"', 'ui-sans-serif', 'system-ui', 'sans-serif'],
+				sans: ['Figtree', 'ui-sans-serif', 'system-ui', 'sans-serif'],
+				display: ['Outfit', 'ui-sans-serif', 'system-ui', 'sans-serif'],
 			},
 			colors: {
 				border: 'hsl(var(--border))',
@@ -52,6 +52,13 @@ export default {
 					'teal-foreground': 'hsl(var(--block-teal-fg))',
 					ink: 'hsl(var(--block-ink))',
 					'ink-foreground': 'hsl(var(--block-ink-fg))'
+				},
+				accent2: {
+					pink: 'hsl(var(--accent-pink))',
+					green: 'hsl(var(--accent-green))',
+					orange: 'hsl(var(--accent-orange))',
+					blue: 'hsl(var(--accent-blue))',
+					violet: 'hsl(var(--accent-violet))'
 				},
 				primary: {
 					DEFAULT: 'hsl(var(--primary))',
@@ -102,7 +109,9 @@ export default {
 			boxShadow: {
 				'elev-1': 'var(--elev-1)',
 				'elev-2': 'var(--elev-2)',
-				'glow-primary': 'var(--glow-primary)'
+				'glow-primary': 'var(--glow-primary)',
+				soft: 'var(--shadow-soft)',
+				lift: 'var(--shadow-lift)'
 			},
 			keyframes: {
 				'fade-up': {
