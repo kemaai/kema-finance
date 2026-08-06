@@ -7,73 +7,73 @@
 
 @layer base {
   :root {
-    --background: 205 45% 95%;
-    --foreground: 222 28% 16%;
+    --background: 210 20% 98%;
+    --foreground: 222 24% 14%;
 
     --card: 0 0% 100%;
-    --card-foreground: 222 28% 16%;
+    --card-foreground: 222 24% 14%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 222 28% 16%;
+    --popover-foreground: 222 24% 14%;
 
-    --primary: 221 83% 53%;
+    --primary: 162 84% 30%;
     --primary-foreground: 0 0% 100%;
 
-    --secondary: 210 35% 96%;
-    --secondary-foreground: 222 24% 22%;
+    --secondary: 210 20% 96%;
+    --secondary-foreground: 222 20% 22%;
 
-    --muted: 210 34% 96%;
-    --muted-foreground: 215 16% 52%;
+    --muted: 210 20% 96%;
+    --muted-foreground: 220 9% 46%;
 
-    --accent: 262 80% 62%;
+    --accent: 162 84% 30%;
     --accent-foreground: 0 0% 100%;
 
-    --destructive: 345 88% 58%;
+    --destructive: 4 84% 58%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 210 32% 91%;
-    --input: 210 34% 96%;
-    --ring: 221 83% 53%;
+    --border: 214 20% 91%;
+    --input: 214 20% 93%;
+    --ring: 162 84% 30%;
 
     --radius: 1.125rem;
 
     --sidebar-background: 0 0% 100%;
-    --sidebar-foreground: 222 24% 22%;
-    --sidebar-primary: 221 83% 53%;
+    --sidebar-foreground: 222 20% 22%;
+    --sidebar-primary: 162 84% 30%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 210 34% 96%;
-    --sidebar-accent-foreground: 222 28% 16%;
-    --sidebar-border: 210 32% 93%;
-    --sidebar-ring: 221 83% 53%;
+    --sidebar-accent: 210 20% 96%;
+    --sidebar-accent-foreground: 222 24% 14%;
+    --sidebar-border: 214 20% 92%;
+    --sidebar-ring: 162 84% 30%;
 
     /* Layered surfaces */
     --surface-1: 0 0% 100%;
-    --surface-2: 205 40% 98%;
-    --surface-3: 205 38% 94%;
+    --surface-2: 210 20% 98%;
+    --surface-3: 210 20% 95%;
 
-    --teal: 168 70% 42%;
+    --teal: 168 70% 38%;
     --teal-foreground: 0 0% 100%;
 
-    /* Accent family — vivid, high-chroma gradients */
-    --accent-pink: 342 100% 58%;
-    --accent-pink-from: 330 100% 66%;
-    --accent-pink-to: 356 100% 52%;
+    /* Accent family — flat, reference-matched */
+    --accent-pink: 4 84% 60%;
+    --accent-pink-from: 4 84% 60%;
+    --accent-pink-to: 4 84% 60%;
 
-    --accent-green: 158 88% 38%;
-    --accent-green-from: 152 90% 47%;
-    --accent-green-to: 172 96% 32%;
+    --accent-green: 162 84% 30%;
+    --accent-green-from: 162 84% 30%;
+    --accent-green-to: 162 84% 30%;
 
-    --accent-orange: 22 100% 54%;
-    --accent-orange-from: 38 100% 58%;
-    --accent-orange-to: 8 100% 55%;
+    --accent-orange: 32 95% 52%;
+    --accent-orange-from: 32 95% 52%;
+    --accent-orange-to: 32 95% 52%;
 
-    --accent-blue: 224 100% 56%;
-    --accent-blue-from: 196 100% 55%;
-    --accent-blue-to: 244 95% 58%;
+    --accent-blue: 221 83% 57%;
+    --accent-blue-from: 221 83% 57%;
+    --accent-blue-to: 221 83% 57%;
 
-    --accent-violet: 268 95% 62%;
-    --accent-violet-from: 282 96% 66%;
-    --accent-violet-to: 254 92% 56%;
+    --accent-violet: 258 84% 62%;
+    --accent-violet-from: 258 84% 62%;
+    --accent-violet-to: 258 84% 62%;
 
     /* Legacy block tokens mapped onto the accent family */
     --block-violet: var(--accent-violet);
@@ -92,15 +92,15 @@
     --block-ink-fg: 0 0% 100%;
 
     /* Chart tokens */
-    --chart-1: 262 80% 62%;
-    --chart-2: 221 83% 53%;
-    --chart-3: 344 92% 62%;
-    --chart-4: 152 62% 44%;
-    --chart-grid: 210 24% 86%;
+    --chart-1: 162 84% 30%;
+    --chart-2: 221 83% 57%;
+    --chart-3: 4 84% 60%;
+    --chart-4: 32 95% 52%;
+    --chart-grid: 214 20% 92%;
 
-    /* Elevation */
-    --shadow-soft: 0 1px 2px hsl(215 30% 30% / 0.04), 0 10px 30px hsl(215 30% 30% / 0.07);
-    --shadow-lift: 0 4px 10px hsl(215 30% 30% / 0.06), 0 22px 50px hsl(215 30% 30% / 0.12);
+    /* Elevation — quase plana, como a referência */
+    --shadow-soft: 0 1px 2px hsl(215 25% 30% / 0.04);
+    --shadow-lift: 0 2px 8px hsl(215 25% 30% / 0.07);
     --elev-1: var(--shadow-soft);
     --elev-2: var(--shadow-lift);
     --glow-primary: 0 10px 26px hsl(var(--primary) / 0.28);
