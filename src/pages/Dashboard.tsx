@@ -184,70 +184,88 @@ export const Dashboard = () => {
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
-      <div className="p-4 md:p-8 pb-2 md:pb-5">
+      <div className="p-4 md:p-8 pb-2 md:pb-4">
         <div className="max-w-7xl mx-auto">
-          <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-3">
-            <div className="animate-fade-up">
-              <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-muted-foreground mb-2">
-                {new Date().toLocaleDateString('pt-BR', { weekday: 'long', day: '2-digit', month: 'long' })}
-              </p>
-              <h1 className="font-display text-3xl md:text-5xl font-bold text-foreground tracking-tight">
-                Olá, {profile?.first_name || 'Usuário'}
-              </h1>
-              <p className="text-sm text-muted-foreground mt-1.5">Aqui está o resumo do seu negócio</p>
+          <div className="flex items-start justify-between gap-3">
+            <div className="flex items-center gap-3 min-w-0 animate-fade-up">
+              <div className="hidden sm:flex w-14 h-14 rounded-full bg-primary text-primary-foreground items-center justify-center font-display text-lg font-bold flex-shrink-0">
+                {(profile?.full_name || profile?.first_name || 'Usuário')
+                  .split(' ')
+                  .map((p) => p[0])
+                  .slice(0, 2)
+                  .join('')
+                  .toUpperCase()}
+              </div>
+              <div className="min-w-0">
+                <h1 className="font-display text-2xl md:text-3xl font-bold text-foreground tracking-tight truncate">
+                  Olá, {profile?.first_name || 'Usuário'}! 👋
+                </h1>
+                <p className="text-sm text-muted-foreground mt-0.5">Aqui está o resumo do seu negócio.</p>
+              </div>
             </div>
-            <button
-              onClick={handleRefresh}
-              disabled={isRefreshing}
-              aria-label="Atualizar dados do painel"
-              className="flex items-center gap-2 px-3.5 py-2 rounded-full bg-card shadow-soft text-xs font-medium text-muted-foreground hover:text-foreground transition-all self-start sm:self-auto"
-            >
-              <RefreshCw className={`w-3.5 h-3.5 ${isRefreshing ? 'animate-spin' : ''}`} />
-              <Clock className="w-3 h-3" />
-              <span>{isRefreshing ? 'Atualizando...' : formatRelativeTime(lastSyncTimestamp)}</span>
-            </button>
+            <div className="flex items-center gap-2 flex-shrink-0">
+              <button
+                type="button"
+                aria-label="Notificações"
+                className="w-10 h-10 rounded-full border border-border bg-card flex items-center justify-center text-muted-foreground hover:text-foreground transition-colors"
+              >
+                <Bell className="w-[18px] h-[18px]" />
+              </button>
+              <button
+                onClick={handleRefresh}
+                disabled={isRefreshing}
+                aria-label="Atualizar dados do painel"
+                className="w-10 h-10 rounded-full border border-border bg-card flex items-center justify-center text-muted-foreground hover:text-foreground transition-colors"
+              >
+                <RefreshCw className={`w-[18px] h-[18px] ${isRefreshing ? 'animate-spin' : ''}`} />
+              </button>
+            </div>
           </div>
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-4 md:px-8 pb-8 space-y-4 md:space-y-5">
-        {/* Period filter */}
-        <div className="flex items-center gap-2.5 flex-wrap">
-          <CalendarDays className="w-4 h-4 text-muted-foreground" />
-          <span className="text-xs font-medium text-muted-foreground mr-0.5">Período</span>
-          <div className="segmented">
-            {(['semanal', 'quinzenal', 'mensal'] as PeriodoFiltro[]).map((p) => (
-              <button
-                key={p}
-                onClick={() => setPeriodoInstalacoes(p)}
-                data-active={periodoInstalacoes === p}
-                className="segmented-item"
-              >
-                {p === 'semanal' ? 'Semanal' : p === 'quinzenal' ? 'Quinzenal' : 'Mensal'}
-              </button>
-            ))}
+      <div className="max-w-7xl mx-auto px-4 md:px-8 pb-8 space-y-3.5 md:space-y-4">
+        {/* Sync + Period filter */}
+        <div className="flex items-center justify-between gap-3 flex-wrap">
+          <div className="inline-flex items-center gap-2 rounded-full border border-border bg-card px-3.5 py-2">
+            <CalendarDays className="w-4 h-4 text-muted-foreground" />
+            <span className="text-xs font-medium text-muted-foreground">
+              {isRefreshing ? 'Atualizando...' : formatRelativeTime(lastSyncTimestamp)}
+            </span>
+            <span className="w-1.5 h-1.5 rounded-full bg-primary" />
+          </div>
+          <div className="flex items-center gap-2.5">
+            <span className="hidden sm:inline text-xs font-medium text-muted-foreground">Período</span>
+            <div className="segmented">
+              {(['semanal', 'quinzenal', 'mensal'] as PeriodoFiltro[]).map((p) => (
+                <button
+                  key={p}
+                  onClick={() => setPeriodoInstalacoes(p)}
+                  data-active={periodoInstalacoes === p}
+                  className="segmented-item"
+                >
+                  {p === 'semanal' ? 'Semanal' : p === 'quinzenal' ? 'Quinzenal' : 'Mensal'}
+                </button>
+              ))}
+            </div>
           </div>
         </div>
 
-        {/* Bento assimétrico — hierarquia visual clara */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">
-          {/* Hero: receita total ocupa toda a largura no mobile e metade no desktop */}
+        {/* Faixa de 5 KPIs — igual à referência */}
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-2.5 md:gap-3">
           <DashboardCard
             title="Receita Total"
             value={formatBRLCompact(receitaTotal)}
-            subValue={`Serviços ${formatBRLShort(receitaMensalServicos)} • Instalações ${formatBRLShort(receitaPeriodoInstalacoes)}`}
+            subValue={`Serviços ${formatBRLShort(receitaMensalServicos)} • Inst. ${formatBRLShort(receitaPeriodoInstalacoes)}`}
             icon={DollarSign}
             variant="green"
-            size="hero"
-            className="col-span-2 lg:col-span-2 lg:row-span-2"
           />
           <DashboardCard
-            title="Despesas"
-            value={formatBRLCompact(totalDespesasMes)}
-            subValue={`Pendente ${formatBRLShort(totalDespesasPendentes)}`}
-            icon={CreditCard}
-            variant="red"
-            size="featured"
+            title="Serviços do Mês"
+            value={servicosCount.toString()}
+            subValue={`Pago: ${formatBRLShort(receitaServicosPagos)}`}
+            icon={Briefcase}
+            variant="orange"
           />
           <DashboardCard
             title="Instalações"
@@ -255,52 +273,21 @@ export const Dashboard = () => {
             subValue={`${totalM2Periodo.toFixed(1)} m² ${labelPeriodo}`}
             icon={Scissors}
             variant="blue"
-            size="featured"
           />
-          <DashboardCard
-            title="Serviços do Mês"
-            value={servicosCount.toString()}
-            subValue={`Pago ${formatBRLShort(receitaServicosPagos)}`}
-            icon={Briefcase}
-            variant="orange"
-            size="featured"
-            className="col-span-2 lg:col-span-2"
-          />
-        </div>
-
-        {/* KPIs de apoio — cartões compactos em vidro */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-2.5 md:gap-4">
           <DashboardCard
             title="Clientes"
             value={clientesAtivos.toString()}
             subValue={`${mediaServicos} serv./cliente`}
             icon={Users}
             variant="purple"
-            size="compact"
           />
           <DashboardCard
-            title="Despesas Pagas"
-            value={formatBRLCompact(totalDespesasPagas)}
-            subValue={`${despesasPagas.length} de ${despesasDoMes.length} no mês`}
-            icon={CheckCircle}
-            variant="green"
-            size="compact"
-          />
-          <DashboardCard
-            title="Serviços Pagos"
-            value={formatBRLCompact(totalPagoServicosMes)}
-            subValue={`Pendente ${formatBRLShort(totalPendenteServicosMes)}`}
-            icon={Briefcase}
-            variant="teal"
-            size="compact"
-          />
-          <DashboardCard
-            title="Metragem"
-            value={`${totalM2Periodo.toFixed(1)} m²`}
-            subValue={`Concluídas ${labelPeriodo}`}
-            icon={Scissors}
-            variant="blue"
-            size="compact"
+            title="Despesas"
+            value={formatBRLCompact(totalDespesasMes)}
+            subValue={`Pend.: ${formatBRLShort(totalDespesasPendentes)}`}
+            icon={CreditCard}
+            variant="red"
+            className="col-span-2 md:col-span-1"
           />
         </div>
 
