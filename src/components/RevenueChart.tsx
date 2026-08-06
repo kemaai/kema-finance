@@ -76,6 +76,20 @@ const renderLegend = (value: string) => (
   <span className="text-xs font-medium text-muted-foreground">{value}</span>
 );
 
+/** Rótulo percentual dentro da fatia — nunca é cortado pelas bordas do card. */
+const renderPieLabel = ({ cx, cy, midAngle, innerRadius, outerRadius, percent }: any) => {
+  if (!percent || percent < 0.05) return null;
+  const RAD = Math.PI / 180;
+  const r = innerRadius + (outerRadius - innerRadius) * 0.5;
+  const x = cx + r * Math.cos(-midAngle * RAD);
+  const y = cy + r * Math.sin(-midAngle * RAD);
+  return (
+    <text x={x} y={y} fill="#fff" textAnchor="middle" dominantBaseline="central" fontSize={12} fontWeight={700}>
+      {`${Math.round(percent * 100)}%`}
+    </text>
+  );
+};
+
 export const RevenueChart: React.FC<RevenueChartProps> = ({ servicos = [], instalacoes = [], despesas = [] }) => {
   const [activeTab, setActiveTab] = useState('linha');
 
@@ -132,6 +146,7 @@ export const RevenueChart: React.FC<RevenueChartProps> = ({ servicos = [], insta
     { name: 'Despesas', value: totalDespesas },
   ];
   const pieColors = [COLORS.servicos, COLORS.instalacoes, COLORS.despesas];
+  const pieTotal = pieData.reduce((sum, item) => sum + item.value, 0);
 
   return (
     <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
@@ -166,27 +181,34 @@ export const RevenueChart: React.FC<RevenueChartProps> = ({ servicos = [], insta
       </TabsContent>
 
       <TabsContent value="pizza" className="h-72 md:h-80">
-        <ResponsiveContainer width="100%" height="100%">
-          <PieChart>
-            <Pie
-              data={pieData}
-              cx="50%"
-              cy="50%"
-              labelLine={false}
-              label={({ name, value }) => `${name}: R$ ${Number(value).toFixed(0)}`}
-              innerRadius={58}
-              outerRadius={92}
-              paddingAngle={3}
-              dataKey="value"
-            >
-              {pieData.map((_, index) => (
-                <Cell key={`cell-${index}`} fill={pieColors[index]} stroke="hsl(var(--surface-1))" strokeWidth={3} />
-              ))}
-            </Pie>
-            <Tooltip content={<CustomTooltip />} />
-            <Legend iconType="circle" iconSize={8} formatter={renderLegend} wrapperStyle={{ paddingTop: 12 }} />
-          </PieChart>
-        </ResponsiveContainer>
+        <div className="relative h-full w-full">
+          <ResponsiveContainer width="100%" height="100%">
+            <PieChart margin={{ top: 4, right: 4, bottom: 4, left: 4 }}>
+              <Pie
+                data={pieData}
+                cx="50%"
+                cy="45%"
+                labelLine={false}
+                label={renderPieLabel}
+                innerRadius="52%"
+                outerRadius="78%"
+                paddingAngle={3}
+                dataKey="value"
+                stroke="none"
+              >
+                {pieData.map((_, index) => (
+                  <Cell key={`cell-${index}`} fill={pieColors[index]} stroke="hsl(var(--surface-1))" strokeWidth={3} />
+                ))}
+              </Pie>
+              <Tooltip content={<CustomTooltip />} />
+              <Legend iconType="circle" iconSize={8} formatter={renderLegend} wrapperStyle={{ paddingTop: 8 }} />
+            </PieChart>
+          </ResponsiveContainer>
+          <div className="pointer-events-none absolute inset-x-0 top-[45%] -translate-y-1/2 flex flex-col items-center">
+            <span className="text-[10px] uppercase tracking-[0.16em] text-muted-foreground">Total</span>
+            <span className="num text-lg md:text-xl font-bold text-foreground">{compactBRL(pieTotal)}</span>
+          </div>
+        </div>
       </TabsContent>
 
       <TabsContent value="barra" className="h-72 md:h-80">

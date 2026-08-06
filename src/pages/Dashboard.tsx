@@ -7,6 +7,7 @@ import { useServicos, useClientes, useInstalacoes, useDespesas } from '../hooks/
 import { useAuth } from '../hooks/useAuth';
 import { useM2Price } from '../hooks/useM2Price';
 import { parseLocalDate } from '../lib/utils';
+import { formatBRLCompact, formatBRLShort } from '../lib/format';
 import { useQueryClient } from '@tanstack/react-query';
 import { DollarSign, Briefcase, Scissors, Users, TrendingUp, Calendar, Bell, CheckCircle, Sparkles, CreditCard, AlertTriangle, RefreshCw, Clock, CalendarDays } from 'lucide-react';
 
@@ -228,31 +229,25 @@ export const Dashboard = () => {
           </div>
         </div>
 
-        {/* Top KPI row — full-gradient cards */}
+        {/* Bento assimétrico — hierarquia visual clara */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">
+          {/* Hero: receita total ocupa toda a largura no mobile e metade no desktop */}
           <DashboardCard
             title="Receita Total"
-            value={`R$ ${receitaTotal.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`}
-            subValue={`Serviços: R$ ${receitaMensalServicos.toFixed(0)} • Inst: R$ ${receitaPeriodoInstalacoes.toFixed(0)}`}
+            value={formatBRLCompact(receitaTotal)}
+            subValue={`Serviços ${formatBRLShort(receitaMensalServicos)} • Instalações ${formatBRLShort(receitaPeriodoInstalacoes)}`}
             icon={DollarSign}
             variant="green"
-            featured
+            size="hero"
+            className="col-span-2 lg:col-span-2 lg:row-span-2"
           />
           <DashboardCard
             title="Despesas"
-            value={`R$ ${totalDespesasMes.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`}
-            subValue={`Pendente: R$ ${totalDespesasPendentes.toFixed(0)}`}
+            value={formatBRLCompact(totalDespesasMes)}
+            subValue={`Pendente ${formatBRLShort(totalDespesasPendentes)}`}
             icon={CreditCard}
             variant="red"
-            featured
-          />
-          <DashboardCard
-            title="Serviços do Mês"
-            value={servicosCount.toString()}
-            subValue={`Pago: R$ ${receitaServicosPagos.toFixed(0)}`}
-            icon={Briefcase}
-            variant="orange"
-            featured
+            size="featured"
           />
           <DashboardCard
             title="Instalações"
@@ -260,32 +255,44 @@ export const Dashboard = () => {
             subValue={`${totalM2Periodo.toFixed(1)} m² ${labelPeriodo}`}
             icon={Scissors}
             variant="blue"
-            featured
+            size="featured"
+          />
+          <DashboardCard
+            title="Serviços do Mês"
+            value={servicosCount.toString()}
+            subValue={`Pago ${formatBRLShort(receitaServicosPagos)}`}
+            icon={Briefcase}
+            variant="orange"
+            size="featured"
+            className="col-span-2 lg:col-span-2"
           />
         </div>
 
-        {/* Secondary KPIs — soft white cards */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">
+        {/* KPIs de apoio — cartões compactos em vidro */}
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-2.5 md:gap-4">
           <DashboardCard
             title="Clientes"
             value={clientesAtivos.toString()}
             subValue={`${mediaServicos} serv./cliente`}
             icon={Users}
             variant="purple"
+            size="compact"
           />
           <DashboardCard
             title="Despesas Pagas"
-            value={`R$ ${totalDespesasPagas.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`}
+            value={formatBRLCompact(totalDespesasPagas)}
             subValue={`${despesasPagas.length} de ${despesasDoMes.length} no mês`}
             icon={CheckCircle}
             variant="green"
+            size="compact"
           />
           <DashboardCard
             title="Serviços Pagos"
-            value={`R$ ${totalPagoServicosMes.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`}
-            subValue={`Pendente: R$ ${totalPendenteServicosMes.toFixed(0)}`}
+            value={formatBRLCompact(totalPagoServicosMes)}
+            subValue={`Pendente ${formatBRLShort(totalPendenteServicosMes)}`}
             icon={Briefcase}
             variant="teal"
+            size="compact"
           />
           <DashboardCard
             title="Metragem"
@@ -293,6 +300,7 @@ export const Dashboard = () => {
             subValue={`Concluídas ${labelPeriodo}`}
             icon={Scissors}
             variant="blue"
+            size="compact"
           />
         </div>
 
