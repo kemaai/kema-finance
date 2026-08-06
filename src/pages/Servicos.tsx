@@ -116,7 +116,7 @@ export const Servicos = () => {
     <div className="p-3 md:p-6 pb-20 md:pb-6">
       <div className="flex flex-col gap-3 md:gap-4 md:flex-row md:items-center justify-between mb-4 md:mb-6">
         <div>
-          <h1 className="text-xl md:text-2xl font-bold text-foreground">Serviços</h1>
+          <h1 className="page-title">Serviços</h1>
           <p className="text-sm md:text-base text-muted-foreground">Gerencie os serviços prestados</p>
           <p className="text-sm text-primary font-medium mt-1">
             Total faturado no mês: R$ {totalFaturado.toFixed(2)}
@@ -132,7 +132,7 @@ export const Servicos = () => {
       </div>
 
       <div className="card-tech">
-        <div className="p-3 md:p-4 border-b border-orange-500/20">
+        <div className="p-3 md:p-4 border-b border-border">
           <SiteMonthFilter
             selectedMonth={selectedMonth}
             onPreviousMonth={goToPreviousMonth}

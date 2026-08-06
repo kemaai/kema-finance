@@ -44,7 +44,7 @@ export const Dividas = () => {
     <div className="p-4 md:p-6 max-w-7xl mx-auto">
       <div className="flex justify-between items-center mb-4 md:mb-6">
         <div>
-          <h1 className="text-xl md:text-2xl font-bold text-foreground">Dívidas</h1>
+          <h1 className="page-title">Dívidas</h1>
           <p className="text-muted-foreground mt-1">
             Gerencie seus empréstimos e dívidas negativadas
           </p>

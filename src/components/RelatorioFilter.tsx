@@ -78,24 +78,24 @@ export const RelatorioFilter: React.FC<RelatorioFilterProps> = ({
         <div className="space-y-2">
           <label className="text-sm font-medium text-foreground">Período:</label>
           <Tabs value={periodoRelatorio} onValueChange={(value) => onPeriodoChange(value as 'semanal' | 'mensal' | 'anual')} className="w-full">
-            <TabsList className="grid w-full grid-cols-3 bg-background/50 border border-orange-500/30">
+            <TabsList className="grid w-full grid-cols-3 bg-background/50 border border-border">
               <TabsTrigger 
                 value="semanal" 
-                className="flex items-center gap-2 data-[state=active]:bg-orange-500 data-[state=active]:text-white"
+                className="flex items-center gap-2 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
               >
                 <CalendarDays className="w-4 h-4" />
                 <span className="hidden sm:inline">Semanal</span>
               </TabsTrigger>
               <TabsTrigger 
                 value="mensal"
-                className="flex items-center gap-2 data-[state=active]:bg-orange-500 data-[state=active]:text-white"
+                className="flex items-center gap-2 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
               >
                 <CalendarRange className="w-4 h-4" />
                 <span className="hidden sm:inline">Mensal</span>
               </TabsTrigger>
               <TabsTrigger 
                 value="anual"
-                className="flex items-center gap-2 data-[state=active]:bg-orange-500 data-[state=active]:text-white"
+                className="flex items-center gap-2 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
               >
                 <CalendarClock className="w-4 h-4" />
                 <span className="hidden sm:inline">Anual</span>
@@ -182,7 +182,7 @@ export const RelatorioFilter: React.FC<RelatorioFilterProps> = ({
             <Button 
               variant="outline" 
               onClick={onResetFilter}
-              className="w-full border-orange-500/30 hover:bg-orange-500/10 text-foreground"
+              className="w-full border-border hover:bg-muted text-foreground"
             >
               <Calendar className="w-4 h-4 mr-2" />
               Limpar
@@ -191,7 +191,7 @@ export const RelatorioFilter: React.FC<RelatorioFilterProps> = ({
         </div>
 
         {/* Indicador do período selecionado */}
-        <div className="mt-4 p-3 bg-orange-500/10 border border-orange-500/30 rounded-lg">
+        <div className="mt-4 p-3 bg-orange-500/10 border border-border rounded-lg">
           <p className="text-sm text-orange-400">
             <strong>Período:</strong> {formatPeriodo(periodoRelatorio, semanaEscolhida, mesEscolhido, anoEscolhido)}
             {tipoRelatorio !== 'todos' && (

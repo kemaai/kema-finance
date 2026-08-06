@@ -477,7 +477,7 @@ export const Relatorios = () => {
     return (
       <div className="p-3 md:p-6 pb-20 md:pb-6">
         <div className="flex items-center justify-center h-64">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-orange-500 mr-3"></div>
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mr-3"></div>
           <div className="text-lg text-foreground">Carregando relatórios...</div>
         </div>
       </div>
@@ -488,7 +488,7 @@ export const Relatorios = () => {
     <div className="p-3 md:p-6 pb-20 md:pb-6">
       <div className="flex flex-col gap-3 md:gap-4 md:flex-row md:items-center justify-between mb-4 md:mb-6">
         <div>
-          <h1 className="text-xl md:text-2xl font-bold text-foreground">Relatórios</h1>
+          <h1 className="page-title">Relatórios</h1>
           <p className="text-sm md:text-base text-muted-foreground">
             Análises {periodoRelatorio === 'semanal' ? 'semanais' : periodoRelatorio === 'mensal' ? 'mensais' : 'anuais'} de todos os dados
           </p>
@@ -543,7 +543,7 @@ export const Relatorios = () => {
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4">
-            <div className="p-3 bg-orange-500/10 border border-orange-500/30 rounded-lg">
+            <div className="p-3 bg-orange-500/10 border border-border rounded-lg">
               <div className="flex items-center gap-2 mb-1">
                 <Scissors className="w-4 h-4 text-orange-500" />
                 <span className="text-xs text-muted-foreground">Instalações</span>
@@ -583,12 +583,12 @@ export const Relatorios = () => {
       </Card>
 
       <Tabs defaultValue="visao-geral" className="space-y-4 md:space-y-6">
-        <TabsList className={`grid w-full ${isMobile ? 'grid-cols-3 h-auto gap-1' : 'grid-cols-5'} bg-background/50 border border-orange-500/30`}>
-          <TabsTrigger value="visao-geral" className="data-[state=active]:bg-orange-500 data-[state=active]:text-white text-xs md:text-sm">Visão Geral</TabsTrigger>
-          <TabsTrigger value="graficos" className="data-[state=active]:bg-orange-500 data-[state=active]:text-white text-xs md:text-sm">Gráficos</TabsTrigger>
-          <TabsTrigger value="financeiro" className="data-[state=active]:bg-orange-500 data-[state=active]:text-white text-xs md:text-sm">Financeiro</TabsTrigger>
-          <TabsTrigger value="operacional" className="data-[state=active]:bg-orange-500 data-[state=active]:text-white text-xs md:text-sm">Operacional</TabsTrigger>
-          <TabsTrigger value="detalhado" className="data-[state=active]:bg-orange-500 data-[state=active]:text-white text-xs md:text-sm">Detalhado</TabsTrigger>
+        <TabsList className={`grid w-full ${isMobile ? 'grid-cols-3 h-auto gap-1' : 'grid-cols-5'} bg-background/50 border border-border`}>
+          <TabsTrigger value="visao-geral" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground text-xs md:text-sm">Visão Geral</TabsTrigger>
+          <TabsTrigger value="graficos" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground text-xs md:text-sm">Gráficos</TabsTrigger>
+          <TabsTrigger value="financeiro" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground text-xs md:text-sm">Financeiro</TabsTrigger>
+          <TabsTrigger value="operacional" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground text-xs md:text-sm">Operacional</TabsTrigger>
+          <TabsTrigger value="detalhado" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground text-xs md:text-sm">Detalhado</TabsTrigger>
         </TabsList>
 
         <TabsContent value="visao-geral" className="space-y-4 md:space-y-6">
@@ -754,7 +754,7 @@ export const Relatorios = () => {
 
           {/* Cards com resumo dos dados do gráfico */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4">
-            <div className="p-3 bg-orange-500/10 border border-orange-500/30 rounded-lg">
+            <div className="p-3 bg-orange-500/10 border border-border rounded-lg">
               <div className="text-xs text-muted-foreground mb-1">Total Instalações</div>
               <div className="text-lg md:text-xl font-bold text-orange-500">
                 {dadosGrafico.reduce((sum, d) => sum + (d.instalacoes || 0), 0)}
@@ -802,7 +802,7 @@ export const Relatorios = () => {
                   <span className="font-medium text-xs md:text-sm text-foreground">Serviços</span>
                   <span className="text-sm md:text-lg font-bold text-blue-500">R$ {metricas.receitaServicos.toFixed(2)}</span>
                 </div>
-                <div className="flex justify-between items-center p-2 md:p-3 bg-orange-500/10 border border-orange-500/30 rounded-lg">
+                <div className="flex justify-between items-center p-2 md:p-3 bg-orange-500/10 border border-border rounded-lg">
                   <span className="font-medium text-xs md:text-sm text-foreground">Instalações</span>
                   <span className="text-sm md:text-lg font-bold text-orange-500">R$ {metricas.receitaInstalacoes.toFixed(2)}</span>
                 </div>
@@ -884,7 +884,7 @@ export const Relatorios = () => {
                         </div>
                       </div>
                       
-                      <div className="p-3 md:p-4 bg-orange-500/10 border border-orange-500/30 rounded-lg">
+                      <div className="p-3 md:p-4 bg-orange-500/10 border border-border rounded-lg">
                         <h4 className="font-medium text-orange-400 mb-2 text-sm">Agendadas</h4>
                         <div className="text-xl md:text-2xl font-bold text-orange-500">{instalacoesAgendadas.length}</div>
                         <p className="text-xs md:text-sm text-muted-foreground">instalações</p>
@@ -950,7 +950,7 @@ export const Relatorios = () => {
                       return <p className="text-xs md:text-sm text-muted-foreground">Nenhum serviço próximo</p>;
                     }
                     return proximos.map(s => (
-                      <div key={s.id} className="flex justify-between items-center p-2 border border-orange-500/30 rounded bg-background/50">
+                      <div key={s.id} className="flex justify-between items-center p-2 border border-border rounded bg-background/50">
                         <div>
                           <div className="font-medium text-xs md:text-sm text-foreground">{s.cliente_nome}</div>
                           <div className="text-xs text-muted-foreground">
@@ -976,7 +976,7 @@ export const Relatorios = () => {
                     .filter(inst => inst.status === 'Agendado')
                     .slice(0, 5)
                     .map((instalacao) => (
-                      <div key={instalacao.id} className="flex justify-between items-center p-2 border border-orange-500/30 rounded bg-background/50">
+                      <div key={instalacao.id} className="flex justify-between items-center p-2 border border-border rounded bg-background/50">
                         <div>
                           <div className="font-medium text-xs md:text-sm text-foreground">{instalacao.arquiteto_nome}</div>
                           <div className="text-xs text-muted-foreground">

@@ -239,7 +239,7 @@ export default function Despesas() {
     <div className="p-4 md:p-6 space-y-4 md:space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
         <div>
-          <h1 className="text-xl md:text-2xl font-bold text-foreground">Controle de Despesas</h1>
+          <h1 className="page-title">Controle de Despesas</h1>
           <p className="text-muted-foreground">
             {format(mesAtual, 'MMMM yyyy', { locale: ptBR })}
           </p>
@@ -337,7 +337,7 @@ export default function Despesas() {
         </Button>
         
         {despesasDoMes.length === 0 && (
-          <Button variant="outline" onClick={criarContasDoMes} className="border-orange-500/30 hover:bg-orange-500/10">
+          <Button variant="outline" onClick={criarContasDoMes} className="border-border hover:bg-muted">
             Criar Contas do Mês
           </Button>
         )}
