@@ -7,10 +7,10 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { parseLocalDate } from '@/lib/utils';
 
 const COLORS = {
-  servicos: '#F97316',    // orange
-  instalacoes: '#6366F1', // indigo
-  despesas: '#EF4444',    // red
-  saldo: '#10B981',       // emerald
+  servicos: '#8B7CFF',    // violet block
+  instalacoes: '#2563EB', // electric blue block
+  despesas: '#FF5A5F',    // coral block
+  saldo: '#14C9A0',       // teal block
 };
 
 interface Servico {
@@ -41,7 +41,7 @@ interface RevenueChartProps {
 const CustomTooltip = ({ active, payload, label }: any) => {
   if (active && payload && payload.length) {
     return (
-      <div className="rounded-xl border border-border bg-popover/95 backdrop-blur-md p-3 shadow-elev-2 min-w-[170px]">
+      <div className="rounded-2xl border border-border bg-popover p-3 shadow-elev-2 min-w-[170px]">
         <p className="font-display text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-2">{label}</p>
         <div className="space-y-1.5">
           {payload.map((entry: any, index: number) => (
@@ -135,10 +135,10 @@ export const RevenueChart: React.FC<RevenueChartProps> = ({ servicos = [], insta
 
   return (
     <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-      <TabsList className="inline-flex h-auto w-auto gap-1 rounded-full border border-border/60 bg-muted/40 p-1 mb-5">
-        <TabsTrigger value="linha" className="rounded-full px-4 py-1.5 text-xs font-semibold data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-glow-primary">Área</TabsTrigger>
-        <TabsTrigger value="pizza" className="rounded-full px-4 py-1.5 text-xs font-semibold data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-glow-primary">Pizza</TabsTrigger>
-        <TabsTrigger value="barra" className="rounded-full px-4 py-1.5 text-xs font-semibold data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-glow-primary">Barra</TabsTrigger>
+      <TabsList className="inline-flex h-auto w-auto gap-1 rounded-full bg-surface-3 p-1 mb-5">
+        <TabsTrigger value="linha" className="rounded-full px-4 py-1.5 text-xs font-semibold data-[state=active]:bg-block-ink data-[state=active]:text-block-ink-foreground">Área</TabsTrigger>
+        <TabsTrigger value="pizza" className="rounded-full px-4 py-1.5 text-xs font-semibold data-[state=active]:bg-block-ink data-[state=active]:text-block-ink-foreground">Pizza</TabsTrigger>
+        <TabsTrigger value="barra" className="rounded-full px-4 py-1.5 text-xs font-semibold data-[state=active]:bg-block-ink data-[state=active]:text-block-ink-foreground">Barra</TabsTrigger>
       </TabsList>
 
       <TabsContent value="linha" className="h-72 md:h-80">
@@ -147,20 +147,20 @@ export const RevenueChart: React.FC<RevenueChartProps> = ({ servicos = [], insta
             <defs>
               {(['servicos', 'instalacoes', 'despesas'] as const).map((k) => (
                 <linearGradient key={k} id={`grad-${k}`} x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stopColor={COLORS[k]} stopOpacity={0.35} />
+                  <stop offset="0%" stopColor={COLORS[k]} stopOpacity={0.28} />
                   <stop offset="100%" stopColor={COLORS[k]} stopOpacity={0} />
                 </linearGradient>
               ))}
             </defs>
-            <CartesianGrid vertical={false} stroke="hsl(var(--chart-grid))" strokeOpacity={0.2} />
+            <CartesianGrid vertical={false} stroke="hsl(var(--chart-grid))" strokeOpacity={0.35} strokeDasharray="3 6" />
             <XAxis dataKey="month" {...axisProps} dy={6} />
             <YAxis {...axisProps} width={64} tickFormatter={compactBRL} />
             <Tooltip content={<CustomTooltip />} />
             <Legend iconType="circle" iconSize={8} formatter={renderLegend} wrapperStyle={{ paddingTop: 12 }} />
-            <Area type="monotone" dataKey="servicos" stroke={COLORS.servicos} strokeWidth={2} fill="url(#grad-servicos)" name="Serviços" activeDot={{ r: 4, strokeWidth: 0 }} dot={false} />
-            <Area type="monotone" dataKey="instalacoes" stroke={COLORS.instalacoes} strokeWidth={2} fill="url(#grad-instalacoes)" name="Instalações" activeDot={{ r: 4, strokeWidth: 0 }} dot={false} />
-            <Area type="monotone" dataKey="despesas" stroke={COLORS.despesas} strokeWidth={2} fill="url(#grad-despesas)" name="Despesas" activeDot={{ r: 4, strokeWidth: 0 }} dot={false} />
-            <Line type="monotone" dataKey="saldo" stroke={COLORS.saldo} strokeWidth={2} strokeDasharray="6 4" name="Saldo Líquido" dot={false} activeDot={{ r: 4, strokeWidth: 0 }} />
+            <Area type="monotone" dataKey="servicos" stroke={COLORS.servicos} strokeWidth={2.5} fill="url(#grad-servicos)" name="Serviços" activeDot={{ r: 5, strokeWidth: 0 }} dot={false} />
+            <Area type="monotone" dataKey="instalacoes" stroke={COLORS.instalacoes} strokeWidth={2.5} fill="url(#grad-instalacoes)" name="Instalações" activeDot={{ r: 5, strokeWidth: 0 }} dot={false} />
+            <Area type="monotone" dataKey="despesas" stroke={COLORS.despesas} strokeWidth={2.5} fill="url(#grad-despesas)" name="Despesas" activeDot={{ r: 5, strokeWidth: 0 }} dot={false} />
+            <Line type="monotone" dataKey="saldo" stroke={COLORS.saldo} strokeWidth={2.5} strokeDasharray="6 5" name="Saldo Líquido" dot={false} activeDot={{ r: 5, strokeWidth: 0 }} />
           </AreaChart>
         </ResponsiveContainer>
       </TabsContent>
@@ -192,14 +192,14 @@ export const RevenueChart: React.FC<RevenueChartProps> = ({ servicos = [], insta
       <TabsContent value="barra" className="h-72 md:h-80">
         <ResponsiveContainer width="100%" height="100%">
           <BarChart data={data} margin={{ top: 8, right: 8, left: -12, bottom: 0 }} barGap={4}>
-            <CartesianGrid vertical={false} stroke="hsl(var(--chart-grid))" strokeOpacity={0.2} />
+            <CartesianGrid vertical={false} stroke="hsl(var(--chart-grid))" strokeOpacity={0.35} strokeDasharray="3 6" />
             <XAxis dataKey="month" {...axisProps} dy={6} />
             <YAxis {...axisProps} width={64} tickFormatter={compactBRL} />
             <Tooltip content={<CustomTooltip />} cursor={{ fill: 'hsl(var(--muted-foreground))', fillOpacity: 0.06 }} />
             <Legend iconType="circle" iconSize={8} formatter={renderLegend} wrapperStyle={{ paddingTop: 12 }} />
-            <Bar dataKey="servicos" fill={COLORS.servicos} name="Serviços" radius={[8, 8, 0, 0]} maxBarSize={22} />
-            <Bar dataKey="instalacoes" fill={COLORS.instalacoes} name="Instalações" radius={[8, 8, 0, 0]} maxBarSize={22} />
-            <Bar dataKey="despesas" fill={COLORS.despesas} name="Despesas" radius={[8, 8, 0, 0]} maxBarSize={22} />
+            <Bar dataKey="servicos" fill={COLORS.servicos} name="Serviços" radius={[10, 10, 0, 0]} maxBarSize={20} />
+            <Bar dataKey="instalacoes" fill={COLORS.instalacoes} name="Instalações" radius={[10, 10, 0, 0]} maxBarSize={20} />
+            <Bar dataKey="despesas" fill={COLORS.despesas} name="Despesas" radius={[10, 10, 0, 0]} maxBarSize={20} />
           </BarChart>
         </ResponsiveContainer>
       </TabsContent>

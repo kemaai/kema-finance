@@ -35,7 +35,7 @@ export function AppSidebar() {
   const navigate = useNavigate();
   const { user, profile, signOut } = useAuth();
   const { toast } = useToast();
-  const [isDarkMode, setIsDarkMode] = useLocalStorage<boolean>('darkMode', true);
+  const [isDarkMode, setIsDarkMode] = useLocalStorage<boolean>('darkMode', false);
 
   const handleSignOut = async () => {
     await signOut();
@@ -68,7 +68,7 @@ export function AppSidebar() {
     <Sidebar className="border-r border-sidebar-border bg-sidebar">
       <SidebarHeader className="p-5">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-2xl bg-primary/12 border border-primary/25 flex items-center justify-center shadow-glow-primary">
+          <div className="w-10 h-10 rounded-2xl bg-block-ink flex items-center justify-center">
             <img
               src={kemaIcon}
               alt="KemaFinance"
@@ -102,8 +102,8 @@ export function AppSidebar() {
                       onClick={() => navigate(item.url)}
                       className={`relative flex items-center gap-3 w-full px-3 py-2.5 rounded-xl transition-all duration-200 ${
                         isActive
-                          ? 'bg-primary text-primary-foreground shadow-glow-primary font-semibold'
-                          : 'text-muted-foreground hover:text-foreground hover:bg-muted/60'
+                          ? 'bg-block-ink text-block-ink-foreground font-semibold shadow-elev-1'
+                          : 'text-muted-foreground hover:text-foreground hover:bg-muted'
                       }`}
                     >
                       <button
@@ -133,7 +133,7 @@ export function AppSidebar() {
                   <SidebarMenuButton
                     asChild
                     onClick={() => navigate(item.url)}
-                    className="flex items-center gap-3 w-full px-3 py-2 rounded-xl text-muted-foreground hover:text-primary hover:bg-primary/10 transition-all duration-200"
+                    className="flex items-center gap-3 w-full px-3 py-2 rounded-xl text-muted-foreground hover:text-foreground hover:bg-muted transition-all duration-200"
                   >
                     <button className="flex items-center gap-3 w-full">
                       <item.icon className="w-4 h-4 opacity-80" />
@@ -161,11 +161,11 @@ export function AppSidebar() {
               <button
                 type="button"
                 onClick={() => navigate('/perfil')}
-                className="flex items-center gap-3 p-2.5 bg-muted/40 rounded-2xl border border-border/60 w-full text-left hover:bg-muted/70 hover:border-primary/40 transition-colors"
+                className="flex items-center gap-3 p-2.5 bg-surface-2 rounded-2xl border border-border w-full text-left hover:bg-muted transition-colors"
               >
-                <Avatar className="w-9 h-9 ring-2 ring-primary/25">
+                <Avatar className="w-9 h-9 ring-2 ring-border">
                   <AvatarImage src={profile?.avatar_url || undefined} alt={displayName} />
-                  <AvatarFallback className="bg-primary/15 text-primary text-xs font-semibold">
+                  <AvatarFallback className="bg-block-violet text-block-violet-foreground text-xs font-semibold">
                     {initials}
                   </AvatarFallback>
                 </Avatar>
