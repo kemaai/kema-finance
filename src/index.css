@@ -3,156 +3,200 @@
 @tailwind components;
 @tailwind utilities;
 
-/* KemaFinance 2026 — White canvas, vivid solid blocks */
+/* KemaFinance 2026 — Soft-UI light / premium dark */
 
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 240 12% 8%;
+    --background: 205 45% 95%;
+    --foreground: 222 28% 16%;
 
     --card: 0 0% 100%;
-    --card-foreground: 240 12% 8%;
+    --card-foreground: 222 28% 16%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 240 12% 8%;
+    --popover-foreground: 222 28% 16%;
 
-    --primary: 24 95% 53%;
+    --primary: 221 83% 53%;
     --primary-foreground: 0 0% 100%;
 
-    --secondary: 240 12% 96%;
-    --secondary-foreground: 240 12% 16%;
+    --secondary: 210 35% 96%;
+    --secondary-foreground: 222 24% 22%;
 
-    --muted: 240 10% 96%;
-    --muted-foreground: 240 5% 45%;
+    --muted: 210 34% 96%;
+    --muted-foreground: 215 16% 52%;
 
-    --accent: 252 100% 74%;
+    --accent: 262 80% 62%;
     --accent-foreground: 0 0% 100%;
 
-    --destructive: 358 92% 63%;
+    --destructive: 345 88% 58%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 240 8% 91%;
-    --input: 240 10% 96%;
-    --ring: 24 95% 53%;
+    --border: 210 32% 91%;
+    --input: 210 34% 96%;
+    --ring: 221 83% 53%;
 
-    --radius: 1rem;
+    --radius: 1.125rem;
 
     --sidebar-background: 0 0% 100%;
-    --sidebar-foreground: 240 12% 16%;
-    --sidebar-primary: 24 95% 53%;
+    --sidebar-foreground: 222 24% 22%;
+    --sidebar-primary: 221 83% 53%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 240 10% 96%;
-    --sidebar-accent-foreground: 240 12% 12%;
-    --sidebar-border: 240 8% 92%;
-    --sidebar-ring: 24 95% 53%;
+    --sidebar-accent: 210 34% 96%;
+    --sidebar-accent-foreground: 222 28% 16%;
+    --sidebar-border: 210 32% 93%;
+    --sidebar-ring: 221 83% 53%;
 
     /* Layered surfaces */
     --surface-1: 0 0% 100%;
-    --surface-2: 240 20% 98%;
-    --surface-3: 240 12% 95%;
+    --surface-2: 205 40% 98%;
+    --surface-3: 205 38% 94%;
 
-    /* Secondary accent (teal) */
-    --teal: 172 76% 40%;
+    --teal: 168 70% 42%;
     --teal-foreground: 0 0% 100%;
 
-    /* Vivid solid blocks */
-    --block-violet: 252 100% 74%;
+    /* Accent family (soft-UI gradients) */
+    --accent-pink: 344 92% 62%;
+    --accent-pink-from: 348 100% 71%;
+    --accent-pink-to: 338 84% 54%;
+
+    --accent-green: 152 62% 44%;
+    --accent-green-from: 148 66% 58%;
+    --accent-green-to: 158 72% 36%;
+
+    --accent-orange: 26 96% 58%;
+    --accent-orange-from: 36 100% 65%;
+    --accent-orange-to: 20 94% 55%;
+
+    --accent-blue: 221 83% 53%;
+    --accent-blue-from: 203 96% 63%;
+    --accent-blue-to: 226 80% 52%;
+
+    --accent-violet: 262 80% 62%;
+    --accent-violet-from: 258 92% 72%;
+    --accent-violet-to: 268 76% 54%;
+
+    /* Legacy block tokens mapped onto the accent family */
+    --block-violet: var(--accent-violet);
     --block-violet-fg: 0 0% 100%;
-    --block-lime: 74 82% 62%;
-    --block-lime-fg: 240 14% 10%;
-    --block-peach: 24 100% 74%;
-    --block-peach-fg: 240 14% 10%;
-    --block-blue: 221 90% 56%;
+    --block-lime: var(--accent-green);
+    --block-lime-fg: 0 0% 100%;
+    --block-peach: var(--accent-orange);
+    --block-peach-fg: 0 0% 100%;
+    --block-blue: var(--accent-blue);
     --block-blue-fg: 0 0% 100%;
-    --block-coral: 358 100% 68%;
+    --block-coral: var(--accent-pink);
     --block-coral-fg: 0 0% 100%;
-    --block-teal: 168 80% 44%;
-    --block-teal-fg: 240 14% 10%;
-    --block-ink: 240 14% 9%;
+    --block-teal: 168 70% 42%;
+    --block-teal-fg: 0 0% 100%;
+    --block-ink: 222 30% 14%;
     --block-ink-fg: 0 0% 100%;
 
     /* Chart tokens */
-    --chart-1: 252 100% 70%;
-    --chart-2: 221 90% 56%;
-    --chart-3: 358 100% 66%;
-    --chart-4: 168 80% 40%;
-    --chart-grid: 240 8% 84%;
+    --chart-1: 262 80% 62%;
+    --chart-2: 221 83% 53%;
+    --chart-3: 344 92% 62%;
+    --chart-4: 152 62% 44%;
+    --chart-grid: 210 24% 86%;
 
     /* Elevation */
-    --elev-1: 0 1px 2px hsl(240 12% 8% / 0.04), 0 6px 20px hsl(240 12% 8% / 0.06);
-    --elev-2: 0 2px 6px hsl(240 12% 8% / 0.06), 0 18px 44px hsl(240 12% 8% / 0.10);
-    --glow-primary: 0 8px 24px hsl(var(--primary) / 0.28);
+    --shadow-soft: 0 1px 2px hsl(215 30% 30% / 0.04), 0 10px 30px hsl(215 30% 30% / 0.07);
+    --shadow-lift: 0 4px 10px hsl(215 30% 30% / 0.06), 0 22px 50px hsl(215 30% 30% / 0.12);
+    --elev-1: var(--shadow-soft);
+    --elev-2: var(--shadow-lift);
+    --glow-primary: 0 10px 26px hsl(var(--primary) / 0.28);
   }
 
   .dark {
-    --background: 240 14% 6%;
-    --foreground: 240 12% 95%;
+    --background: 240 6% 5%;
+    --foreground: 0 0% 96%;
 
-    --card: 240 12% 10%;
-    --card-foreground: 240 12% 95%;
+    --card: 240 6% 9%;
+    --card-foreground: 0 0% 96%;
 
-    --popover: 240 12% 10%;
-    --popover-foreground: 240 12% 95%;
+    --popover: 240 6% 10%;
+    --popover-foreground: 0 0% 96%;
 
-    --primary: 24 95% 53%;
+    --primary: 217 91% 60%;
     --primary-foreground: 0 0% 100%;
 
-    --secondary: 240 10% 16%;
-    --secondary-foreground: 240 12% 95%;
+    --secondary: 240 5% 14%;
+    --secondary-foreground: 0 0% 96%;
 
-    --muted: 240 10% 15%;
-    --muted-foreground: 240 6% 62%;
+    --muted: 240 5% 13%;
+    --muted-foreground: 240 5% 62%;
 
-    --accent: 252 100% 74%;
+    --accent: 217 91% 60%;
     --accent-foreground: 0 0% 100%;
 
-    --destructive: 358 84% 58%;
+    --destructive: 345 85% 60%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 240 10% 20%;
-    --input: 240 10% 14%;
-    --ring: 24 95% 53%;
+    --border: 240 5% 15%;
+    --input: 240 5% 13%;
+    --ring: 217 91% 60%;
 
-    --sidebar-background: 240 14% 7%;
-    --sidebar-foreground: 240 10% 88%;
-    --sidebar-primary: 24 95% 53%;
+    --sidebar-background: 240 6% 6%;
+    --sidebar-foreground: 0 0% 88%;
+    --sidebar-primary: 217 91% 60%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 240 10% 16%;
-    --sidebar-accent-foreground: 240 12% 95%;
-    --sidebar-border: 240 10% 16%;
-    --sidebar-ring: 24 95% 53%;
+    --sidebar-accent: 240 5% 13%;
+    --sidebar-accent-foreground: 0 0% 96%;
+    --sidebar-border: 240 5% 14%;
+    --sidebar-ring: 217 91% 60%;
 
-    --surface-1: 240 12% 10%;
-    --surface-2: 240 11% 13%;
-    --surface-3: 240 10% 17%;
+    --surface-1: 240 6% 9%;
+    --surface-2: 240 5% 11%;
+    --surface-3: 240 5% 15%;
 
-    --teal: 168 76% 42%;
+    --teal: 168 70% 46%;
     --teal-foreground: 0 0% 100%;
 
-    --block-violet: 252 96% 70%;
+    --accent-pink: 344 88% 64%;
+    --accent-pink-from: 348 96% 70%;
+    --accent-pink-to: 338 82% 56%;
+
+    --accent-green: 152 60% 48%;
+    --accent-green-from: 148 62% 58%;
+    --accent-green-to: 158 66% 40%;
+
+    --accent-orange: 26 94% 60%;
+    --accent-orange-from: 36 96% 66%;
+    --accent-orange-to: 20 92% 56%;
+
+    --accent-blue: 217 91% 60%;
+    --accent-blue-from: 203 94% 66%;
+    --accent-blue-to: 226 84% 56%;
+
+    --accent-violet: 262 82% 68%;
+    --accent-violet-from: 258 92% 74%;
+    --accent-violet-to: 268 78% 58%;
+
+    --block-violet: var(--accent-violet);
     --block-violet-fg: 0 0% 100%;
-    --block-lime: 74 78% 58%;
-    --block-lime-fg: 240 14% 8%;
-    --block-peach: 24 96% 68%;
-    --block-peach-fg: 240 14% 8%;
-    --block-blue: 221 88% 60%;
+    --block-lime: var(--accent-green);
+    --block-lime-fg: 0 0% 100%;
+    --block-peach: var(--accent-orange);
+    --block-peach-fg: 0 0% 100%;
+    --block-blue: var(--accent-blue);
     --block-blue-fg: 0 0% 100%;
-    --block-coral: 358 94% 64%;
+    --block-coral: var(--accent-pink);
     --block-coral-fg: 0 0% 100%;
-    --block-teal: 168 76% 42%;
-    --block-teal-fg: 240 14% 8%;
-    --block-ink: 240 10% 15%;
+    --block-teal: 168 70% 46%;
+    --block-teal-fg: 0 0% 100%;
+    --block-ink: 240 5% 14%;
     --block-ink-fg: 0 0% 100%;
 
-    --chart-1: 252 96% 72%;
-    --chart-2: 221 88% 62%;
-    --chart-3: 358 94% 66%;
-    --chart-4: 168 76% 46%;
-    --chart-grid: 240 8% 30%;
+    --chart-1: 262 82% 68%;
+    --chart-2: 217 91% 60%;
+    --chart-3: 344 88% 64%;
+    --chart-4: 152 60% 48%;
+    --chart-grid: 240 5% 24%;
 
-    --elev-1: 0 1px 2px hsl(0 0% 0% / 0.4), 0 8px 24px hsl(0 0% 0% / 0.3);
-    --elev-2: 0 2px 6px hsl(0 0% 0% / 0.45), 0 18px 48px hsl(0 0% 0% / 0.4);
-    --glow-primary: 0 10px 30px hsl(var(--primary) / 0.3);
+    --shadow-soft: 0 1px 2px hsl(0 0% 0% / 0.5), 0 10px 30px hsl(0 0% 0% / 0.4);
+    --shadow-lift: 0 4px 12px hsl(0 0% 0% / 0.55), 0 24px 56px hsl(0 0% 0% / 0.5);
+    --elev-1: var(--shadow-soft);
+    --elev-2: var(--shadow-lift);
+    --glow-primary: 0 12px 32px hsl(var(--primary) / 0.35);
   }
 }
 
