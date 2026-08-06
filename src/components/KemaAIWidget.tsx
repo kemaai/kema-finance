@@ -14,11 +14,8 @@ export const KemaAIWidget = () => {
     return 'text-green-500';
   };
 
-  const getScoreGradient = () => {
-    if (diagnostico.scoreFinanceiro <= 39) return 'from-red-500 to-red-600';
-    if (diagnostico.scoreFinanceiro <= 69) return 'from-amber-500 to-amber-600';
-    return 'from-green-500 to-green-600';
-  };
+  const scoreHex =
+    diagnostico.scoreFinanceiro <= 39 ? '#EF4444' : diagnostico.scoreFinanceiro <= 69 ? '#F59E0B' : '#0E9F6E';
 
   const alertaPrincipal = alertas.find(a => a.tipo === 'critico') || alertas.find(a => a.tipo === 'atencao') || alertas[0];
 
@@ -63,11 +60,10 @@ export const KemaAIWidget = () => {
         <div
           className="relative w-[92px] h-[92px] rounded-full flex-shrink-0"
           style={{
-            background: `conic-gradient(currentColor ${diagnostico.scoreFinanceiro * 3.6}deg, hsl(var(--muted)) 0deg)`,
+            background: `conic-gradient(${scoreHex} ${diagnostico.scoreFinanceiro * 3.6}deg, hsl(var(--muted)) 0deg)`,
           }}
           aria-label={`Score financeiro ${diagnostico.scoreFinanceiro} de 100`}
         >
-          <div className={`absolute inset-0 rounded-full ${getScoreColor()}`} style={{ color: 'currentColor' }} />
           <div className="absolute inset-[9px] rounded-full bg-card flex flex-col items-center justify-center">
             <span className={`num text-2xl font-bold ${getScoreColor()}`}>{diagnostico.scoreFinanceiro}</span>
             <span className="text-[9px] uppercase tracking-wider text-muted-foreground">de 100</span>
