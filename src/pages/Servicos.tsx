@@ -1,3 +1,4 @@
+import { KemaInsightsPanel } from '@/components/kema/KemaInsightsPanel';
 import React, { useState } from 'react';
 import { Plus, Search, Briefcase } from 'lucide-react';
 import { ServicoForm, type Servico, type ServicoInput } from '../components/ServicoForm';
@@ -130,6 +131,8 @@ export const Servicos = () => {
           Novo Serviço
         </button>
       </div>
+
+      <KemaInsightsPanel max={2} />
 
       <div className="card-tech">
         <div className="p-3 md:p-4 border-b border-border">

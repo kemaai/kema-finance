@@ -10,6 +10,7 @@ import { useDespesas } from '@/hooks/useSupabaseData';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import { KemaInsightsPanel } from '@/components/kema/KemaInsightsPanel';
 import { useQueryClient } from '@tanstack/react-query';
 import { format, isSameMonth, addMonths } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
@@ -266,6 +267,8 @@ export default function Despesas() {
           </Button>
         </div>
       </div>
+
+      <KemaInsightsPanel max={2} />
 
       {/* Estatísticas */}
       <div className="grid grid-cols-1 md:grid-cols-5 gap-4">

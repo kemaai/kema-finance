@@ -3,6 +3,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { DashboardCard } from '../components/DashboardCard';
 import { RevenueChart } from '../components/RevenueChart';
 import { KemaAIWidget } from '../components/KemaAIWidget';
+import { KemaInsightsPanel } from '../components/kema/KemaInsightsPanel';
 import { useServicos, useClientes, useInstalacoes, useDespesas } from '../hooks/useSupabaseData';
 import { useAuth } from '../hooks/useAuth';
 import { useM2Price } from '../hooks/useM2Price';
@@ -288,6 +289,9 @@ export const Dashboard = () => {
 
         {/* KemaFinance AI Widget */}
         <KemaAIWidget />
+
+        {/* Prioridades geradas pelo agente */}
+        <KemaInsightsPanel scope="all" max={4} title="Prioridades da sua operação" />
 
         {/* Revenue Chart */}
         <div className="bento-block p-4 md:p-6">

@@ -3,6 +3,8 @@ import { useLocation } from 'react-router-dom';
 import { SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar';
 import { AppSidebar } from './AppSidebar';
 import { MobileNavigation } from './MobileNavigation';
+import { KemaAgentProvider } from '@/contexts/KemaAgentContext';
+import { KemaAgentDock } from './kema/KemaAgentDock';
 
 
 interface LayoutProps {
@@ -28,6 +30,7 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
   };
 
   return (
+    <KemaAgentProvider>
     <SidebarProvider>
       <div className="min-h-screen flex w-full bg-background">
         {/* Desktop Sidebar */}
@@ -54,7 +57,11 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
 
         {/* Mobile Bottom Navigation */}
         <MobileNavigation />
+
+        {/* Assistente KEMA AI global */}
+        <KemaAgentDock />
       </div>
     </SidebarProvider>
+    </KemaAgentProvider>
   );
 };

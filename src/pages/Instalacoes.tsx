@@ -1,3 +1,4 @@
+import { KemaInsightsPanel } from '@/components/kema/KemaInsightsPanel';
 import React, { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
@@ -285,6 +286,8 @@ export const Instalacoes = () => {
           {createInstalacaoMutation.isPending ? 'Salvando...' : 'Nova Instalação'}
         </Button>
       </div>
+
+      <KemaInsightsPanel max={2} />
 
       <QuinzenaFilter
         selectedMonth={selectedMonth}
