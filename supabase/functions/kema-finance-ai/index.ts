@@ -9,38 +9,38 @@ const corsHeaders = {
 const MAX_MESSAGES = 50;
 const MAX_MESSAGE_LENGTH = 4000;
 
-const SYSTEM_PROMPT = `Você é o KemaFinance AI, um Agente Financeiro Especialista em Patrimônio Pessoal.
+const SYSTEM_PROMPT = `Você é o KEMA AI, o copiloto operacional e financeiro do KemaFinance — um app de gestão para um profissional que vende serviços (sites/serviços recorrentes) e instalações (medidas em m²), com clientes, despesas, empréstimos e dívidas negativadas.
 
-SUAS RESPONSABILIDADES:
-1. Diagnóstico Financeiro: Analise os dados e forneça um diagnóstico claro da situação
-2. Análise de Gastos: Identifique essenciais, ajustáveis, supérfluos e vazamentos
-3. Estratégia de Corte: Sugira o que cortar, reduzir ou renegociar
-4. Gestão de Dívidas: Aplique método Avalanche (juros altos) ou Bola de Neve (motivação)
-5. Reserva de Emergência: Calcule meta (3-6 meses do custo de vida)
-6. Plano de Economia: Defina valores mínimo, ideal e agressivo
+QUEM VOCÊ É:
+Um consultor sênior de negócios + finanças pessoais que enxerga TODOS os dados do usuário em tempo real (serviços, instalações, clientes, despesas, dívidas, metas) e responde SEMPRE com base nesses números reais, nunca em suposições genéricas.
 
-REGRAS IMPORTANTES:
-- Seja direto, didático e prático
-- Explique impacto financeiro real (mensal e anual)
-- NUNCA julgue o usuário
-- Priorize decisões de maior impacto financeiro
-- Adapte recomendações à realidade dos dados
-- Use emojis para classificação: 🔴 Crítica, 🟡 Atenção, 🟢 Saudável
-- Formate valores em Reais (R$)
-- Inclua dicas de educação financeira quando apropriado
-- Não sugira investimentos antes de reserva de emergência estar completa
+O QUE VOCÊ FAZ:
+1. Diagnóstico: leia o contexto e diga em 1 frase onde o usuário está.
+2. Orientação operacional: agenda de instalações, cobranças pendentes, recebimentos não confirmados, cadastros incompletos, clientes inativos.
+3. Orientação financeira: fluxo de caixa, corte de gastos, quitação de dívidas (Avalanche/Bola de Neve), reserva de emergência, precificação e ticket médio.
+4. Organização: ajude a priorizar o dia/semana/mês com listas curtas e acionáveis.
+5. Crescimento: aponte oportunidades (recorrência, reativação de clientes, diversificação de carteira).
 
-CÁLCULOS IMPORTANTES:
-- Score Financeiro (0-100): 
-  - 0-39: 🔴 Crítica (déficit ou >80% comprometido)
-  - 40-69: 🟡 Atenção (60-80% comprometido)
-  - 70-100: 🟢 Saudável (<60% comprometido)
+COMO RESPONDER:
+- Português do Brasil, direto, prático, sem enrolação. Máximo ~250 palavras salvo pedido explícito.
+- Comece pela resposta, não por preâmbulo.
+- Use SEMPRE números reais do contexto (valores em R$, quantidades, prazos).
+- Estruture com títulos curtos (##), listas e negrito nos valores.
+- Termine com **Próximos passos**: no máximo 3 ações objetivas.
+- Considere a PÁGINA ATUAL do usuário: priorize o que é relevante para aquela tela.
+- Emojis de status: 🔴 crítico, 🟡 atenção, 🟢 saudável, 💡 oportunidade.
+- NUNCA julgue o usuário. Nunca invente dados que não estão no contexto — se faltar, diga o que ele precisa cadastrar.
+- Não sugira investimentos antes da reserva de emergência estar formada.
+- Você não executa ações no app; oriente o usuário sobre qual menu usar (Serviços, Instalações, Clientes, Despesas, Dívidas, Relatórios).
+
+REGRAS DE CÁLCULO:
 - % Comprometido = (Despesas + Dívidas) / Receita × 100
-- Capacidade de Economia = Saldo × 0.3 (30% do saldo positivo)
-- Meta Reserva = 6 × Despesas mensais médias
+- Score: 0-39 🔴 Crítica | 40-69 🟡 Atenção | 70-100 🟢 Saudável
+- Capacidade de Economia = 30% do saldo positivo
+- Meta de Reserva = 6 × despesa mensal média
+- Impacto sempre em valor mensal E anual quando fizer sentido.
 
-OBJETIVO FINAL:
-Ajudar o usuário a sair das dívidas, economizar dinheiro e construir patrimônio.`;
+OBJETIVO: manter a operação organizada, o caixa positivo, as dívidas caindo e o patrimônio crescendo.`;
 
 serve(async (req) => {
   if (req.method === "OPTIONS") {
@@ -98,44 +98,71 @@ serve(async (req) => {
     }
 
     // Build context message with financial data
+    const safeNum = (val: unknown) => {
+      const n = Number(val);
+      return isNaN(n) ? 0 : n;
+    };
+    const brl = (val: unknown) => `R$ ${safeNum(val).toFixed(2)}`;
+    const safeStr = (val: unknown, max = 200) => String(val ?? "N/A").slice(0, max);
+
     let contextMessage = "";
     if (financialContext) {
-      const safeNum = (val: unknown) => {
-        const n = Number(val);
-        return isNaN(n) ? 0 : n;
-      };
-      contextMessage = `
-CONTEXTO FINANCEIRO ATUAL DO USUÁRIO:
+      const op = financialContext.operacional ?? {};
+      const insights: string[] = Array.isArray(financialContext.insightsAtivos)
+        ? financialContext.insightsAtivos.slice(0, 10).map((i: unknown) => safeStr(i, 220))
+        : [];
+      const maiores: string[] = Array.isArray(op.maioresDespesas)
+        ? op.maioresDespesas.slice(0, 5).map((d: { nome?: string; valor?: number }) => `${safeStr(d?.nome, 40)} (${brl(d?.valor)})`)
+        : [];
 
-📊 RESUMO GERAL:
-- Receita Total Mensal: R$ ${safeNum(financialContext.receitaTotal).toFixed(2)}
-  • Sites: R$ ${safeNum(financialContext.receitaServicos).toFixed(2)}
-  • Instalações: R$ ${safeNum(financialContext.receitaInstalacoes).toFixed(2)}
-- Despesas Totais do Mês: R$ ${safeNum(financialContext.despesaTotal).toFixed(2)}
-  • Pagas: R$ ${safeNum(financialContext.despesasPagas).toFixed(2)}
-  • Pendentes: R$ ${safeNum(financialContext.despesasPendentes).toFixed(2)}
-- Saldo Líquido: R$ ${safeNum(financialContext.saldoReal).toFixed(2)}
-- Percentual Comprometido: ${safeNum(financialContext.percentualComprometido).toFixed(1)}%
+      contextMessage = `
+CONTEXTO EM TEMPO REAL DO USUÁRIO (dados reais do app)
+
+🧭 ONDE ELE ESTÁ AGORA:
+- Tela atual: ${safeStr(financialContext.paginaAtual, 40)} (${safeStr(financialContext.rotaAtual, 40)})
+
+📊 FINANCEIRO DO MÊS:
+- Receita total: ${brl(financialContext.receitaTotal)} (Serviços ${brl(financialContext.receitaServicos)} | Instalações ${brl(financialContext.receitaInstalacoes)})
+- Despesas: ${brl(financialContext.despesaTotal)} (Pagas ${brl(financialContext.despesasPagas)} | Pendentes ${brl(financialContext.despesasPendentes)})
+- Saldo líquido: ${brl(financialContext.saldoReal)}
+- Comprometimento da renda: ${safeNum(financialContext.percentualComprometido).toFixed(1)}%
+- Score financeiro: ${safeNum(financialContext.scoreFinanceiro)}/100 (${safeStr(financialContext.classificacaoLabel ?? financialContext.classificacao, 30)})
+- Capacidade de economia: ${brl(financialContext.capacidadeEconomia)}/mês
+- Meta de reserva de emergência: ${brl(financialContext.metaReservaEmergencia)}
 
 💳 DÍVIDAS:
-- Total em Empréstimos: R$ ${safeNum(financialContext.totalEmprestimos).toFixed(2)}
-- Total Dívidas Negativadas: R$ ${safeNum(financialContext.totalDividasNegativadas).toFixed(2)}
-- Total Geral de Dívidas: R$ ${safeNum(financialContext.totalDividas).toFixed(2)}
+- Empréstimos: ${brl(financialContext.totalEmprestimos)} (${safeNum(op.emprestimosAbertos?.qtd)} ativos)
+- Negativadas em aberto: ${brl(financialContext.totalDividasNegativadas)} (${safeNum(op.dividasNegativadasAbertas?.qtd)})
+- Total: ${brl(financialContext.totalDividas)}
 
-📈 MÉTRICAS:
-- Score Financeiro: ${safeNum(financialContext.scoreFinanceiro)}/100
-- Classificação: ${String(financialContext.classificacao || 'N/A').slice(0, 50)}
-- Capacidade de Economia: R$ ${safeNum(financialContext.capacidadeEconomia).toFixed(2)}/mês
-- Meta Reserva de Emergência: R$ ${safeNum(financialContext.metaReservaEmergencia).toFixed(2)}
+🗓️ OPERAÇÃO — DESPESAS:
+- Vencidas: ${safeNum(op.despesasVencidas?.qtd)} (${brl(op.despesasVencidas?.valor)})
+- Vencem em 7 dias: ${safeNum(op.despesasProximos7Dias?.qtd)} (${brl(op.despesasProximos7Dias?.valor)})
+- Pendentes no mês: ${safeNum(op.despesasPendentesMes?.qtd)} (${brl(op.despesasPendentesMes?.valor)})
+- Maiores despesas do mês: ${maiores.join(", ") || "Nenhuma"}
 
-📋 DETALHES:
-- Sites Ativos: ${safeNum(financialContext.sitesAtivos)}
-- Instalações este Mês: ${safeNum(financialContext.instalacoesDoMes)}
-- Total de Clientes: ${safeNum(financialContext.totalClientes)}
-- Despesas Recorrentes: ${safeNum(financialContext.despesasRecorrentes)}
+🔧 OPERAÇÃO — INSTALAÇÕES:
+- Pendentes (não concluídas): ${safeNum(op.instalacoesPendentes)}
+- Com data já vencida: ${safeNum(op.instalacoesAtrasadas)}
+- Concluídas SEM recebimento confirmado: ${safeNum(op.instalacoesNaoRecebidas?.qtd)} (${brl(op.instalacoesNaoRecebidas?.valor)})
+- Agendadas nos próximos 7 dias: ${safeNum(op.instalacoesProximas?.qtd)} (${brl(op.instalacoesProximas?.valor)})
+- Ticket médio por instalação: ${brl(op.ticketMedioInstalacao)}
+- Instalações concluídas no mês: ${safeNum(financialContext.instalacoesDoMes)}
 
-HISTÓRICO RECENTE:
-${String(financialContext.historicoRecente || 'Não disponível').slice(0, 2000)}
+🧾 OPERAÇÃO — SERVIÇOS E CLIENTES:
+- Serviços não pagos: ${safeNum(op.servicosNaoPagos?.qtd)} (${brl(op.servicosNaoPagos?.valor)})
+- Serviços recorrentes cadastrados: ${safeNum(op.servicosRecorrentes)}
+- Serviços no mês: ${safeNum(financialContext.sitesAtivos)}
+- Total de clientes: ${safeNum(financialContext.totalClientes)}
+- Clientes sem movimento: ${safeNum(op.clientesSemMovimento)}
+- Clientes com cadastro incompleto: ${safeNum(op.clientesComDadosIncompletos)}
+- Maior concentração de receita: ${op.concentracaoMaiorCliente ? `${safeStr(op.concentracaoMaiorCliente.nome, 40)} com ${safeNum(op.concentracaoMaiorCliente.percentual).toFixed(0)}%` : "N/A"}
+
+🚨 INSIGHTS JÁ DETECTADOS PELO APP:
+${insights.length ? insights.map((i) => `- ${i}`).join("\n") : "- Nenhum alerta ativo"}
+
+📌 ALERTAS RECENTES:
+${safeStr(financialContext.historicoRecente, 1200)}
 `;
     }
 

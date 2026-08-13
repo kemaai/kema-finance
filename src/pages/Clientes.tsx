@@ -1,3 +1,4 @@
+import { KemaInsightsPanel } from '@/components/kema/KemaInsightsPanel';
 import React, { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
@@ -222,6 +223,8 @@ export const Clientes = () => {
           {createClienteMutation.isPending ? 'Salvando...' : 'Novo Cliente'}
         </Button>
       </div>
+
+      <KemaInsightsPanel max={2} />
 
       {(showForm || editingCliente) && (
         <div className="card-tech p-6">

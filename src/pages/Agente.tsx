@@ -6,9 +6,10 @@ import { MetasProgressCard } from '@/components/MetasProgressCard';
 import { PlanoDistribuicaoCard } from '@/components/PlanoDistribuicaoCard';
 import { MetaReservaCard } from '@/components/MetaReservaCard';
 import { GerarMetasButton } from '@/components/GerarMetasButton';
-import { useKemaFinanceAI } from '@/hooks/useKemaFinanceAI';
+import { KemaInsightsPanel } from '@/components/kema/KemaInsightsPanel';
+import { useKemaAgent } from '@/contexts/KemaAgentContext';
 import { useMetasFinanceiras, PlanoDistribuicao } from '@/hooks/useMetasFinanceiras';
-import { Brain, Sparkles, Target, MessageCircle, BarChart3 } from 'lucide-react';
+import { Brain, Sparkles, Target, MessageCircle, BarChart3, Lightbulb } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 export function Agente() {
@@ -20,7 +21,7 @@ export function Agente() {
     sendMessage,
     clearMessages,
     suggestedQuestions,
-  } = useKemaFinanceAI();
+  } = useKemaAgent();
 
   const {
     metasAtivas,
@@ -64,10 +65,14 @@ export function Agente() {
 
       <div className="max-w-7xl mx-auto p-4 md:p-8 -mt-4 md:-mt-8 relative z-10">
         <Tabs defaultValue="diagnostico" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-3 lg:w-auto lg:inline-grid">
+          <TabsList className="grid w-full grid-cols-4 lg:w-auto lg:inline-grid">
             <TabsTrigger value="diagnostico" className="flex items-center gap-2">
               <BarChart3 className="w-4 h-4" />
               <span className="hidden sm:inline">Diagnóstico</span>
+            </TabsTrigger>
+            <TabsTrigger value="insights" className="flex items-center gap-2">
+              <Lightbulb className="w-4 h-4" />
+              <span className="hidden sm:inline">Insights</span>
             </TabsTrigger>
             <TabsTrigger value="metas" className="flex items-center gap-2">
               <Target className="w-4 h-4" />
@@ -124,6 +129,11 @@ export function Agente() {
                 </div>
               </div>
             </div>
+          </TabsContent>
+
+          {/* Tab: Insights */}
+          <TabsContent value="insights" className="space-y-6">
+            <KemaInsightsPanel scope="all" max={12} title="Plano de ação do KEMA AI" />
           </TabsContent>
 
           {/* Tab: Metas */}

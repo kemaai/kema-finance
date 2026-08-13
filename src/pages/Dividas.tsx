@@ -1,4 +1,5 @@
 
+import { KemaInsightsPanel } from '@/components/kema/KemaInsightsPanel';
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -49,6 +50,10 @@ export const Dividas = () => {
             Gerencie seus empréstimos e dívidas negativadas
           </p>
         </div>
+      </div>
+
+      <div className="mb-6">
+        <KemaInsightsPanel max={2} />
       </div>
 
       {/* Cards de Resumo */}
