@@ -72,59 +72,16 @@ export const Relatorios = () => {
   const dadosFiltrados = useMemo(() => {
     const { dataInicio, dataFim } = getPeriodoDatas(periodoRelatorio, semanaEscolhida, mesEscolhido, anoEscolhido, intervalo);
 
-    let resultado = {
-      servicos: servicos,
-      clientes: clientes,
-      instalacoes: instalacoes,
-      despesas: despesas,
+    // Todos os conjuntos são sempre filtrados pelo período selecionado
+    return {
+      servicos: servicos.filter(s => isDateInPeriod(new Date(s.data_servico), dataInicio, dataFim)),
+      clientes: clientes.filter(c => isDateInPeriod(new Date(c.created_at), dataInicio, dataFim)),
+      instalacoes: instalacoes.filter(i => isDateInPeriod(new Date(i.data_instalacao), dataInicio, dataFim)),
+      despesas: despesas.filter(d => isDateInPeriod(new Date(d.data_vencimento), dataInicio, dataFim)),
       emprestimos: emprestimos,
-      dividasNegativadas: dividasNegativadas
+      dividasNegativadas: dividasNegativadas,
     };
-
-    // Filtrar instalações por período
-    if (tipoRelatorio === 'instalacoes' || tipoRelatorio === 'todos') {
-      resultado.instalacoes = instalacoes.filter(instalacao => {
-        const dataInstalacao = new Date(instalacao.data_instalacao);
-        return isDateInPeriod(dataInstalacao, dataInicio, dataFim);
-      });
-    }
-
-    // Filtrar serviços com data no período
-    if (tipoRelatorio === 'sites' || tipoRelatorio === 'servicos' || tipoRelatorio === 'todos') {
-      resultado.servicos = servicos.filter(s => {
-        const dataServico = new Date(s.data_servico);
-        return isDateInPeriod(dataServico, dataInicio, dataFim);
-      });
-    }
-
-    // Filtrar despesas por período
-    if (tipoRelatorio === 'despesas' || tipoRelatorio === 'todos') {
-      resultado.despesas = despesas.filter(despesa => {
-        const dataDespesa = new Date(despesa.data_vencimento);
-        return isDateInPeriod(dataDespesa, dataInicio, dataFim);
-      });
-    }
-
-    // Filtrar clientes criados no período
-    if (tipoRelatorio === 'clientes' || tipoRelatorio === 'todos') {
-      resultado.clientes = clientes.filter(cliente => {
-        const dataCriacao = new Date(cliente.created_at);
-        return isDateInPeriod(dataCriacao, dataInicio, dataFim);
-      });
-    }
-
-    // Filtrar pagamentos de empréstimos no período
-    if (tipoRelatorio === 'emprestimos' || tipoRelatorio === 'todos') {
-      resultado.emprestimos = emprestimos;
-    }
-
-    // Filtrar dívidas pagas no período
-    if (tipoRelatorio === 'dividas' || tipoRelatorio === 'todos') {
-      resultado.dividasNegativadas = dividasNegativadas;
-    }
-
-    return resultado;
-  }, [servicos, clientes, instalacoes, despesas, emprestimos, dividasNegativadas, periodoRelatorio, semanaEscolhida, mesEscolhido, anoEscolhido, tipoRelatorio]);
+  }, [servicos, clientes, instalacoes, despesas, emprestimos, dividasNegativadas, periodoRelatorio, semanaEscolhida, mesEscolhido, anoEscolhido, intervalo]);
 
   // Cálculos de métricas
   const metricas = useMemo(() => {
@@ -204,12 +161,16 @@ export const Relatorios = () => {
       receitaTotal: receitaServicos + receitaInstalacoes,
       saldoLiquido: receitaServicos + receitaInstalacoes - despesasPendentes - totalEmprestimos - totalDividas
     };
-  }, [dadosFiltrados, pagamentosEmprestimo, clientes, periodoRelatorio, semanaEscolhida, mesEscolhido, anoEscolhido]);
+  }, [dadosFiltrados, pagamentosEmprestimo, clientes, periodoRelatorio, semanaEscolhida, mesEscolhido, anoEscolhido, intervalo, m2Price]);
 
   // Dados para os gráficos de evolução
   const dadosGrafico = useMemo(() => {
-    const quantidadePeriodos = periodoRelatorio === 'semanal' ? 8 : periodoRelatorio === 'mensal' ? 6 : 5;
-    const periodos = getHistoricoPeriodos(periodoRelatorio, quantidadePeriodos);
+    const periodos = periodoRelatorio === 'personalizado'
+      ? getMesesDoIntervalo(intervalo)
+      : getHistoricoPeriodos(
+          periodoRelatorio,
+          periodoRelatorio === 'semanal' ? 8 : periodoRelatorio === 'mensal' ? 6 : 5
+        );
     
     return periodos.map(periodo => {
       // Filtrar instalações concluídas no período
@@ -246,7 +207,7 @@ export const Relatorios = () => {
         despesas: totalDespesasPeriodo
       };
     });
-  }, [instalacoes, servicos, despesas, periodoRelatorio]);
+  }, [instalacoes, servicos, despesas, periodoRelatorio, intervalo, m2Price]);
 
   const hoje = new Date();
   const nomesMeses = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 
