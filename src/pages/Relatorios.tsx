@@ -706,6 +706,7 @@ export const Relatorios = () => {
         <TabsContent value="graficos" className="space-y-4 md:space-y-6">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-6">
             {/* Gráfico de Evolução de Receitas */}
+            {(mostrar('receita') || mostrar('servicos')) && (
             <Card className="card-tech">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2 text-sm md:text-base">
@@ -720,13 +721,15 @@ export const Relatorios = () => {
                 <RelatorioChart 
                   data={dadosGrafico}
                   tipo="area"
-                  metricas={['receitaServicos', 'receitaInstalacoes']}
+                  metricas={tipoRelatorio === 'servicos' ? ['receitaServicos'] : ['receitaServicos', 'receitaInstalacoes']}
                   showTabs={true}
                 />
               </CardContent>
             </Card>
+            )}
 
             {/* Gráfico de Instalações e Metragem */}
+            {mostrar('instalacoes') && (
             <Card className="card-tech">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2 text-sm md:text-base">
@@ -745,9 +748,11 @@ export const Relatorios = () => {
                 />
               </CardContent>
             </Card>
+            )}
           </div>
 
           {/* Linha completa - Balanço Geral */}
+          {(tipoRelatorio === 'todos' || tipoRelatorio === 'despesas' || tipoRelatorio === 'receita') && (
           <Card className="card-tech">
             <CardHeader>
               <CardTitle className="flex items-center gap-2 text-sm md:text-base">
@@ -766,9 +771,11 @@ export const Relatorios = () => {
               />
             </CardContent>
           </Card>
+          )}
 
           {/* Cards com resumo dos dados do gráfico */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4">
+            {mostrar('instalacoes') && (
             <div className="p-3 bg-orange-500/10 border border-border rounded-lg">
               <div className="text-xs text-muted-foreground mb-1">Total Instalações</div>
               <div className="text-lg md:text-xl font-bold text-orange-500">
@@ -776,15 +783,19 @@ export const Relatorios = () => {
               </div>
               <div className="text-xs text-muted-foreground">nos últimos períodos</div>
             </div>
+            )}
             
+            {(mostrar('receita') || mostrar('servicos')) && (
             <div className="p-3 bg-green-500/10 border border-green-500/30 rounded-lg">
               <div className="text-xs text-muted-foreground mb-1">Receita Total</div>
               <div className="text-lg md:text-xl font-bold text-green-500">
-                R$ {dadosGrafico.reduce((sum, d) => sum + (d.receita || 0), 0).toFixed(0)}
+                R$ {dadosGrafico.reduce((sum, d) => sum + ((tipoRelatorio === 'servicos' ? d.receitaServicos : d.receita) || 0), 0).toFixed(0)}
               </div>
               <div className="text-xs text-muted-foreground">acumulado</div>
             </div>
+            )}
             
+            {mostrar('instalacoes') && (
             <div className="p-3 bg-blue-500/10 border border-blue-500/30 rounded-lg">
               <div className="text-xs text-muted-foreground mb-1">Metragem Total</div>
               <div className="text-lg md:text-xl font-bold text-blue-500">
@@ -792,7 +803,9 @@ export const Relatorios = () => {
               </div>
               <div className="text-xs text-muted-foreground">instalados</div>
             </div>
+            )}
             
+            {mostrar('despesas') && (
             <div className="p-3 bg-red-500/10 border border-red-500/30 rounded-lg">
               <div className="text-xs text-muted-foreground mb-1">Despesas Total</div>
               <div className="text-lg md:text-xl font-bold text-red-500">
@@ -800,6 +813,7 @@ export const Relatorios = () => {
               </div>
               <div className="text-xs text-muted-foreground">acumulado</div>
             </div>
+            )}
           </div>
         </TabsContent>
 
