@@ -32,12 +32,12 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
   return (
     <KemaAgentProvider>
     <SidebarProvider>
-      <div className="min-h-screen flex w-full bg-background">
+      <div className="flex h-[100dvh] min-h-0 w-full overflow-hidden bg-background md:h-auto md:min-h-screen md:overflow-visible">
         {/* Desktop Sidebar */}
         <AppSidebar />
         
         {/* Main Content Area */}
-        <div className="flex-1 flex flex-col min-w-0 w-full max-w-full overflow-x-hidden">
+        <div className="flex min-h-0 min-w-0 w-full max-w-full flex-1 flex-col overflow-hidden md:overflow-x-hidden md:overflow-y-visible">
           {/* Mobile Header */}
           <header className="md:hidden sticky top-0 z-40 bg-background/80 backdrop-blur-xl border-b border-border/60 px-4 py-3 flex items-center justify-between">
             <div className="flex items-center gap-3">
@@ -50,7 +50,7 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
           </header>
 
           {/* Main Content */}
-          <main className="flex-1 pb-24 md:pb-0 bg-background min-w-0 w-full max-w-full overflow-x-hidden">
+          <main className="app-scroll-area min-h-0 min-w-0 w-full max-w-full flex-1 overflow-x-hidden overflow-y-auto bg-background pb-24 md:overflow-y-visible md:pb-0">
             {children}
           </main>
         </div>
