@@ -224,7 +224,9 @@ export const Relatorios = () => {
       ? `semana${semanaEscolhida}-${anoEscolhido}`
       : periodoRelatorio === 'mensal'
         ? `${nomesMeses[mesEscolhido].toLowerCase()}-${anoEscolhido}`
-        : `anual-${anoEscolhido}`;
+        : periodoRelatorio === 'anual'
+          ? `anual-${anoEscolhido}`
+          : `${nomesMeses[intervalo.mesInicio].toLowerCase()}${intervalo.anoInicio}-a-${nomesMeses[intervalo.mesFim].toLowerCase()}${intervalo.anoFim}`;
 
     switch (categoria) {
       case 'geral':
@@ -440,7 +442,9 @@ export const Relatorios = () => {
       ? `semana${semanaEscolhida}-${anoEscolhido}`
       : periodoRelatorio === 'mensal'
         ? `${nomesMeses[mesEscolhido].toLowerCase()}-${anoEscolhido}`
-        : `anual-${anoEscolhido}`;
+        : periodoRelatorio === 'anual'
+          ? `anual-${anoEscolhido}`
+          : `${nomesMeses[intervalo.mesInicio].toLowerCase()}${intervalo.anoInicio}-a-${nomesMeses[intervalo.mesFim].toLowerCase()}${intervalo.anoFim}`;
     const filename = `relatorio-geral-${periodoNomeArquivo}`;
     const sections = buildGeralSections();
     if (format === 'csv') {
@@ -472,7 +476,8 @@ export const Relatorios = () => {
         <div>
           <h1 className="page-title">Relatórios</h1>
           <p className="text-sm md:text-base text-muted-foreground">
-            Análises {periodoRelatorio === 'semanal' ? 'semanais' : periodoRelatorio === 'mensal' ? 'mensais' : 'anuais'} de todos os dados
+            {formatPeriodo(periodoRelatorio, semanaEscolhida, mesEscolhido, anoEscolhido, intervalo)}
+            {tipoRelatorio !== 'todos' ? ' • categoria filtrada' : ' • todos os dados'}
           </p>
         </div>
         <DropdownMenu>
@@ -504,11 +509,13 @@ export const Relatorios = () => {
         mesEscolhido={mesEscolhido}
         anoEscolhido={anoEscolhido}
         tipoRelatorio={tipoRelatorio}
+        intervalo={intervalo}
         onPeriodoChange={setPeriodoRelatorio}
         onSemanaChange={setSemanaEscolhida}
         onMesChange={setMesEscolhido}
         onAnoChange={setAnoEscolhido}
         onTipoChange={setTipoRelatorio}
+        onIntervaloChange={setIntervalo}
         onResetFilter={resetarFiltros}
       />
 
