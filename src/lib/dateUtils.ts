@@ -52,14 +52,24 @@ export const getTotalWeeksInYear = (year: number): number => {
   return getWeekNumber(dec31);
 };
 
+export type PeriodoTipo = 'semanal' | 'mensal' | 'anual' | 'personalizado';
+
+export interface PeriodoRange {
+  mesInicio: number;
+  anoInicio: number;
+  mesFim: number;
+  anoFim: number;
+}
+
 /**
  * Formata o período para exibição
  */
 export const formatPeriodo = (
-  periodo: 'semanal' | 'mensal' | 'anual',
+  periodo: PeriodoTipo,
   semana: number,
   mes: number,
-  ano: number
+  ano: number,
+  range?: PeriodoRange
 ): string => {
   const nomesMeses = [
     'Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho',
@@ -75,6 +85,9 @@ export const formatPeriodo = (
       return `${nomesMeses[mes]} de ${ano}`;
     case 'anual':
       return `Ano ${ano}`;
+    case 'personalizado':
+      if (!range) return '';
+      return `${nomesMeses[range.mesInicio]}/${range.anoInicio} até ${nomesMeses[range.mesFim]}/${range.anoFim}`;
     default:
       return '';
   }
@@ -84,10 +97,11 @@ export const formatPeriodo = (
  * Obtém as datas de início e fim baseado no período selecionado
  */
 export const getPeriodoDatas = (
-  periodo: 'semanal' | 'mensal' | 'anual',
+  periodo: PeriodoTipo,
   semana: number,
   mes: number,
-  ano: number
+  ano: number,
+  range?: PeriodoRange
 ): { dataInicio: Date; dataFim: Date } => {
   let dataInicio: Date;
   let dataFim: Date;
@@ -105,12 +119,43 @@ export const getPeriodoDatas = (
       dataInicio = new Date(ano, 0, 1);
       dataFim = new Date(ano, 11, 31);
       break;
+    case 'personalizado': {
+      const r = range ?? { mesInicio: mes, anoInicio: ano, mesFim: mes, anoFim: ano };
+      dataInicio = new Date(r.anoInicio, r.mesInicio, 1);
+      dataFim = new Date(r.anoFim, r.mesFim + 1, 0);
+      break;
+    }
     default:
       dataInicio = new Date(ano, mes, 1);
       dataFim = new Date(ano, mes + 1, 0);
   }
 
   return { dataInicio, dataFim };
+};
+
+/**
+ * Gera os meses (buckets) de um intervalo personalizado
+ */
+export const getMesesDoIntervalo = (
+  range: PeriodoRange
+): { inicio: Date; fim: Date; label: string }[] => {
+  const nomesMeses = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'];
+  const periodos: { inicio: Date; fim: Date; label: string }[] = [];
+  let cursor = new Date(range.anoInicio, range.mesInicio, 1);
+  const limite = new Date(range.anoFim, range.mesFim, 1);
+  let guard = 0;
+  while (cursor <= limite && guard < 240) {
+    const inicio = new Date(cursor.getFullYear(), cursor.getMonth(), 1);
+    const fim = new Date(cursor.getFullYear(), cursor.getMonth() + 1, 0);
+    periodos.push({
+      inicio,
+      fim,
+      label: `${nomesMeses[cursor.getMonth()]}/${cursor.getFullYear().toString().slice(-2)}`,
+    });
+    cursor = new Date(cursor.getFullYear(), cursor.getMonth() + 1, 1);
+    guard++;
+  }
+  return periodos;
 };
 
 /**
