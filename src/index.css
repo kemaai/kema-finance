@@ -363,6 +363,15 @@
     @apply font-display tabular-nums tracking-tight;
   }
 
+  /* Scroll horizontal sem barra visível (filtros em mobile) */
+  .no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+
   /* Título de página — mesma linguagem do Dashboard */
   .page-title {
     @apply font-display text-2xl md:text-3xl font-bold text-foreground tracking-tight;
