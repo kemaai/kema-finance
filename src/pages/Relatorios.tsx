@@ -49,7 +49,7 @@ export const Relatorios = () => {
 
   // Função para filtrar dados por período e tipo
   const dadosFiltrados = useMemo(() => {
-    const { dataInicio, dataFim } = getPeriodoDatas(periodoRelatorio, semanaEscolhida, mesEscolhido, anoEscolhido);
+    const { dataInicio, dataFim } = getPeriodoDatas(periodoRelatorio, semanaEscolhida, mesEscolhido, anoEscolhido, intervalo);
 
     let resultado = {
       servicos: servicos,
@@ -107,7 +107,7 @@ export const Relatorios = () => {
 
   // Cálculos de métricas
   const metricas = useMemo(() => {
-    const { dataInicio, dataFim } = getPeriodoDatas(periodoRelatorio, semanaEscolhida, mesEscolhido, anoEscolhido);
+    const { dataInicio, dataFim } = getPeriodoDatas(periodoRelatorio, semanaEscolhida, mesEscolhido, anoEscolhido, intervalo);
 
     // Receitas de Serviços (soma dos valores dos serviços do período)
     const receitaServicos = dadosFiltrados.servicos
@@ -237,7 +237,7 @@ export const Relatorios = () => {
     let nomeArquivo = '';
     
     const dataAtual = hoje.toLocaleDateString('pt-BR');
-    const periodoLabel = formatPeriodo(periodoRelatorio, semanaEscolhida, mesEscolhido, anoEscolhido);
+    const periodoLabel = formatPeriodo(periodoRelatorio, semanaEscolhida, mesEscolhido, anoEscolhido, intervalo);
     const periodoNomeArquivo = periodoRelatorio === 'semanal' 
       ? `semana${semanaEscolhida}-${anoEscolhido}`
       : periodoRelatorio === 'mensal'
@@ -453,7 +453,7 @@ export const Relatorios = () => {
   };
 
   const exportarGeralEstruturado = (format: 'csv' | 'pdf') => {
-    const periodoLabel = formatPeriodo(periodoRelatorio, semanaEscolhida, mesEscolhido, anoEscolhido);
+    const periodoLabel = formatPeriodo(periodoRelatorio, semanaEscolhida, mesEscolhido, anoEscolhido, intervalo);
     const periodoNomeArquivo = periodoRelatorio === 'semanal'
       ? `semana${semanaEscolhida}-${anoEscolhido}`
       : periodoRelatorio === 'mensal'
@@ -535,7 +535,7 @@ export const Relatorios = () => {
         <CardHeader>
           <CardTitle className="flex items-center gap-2 text-sm md:text-base">
             <FileText className="w-4 h-4 md:w-5 md:h-5 text-orange-500" />
-            Resumo: {formatPeriodo(periodoRelatorio, semanaEscolhida, mesEscolhido, anoEscolhido)}
+            Resumo: {formatPeriodo(periodoRelatorio, semanaEscolhida, mesEscolhido, anoEscolhido, intervalo)}
           </CardTitle>
           <CardDescription className="text-xs md:text-sm text-muted-foreground">
             Métricas consolidadas do período selecionado
@@ -794,7 +794,7 @@ export const Relatorios = () => {
               <CardHeader>
                 <CardTitle className="flex items-center gap-2 text-sm md:text-base">
                   <TrendingUp className="w-4 h-4 md:w-5 md:h-5 text-green-500" />
-                  Receitas - {formatPeriodo(periodoRelatorio, semanaEscolhida, mesEscolhido, anoEscolhido)}
+                  Receitas - {formatPeriodo(periodoRelatorio, semanaEscolhida, mesEscolhido, anoEscolhido, intervalo)}
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-3 md:space-y-4">
@@ -824,7 +824,7 @@ export const Relatorios = () => {
               <CardHeader>
                 <CardTitle className="flex items-center gap-2 text-sm md:text-base">
                   <CreditCard className="w-4 h-4 md:w-5 md:h-5 text-red-500" />
-                  Despesas - {formatPeriodo(periodoRelatorio, semanaEscolhida, mesEscolhido, anoEscolhido)}
+                  Despesas - {formatPeriodo(periodoRelatorio, semanaEscolhida, mesEscolhido, anoEscolhido, intervalo)}
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-3">
@@ -857,7 +857,7 @@ export const Relatorios = () => {
             <CardHeader>
               <CardTitle className="flex items-center gap-2 text-sm md:text-base">
                 <Scissors className="w-4 h-4 md:w-5 md:h-5 text-orange-500" />
-                Instalações - {formatPeriodo(periodoRelatorio, semanaEscolhida, mesEscolhido, anoEscolhido)}
+                Instalações - {formatPeriodo(periodoRelatorio, semanaEscolhida, mesEscolhido, anoEscolhido, intervalo)}
               </CardTitle>
               <CardDescription className="text-xs md:text-sm text-muted-foreground">
                 Controle de instalações do período selecionado
@@ -1103,7 +1103,7 @@ export const Relatorios = () => {
               <CardHeader>
                 <CardTitle className="text-sm md:text-base text-foreground">Resumo Consolidado</CardTitle>
                 <CardDescription className="text-xs text-muted-foreground">
-                  {formatPeriodo(periodoRelatorio, semanaEscolhida, mesEscolhido, anoEscolhido)}
+                  {formatPeriodo(periodoRelatorio, semanaEscolhida, mesEscolhido, anoEscolhido, intervalo)}
                 </CardDescription>
               </CardHeader>
               <CardContent>
