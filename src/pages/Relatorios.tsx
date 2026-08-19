@@ -592,6 +592,7 @@ export const Relatorios = () => {
 
         <TabsContent value="visao-geral" className="space-y-4 md:space-y-6">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-6">
+            {mostrar('clientes') && (
             <Card className="card-tech">
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className="text-xs md:text-sm font-medium">Total Clientes</CardTitle>
@@ -602,7 +603,9 @@ export const Relatorios = () => {
                 <p className="text-xs text-muted-foreground">+{metricas.clientesNovos} no período</p>
               </CardContent>
             </Card>
+            )}
 
+            {(mostrar('servicos') || mostrar('receita')) && (
             <Card className="card-tech">
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className="text-xs md:text-sm font-medium">Serviços</CardTitle>
@@ -610,10 +613,12 @@ export const Relatorios = () => {
               </CardHeader>
               <CardContent>
                 <div className="text-lg md:text-2xl font-bold text-orange-500">{dadosFiltrados.servicos.length}</div>
-                <p className="text-xs text-muted-foreground">no período</p>
+                <p className="text-xs text-muted-foreground">R$ {metricas.receitaServicos.toFixed(0)} no período</p>
               </CardContent>
             </Card>
+            )}
 
+            {mostrar('receita') && (
             <Card className="card-tech">
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className="text-xs md:text-sm font-medium">Receita Total</CardTitle>
@@ -623,7 +628,9 @@ export const Relatorios = () => {
                 <div className="text-sm md:text-2xl font-bold text-green-500">R$ {metricas.receitaTotal.toFixed(2)}</div>
               </CardContent>
             </Card>
+            )}
 
+            {mostrar('instalacoes') && (
             <Card className="card-tech">
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className="text-xs md:text-sm font-medium">Instalações</CardTitle>
@@ -634,9 +641,11 @@ export const Relatorios = () => {
                 <p className="text-xs text-muted-foreground">{metricas.metragemTotal.toFixed(0)} M²</p>
               </CardContent>
             </Card>
+            )}
           </div>
 
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-6">
+            {mostrar('despesas') && (
             <Card className="card-tech">
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className="text-xs md:text-sm font-medium">Despesas</CardTitle>
@@ -649,7 +658,9 @@ export const Relatorios = () => {
                 </p>
               </CardContent>
             </Card>
+            )}
 
+            {mostrar('emprestimos') && (
             <Card className="card-tech">
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className="text-xs md:text-sm font-medium">Empréstimos</CardTitle>
@@ -660,7 +671,9 @@ export const Relatorios = () => {
                 <p className="text-xs text-muted-foreground">R$ {metricas.totalPagoNoPeriodo.toFixed(0)} pago</p>
               </CardContent>
             </Card>
+            )}
 
+            {mostrar('dividas') && (
             <Card className="card-tech">
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className="text-xs md:text-sm font-medium">Dívidas</CardTitle>
@@ -671,7 +684,9 @@ export const Relatorios = () => {
                 <p className="text-xs text-muted-foreground">R$ {metricas.valorDividasPagasNoPeriodo.toFixed(0)} quitado</p>
               </CardContent>
             </Card>
+            )}
 
+            {tipoRelatorio === 'todos' && (
             <Card className="card-tech">
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className="text-xs md:text-sm font-medium">Saldo Líquido</CardTitle>
@@ -683,6 +698,7 @@ export const Relatorios = () => {
                 </div>
               </CardContent>
             </Card>
+            )}
           </div>
         </TabsContent>
 
