@@ -819,6 +819,7 @@ export const Relatorios = () => {
 
         <TabsContent value="financeiro" className="space-y-4 md:space-y-6">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
+            {(mostrar('receita') || mostrar('servicos') || mostrar('instalacoes')) && (
             <Card className="card-tech">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2 text-sm md:text-base">
@@ -827,17 +828,27 @@ export const Relatorios = () => {
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-3 md:space-y-4">
+                {(mostrar('receita') || mostrar('servicos')) && (
                 <div className="flex justify-between items-center p-2 md:p-3 bg-blue-500/10 border border-blue-500/30 rounded-lg">
                   <span className="font-medium text-xs md:text-sm text-foreground">Serviços</span>
                   <span className="text-sm md:text-lg font-bold text-blue-500">R$ {metricas.receitaServicos.toFixed(2)}</span>
                 </div>
+                )}
+                {(mostrar('receita') || mostrar('instalacoes')) && (
                 <div className="flex justify-between items-center p-2 md:p-3 bg-orange-500/10 border border-border rounded-lg">
                   <span className="font-medium text-xs md:text-sm text-foreground">Instalações</span>
                   <span className="text-sm md:text-lg font-bold text-orange-500">R$ {metricas.receitaInstalacoes.toFixed(2)}</span>
                 </div>
+                )}
                 <div className="flex justify-between items-center p-2 md:p-3 bg-green-500/10 border-2 border-green-500/50 rounded-lg">
                   <span className="font-bold text-xs md:text-sm text-foreground">Total</span>
-                  <span className="text-lg md:text-xl font-bold text-green-500">R$ {metricas.receitaTotal.toFixed(2)}</span>
+                  <span className="text-lg md:text-xl font-bold text-green-500">
+                    R$ {(tipoRelatorio === 'servicos'
+                      ? metricas.receitaServicos
+                      : tipoRelatorio === 'instalacoes'
+                        ? metricas.receitaInstalacoes
+                        : metricas.receitaTotal).toFixed(2)}
+                  </span>
                 </div>
                 <button 
                   onClick={() => exportarRelatorio('receita')}
@@ -848,7 +859,9 @@ export const Relatorios = () => {
                 </button>
               </CardContent>
             </Card>
+            )}
 
+            {mostrar('despesas') && (
             <Card className="card-tech">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2 text-sm md:text-base">
@@ -878,10 +891,12 @@ export const Relatorios = () => {
                 </button>
               </CardContent>
             </Card>
+            )}
           </div>
         </TabsContent>
 
         <TabsContent value="operacional" className="space-y-4 md:space-y-6">
+          {mostrar('instalacoes') && (
           <Card className="card-tech">
             <CardHeader>
               <CardTitle className="flex items-center gap-2 text-sm md:text-base">
