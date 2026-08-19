@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button';
 import { useServicos, useClientes, useInstalacoes, useDespesas, useEmprestimos, usePagamentosEmprestimo, useDividasNegativadas } from '../hooks/useSupabaseData';
 import { RelatorioFilter } from '../components/RelatorioFilter';
 import { RelatorioChart } from '../components/RelatorioChart';
-import { getWeekNumber, getPeriodoDatas, formatPeriodo, isDateInPeriod, getHistoricoPeriodos } from '@/lib/dateUtils';
+import { getWeekNumber, getPeriodoDatas, formatPeriodo, isDateInPeriod, getHistoricoPeriodos, getMesesDoIntervalo, type PeriodoTipo, type PeriodoRange } from '@/lib/dateUtils';
 import { exportReportCSV, exportReportPDF, type ReportSection } from '@/lib/reportExport';
 import {
   DropdownMenu,
@@ -29,7 +29,17 @@ export const Relatorios = () => {
   const { data: dividasNegativadas = [], isLoading: dividasLoading } = useDividasNegativadas();
   
   // Estados do filtro
-  const [periodoRelatorio, setPeriodoRelatorio] = useState<'semanal' | 'mensal' | 'anual'>('mensal');
+  const [periodoRelatorio, setPeriodoRelatorio] = useState<PeriodoTipo>('mensal');
+  const [intervalo, setIntervalo] = useState<PeriodoRange>(() => {
+    const hoje = new Date();
+    const inicio = new Date(hoje.getFullYear(), hoje.getMonth() - 5, 1);
+    return {
+      mesInicio: inicio.getMonth(),
+      anoInicio: inicio.getFullYear(),
+      mesFim: hoje.getMonth(),
+      anoFim: hoje.getFullYear(),
+    };
+  });
   const [semanaEscolhida, setSemanaEscolhida] = useState(getWeekNumber(new Date()));
   const [mesEscolhido, setMesEscolhido] = useState(new Date().getMonth());
   const [anoEscolhido, setAnoEscolhido] = useState(new Date().getFullYear());
@@ -45,7 +55,18 @@ export const Relatorios = () => {
     setMesEscolhido(new Date().getMonth());
     setAnoEscolhido(new Date().getFullYear());
     setTipoRelatorio('todos');
+    const hoje = new Date();
+    const inicio = new Date(hoje.getFullYear(), hoje.getMonth() - 5, 1);
+    setIntervalo({
+      mesInicio: inicio.getMonth(),
+      anoInicio: inicio.getFullYear(),
+      mesFim: hoje.getMonth(),
+      anoFim: hoje.getFullYear(),
+    });
   };
+
+  // Exibir apenas a categoria selecionada
+  const mostrar = (categoria: string) => tipoRelatorio === 'todos' || tipoRelatorio === categoria;
 
   // Função para filtrar dados por período e tipo
   const dadosFiltrados = useMemo(() => {
