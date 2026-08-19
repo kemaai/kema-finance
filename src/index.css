@@ -209,6 +209,15 @@
     color-scheme: light;
   }
 
+  html, body {
+    @apply max-w-full;
+    overflow-x: hidden;
+  }
+
+  #root {
+    @apply w-full max-w-full overflow-x-hidden;
+  }
+
   html.dark {
     color-scheme: dark;
   }
