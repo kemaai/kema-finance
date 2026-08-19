@@ -971,8 +971,10 @@ export const Relatorios = () => {
               </button>
             </CardContent>
           </Card>
+          )}
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
+            {mostrar('servicos') && (
             <Card className="card-tech">
               <CardHeader>
                 <CardTitle className="text-sm md:text-base text-foreground">Próximos Serviços</CardTitle>
@@ -1008,7 +1010,9 @@ export const Relatorios = () => {
                 </div>
               </CardContent>
             </Card>
+            )}
 
+            {mostrar('instalacoes') && (
             <Card className="card-tech">
               <CardHeader>
                 <CardTitle className="text-sm md:text-base text-foreground">Instalações Agendadas</CardTitle>
@@ -1036,11 +1040,13 @@ export const Relatorios = () => {
                 </div>
               </CardContent>
             </Card>
+            )}
           </div>
         </TabsContent>
 
         <TabsContent value="detalhado" className="space-y-4 md:space-y-6">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
+            {mostrar('servicos') && (
             <Card className="card-tech">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2 text-sm md:text-base text-foreground">
@@ -1064,7 +1070,9 @@ export const Relatorios = () => {
                 </button>
               </CardContent>
             </Card>
+            )}
 
+            {mostrar('clientes') && (
             <Card className="card-tech">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2 text-sm md:text-base text-foreground">
@@ -1090,7 +1098,9 @@ export const Relatorios = () => {
                 </button>
               </CardContent>
             </Card>
+            )}
 
+            {mostrar('emprestimos') && (
             <Card className="card-tech">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2 text-sm md:text-base text-foreground">
@@ -1116,7 +1126,9 @@ export const Relatorios = () => {
                 </button>
               </CardContent>
             </Card>
+            )}
 
+            {mostrar('dividas') && (
             <Card className="card-tech">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2 text-sm md:text-base text-foreground">
@@ -1142,7 +1154,9 @@ export const Relatorios = () => {
                 </button>
               </CardContent>
             </Card>
+            )}
 
+            {tipoRelatorio === 'todos' && (
             <Card className="card-tech md:col-span-2">
               <CardHeader>
                 <CardTitle className="text-sm md:text-base text-foreground">Resumo Consolidado</CardTitle>
@@ -1179,6 +1193,7 @@ export const Relatorios = () => {
                 </div>
               </CardContent>
             </Card>
+            )}
           </div>
         </TabsContent>
       </Tabs>
