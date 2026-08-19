@@ -37,7 +37,7 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
         <AppSidebar />
         
         {/* Main Content Area */}
-        <div className="flex-1 flex flex-col">
+        <div className="flex-1 flex flex-col min-w-0 w-full max-w-full overflow-x-hidden">
           {/* Mobile Header */}
           <header className="md:hidden sticky top-0 z-40 bg-background/80 backdrop-blur-xl border-b border-border/60 px-4 py-3 flex items-center justify-between">
             <div className="flex items-center gap-3">
@@ -50,7 +50,7 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
           </header>
 
           {/* Main Content */}
-          <main className="flex-1 pb-24 md:pb-0 bg-background">
+          <main className="flex-1 pb-24 md:pb-0 bg-background min-w-0 w-full max-w-full overflow-x-hidden">
             {children}
           </main>
         </div>
