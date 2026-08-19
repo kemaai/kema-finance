@@ -222,23 +222,23 @@ export const Dashboard = () => {
 
       <div className="max-w-7xl mx-auto px-4 md:px-8 pb-8 space-y-3.5 md:space-y-4">
         {/* Sync + Period filter */}
-        <div className="flex items-center justify-between gap-3 flex-wrap">
-          <div className="inline-flex items-center gap-2 rounded-full border border-border bg-card px-3.5 py-2">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2.5 sm:gap-3 min-w-0">
+          <div className="inline-flex items-center gap-2 rounded-full border border-border bg-card px-3.5 py-2 self-start max-w-full min-w-0">
             <CalendarDays className="w-4 h-4 text-muted-foreground" />
-            <span className="text-xs font-medium text-muted-foreground">
+            <span className="text-xs font-medium text-muted-foreground truncate">
               {isRefreshing ? 'Atualizando...' : formatRelativeTime(lastSyncTimestamp)}
             </span>
-            <span className="w-1.5 h-1.5 rounded-full bg-primary" />
+            <span className="w-1.5 h-1.5 rounded-full bg-primary flex-shrink-0" />
           </div>
-          <div className="flex items-center gap-2.5">
+          <div className="flex items-center gap-2.5 min-w-0 max-w-full overflow-x-auto no-scrollbar">
             <span className="hidden sm:inline text-xs font-medium text-muted-foreground">Período</span>
-            <div className="segmented">
+            <div className="segmented flex-shrink-0">
               {(['semanal', 'quinzenal', 'mensal'] as PeriodoFiltro[]).map((p) => (
                 <button
                   key={p}
                   onClick={() => setPeriodoInstalacoes(p)}
                   data-active={periodoInstalacoes === p}
-                  className="segmented-item"
+                  className="segmented-item whitespace-nowrap"
                 >
                   {p === 'semanal' ? 'Semanal' : p === 'quinzenal' ? 'Quinzenal' : 'Mensal'}
                 </button>

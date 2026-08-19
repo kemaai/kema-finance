@@ -68,12 +68,12 @@ export const DashboardCard: React.FC<DashboardCardProps> = ({
   const TrendIcon = isNegative ? ArrowDownRight : ArrowUpRight;
 
   return (
-    <div className={cn('card-flat animate-pop-in p-3.5 md:p-4 flex flex-col', className)}>
-      <div className="flex items-start gap-2.5">
+    <div className={cn('card-flat animate-pop-in p-3.5 md:p-4 flex flex-col min-w-0 overflow-hidden', className)}>
+      <div className="flex items-start gap-2.5 min-w-0">
         <div className={cn('icon-tile w-9 h-9 md:w-10 md:h-10 dark:rounded-full', solid)}>
           <Icon className="w-[18px] h-[18px]" strokeWidth={2.2} />
         </div>
-        <p className="text-[13px] font-medium leading-tight text-foreground/80 pt-0.5">
+        <p className="text-[13px] font-medium leading-tight text-foreground/80 pt-0.5 min-w-0 break-words">
           {title}
         </p>
       </div>
@@ -85,9 +85,9 @@ export const DashboardCard: React.FC<DashboardCardProps> = ({
         {value}
       </h3>
 
-      <div className="mt-1.5 flex items-center justify-between gap-2">
+      <div className="mt-1.5 flex items-center justify-between gap-2 min-w-0">
         {subValue && (
-          <p className="text-[11px] md:text-xs text-muted-foreground leading-snug">{subValue}</p>
+          <p className="text-[11px] md:text-xs text-muted-foreground leading-snug min-w-0 break-words">{subValue}</p>
         )}
         {trend && (
           <span
