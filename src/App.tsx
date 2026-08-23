@@ -118,8 +118,8 @@ function App() {
                 }
               />
               <Route
-
                 path="/dividas"
+
                 element={
                   <ProtectedRoute>
                     <Layout>
