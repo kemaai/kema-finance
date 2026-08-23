@@ -13,6 +13,7 @@ const ROUTE_MODULE: Record<string, InsightModule> = {
   '/servicos': 'servicos',
   '/instalacoes': 'instalacoes',
   '/despesas': 'despesas',
+  '/gastos-diarios': 'gastos',
   '/dividas': 'dividas',
   '/relatorios': 'relatorios',
 };
@@ -23,6 +24,7 @@ const MODULE_LABEL: Record<InsightModule, string> = {
   servicos: 'Serviços',
   instalacoes: 'Instalações',
   despesas: 'Despesas',
+  gastos: 'Gastos diários',
   dividas: 'Dívidas',
   relatorios: 'Relatórios',
 };
@@ -53,6 +55,12 @@ const MODULE_SUGGESTIONS: Record<InsightModule, string[]> = {
     'Organize meu calendário de pagamentos do mês',
     'Quanto sobra depois de pagar todas as contas?',
   ],
+  gastos: [
+    'Analise meus gastos diários e diga onde estou desperdiçando dinheiro',
+    'Quanto eu economizaria por ano cortando meus gastos supérfluos?',
+    'Monte um orçamento diário realista para eu conseguir guardar dinheiro',
+    'Qual categoria de gasto está fugindo do controle?',
+  ],
   dividas: [
     'Monte um plano de quitação das minhas dívidas',
     'Devo usar Avalanche ou Bola de Neve no meu caso?',
@@ -64,6 +72,7 @@ const MODULE_SUGGESTIONS: Record<InsightModule, string[]> = {
     'Como melhorar minha margem nos próximos meses?',
   ],
 };
+
 
 interface KemaAgentContextValue {
   open: boolean;
