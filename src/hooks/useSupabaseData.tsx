@@ -99,6 +99,40 @@ interface Servico {
   updated_at: string;
 }
 
+export interface GastoDiario {
+  id: string;
+  user_id: string;
+  descricao: string;
+  valor: number;
+  data_gasto: string;
+  categoria: string;
+  forma_pagamento: string;
+  essencial: boolean;
+  observacao?: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export const useGastosDiarios = () => {
+  const { user } = useAuth();
+
+  return useQuery({
+    queryKey: ['gastos_diarios', user?.id],
+    queryFn: async (): Promise<GastoDiario[]> => {
+      if (!user) return [];
+      const { data, error } = await supabase
+        .from('gastos_diarios')
+        .select('*')
+        .order('data_gasto', { ascending: false });
+      if (error) throw error;
+      return (data || []) as GastoDiario[];
+    },
+    enabled: !!user,
+  });
+};
+
+
+
 export const useServicos = () => {
   const { user } = useAuth();
   return useQuery({
