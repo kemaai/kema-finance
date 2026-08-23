@@ -6,6 +6,7 @@ import {
   useDespesas,
   useEmprestimos,
   useDividasNegativadas,
+  useGastosDiarios,
 } from './useSupabaseData';
 import { parseLocalDate } from '@/lib/utils';
 
@@ -13,11 +14,13 @@ export type InsightSeverity = 'critico' | 'atencao' | 'oportunidade' | 'info';
 export type InsightModule =
   | 'dashboard'
   | 'despesas'
+  | 'gastos'
   | 'instalacoes'
   | 'servicos'
   | 'clientes'
   | 'dividas'
   | 'relatorios';
+
 
 export interface KemaInsight {
   id: string;
