@@ -152,6 +152,41 @@ export function useKemaInsights() {
 
     const soma = <T,>(arr: T[], f: (x: T) => number) => arr.reduce((t, x) => t + f(x), 0);
 
+    // ---- Gastos diários
+    const inicioMesAnterior = new Date(hoje.getFullYear(), hoje.getMonth() - 1, 1);
+    const fimMesAnterior = new Date(hoje.getFullYear(), hoje.getMonth(), 0);
+    const gastosMes = gastosDiarios.filter(g => {
+      const dt = parseLocalDate(g.data_gasto);
+      return dt >= inicioMes && dt <= fimMes;
+    });
+    const gastosAnterior = gastosDiarios.filter(g => {
+      const dt = parseLocalDate(g.data_gasto);
+      return dt >= inicioMesAnterior && dt <= fimMesAnterior;
+    });
+    const superfluos = gastosMes.filter(g => !g.essencial);
+    const totalGastosMes = soma(gastosMes, g => Number(g.valor));
+    const essenciaisValor = totalGastosMes - soma(superfluos, g => Number(g.valor));
+    const diasDecorridos = hoje.getDate();
+    const diasNoMes = fimMes.getDate();
+    const mediaDiaria = diasDecorridos > 0 ? totalGastosMes / diasDecorridos : 0;
+
+    const mapCategoria = new Map<string, number>();
+    gastosMes.forEach(g =>
+      mapCategoria.set(g.categoria, (mapCategoria.get(g.categoria) || 0) + Number(g.valor))
+    );
+    const gastosPorCategoria = [...mapCategoria.entries()]
+      .map(([categoria, valor]) => ({ categoria, valor }))
+      .sort((a, b) => b.valor - a.valor);
+    const topCategoria = gastosPorCategoria[0];
+
+    const despesasMesTotal = soma(
+      despesas.filter(d => {
+        const dt = parseLocalDate(d.data_vencimento);
+        return dt >= inicioMes && dt <= fimMes;
+      }),
+      d => Number(d.valor)
+    );
+
     return {
       despesasVencidas: { qtd: vencidas.length, valor: soma(vencidas, d => Number(d.valor)) },
       despesasProximos7Dias: { qtd: proximas.length, valor: soma(proximas, d => Number(d.valor)) },
@@ -181,8 +216,24 @@ export function useKemaInsights() {
         valor: soma(dividasNegativadas.filter(d => !d.pago), d => Number(d.valor_atual)),
       },
       concentracaoMaiorCliente: concentracao,
+      gastosDiariosMes: { qtd: gastosMes.length, valor: totalGastosMes },
+      gastosDiariosMesAnterior: soma(gastosAnterior, g => Number(g.valor)),
+      gastosSuperfluosMes: { qtd: superfluos.length, valor: soma(superfluos, g => Number(g.valor)) },
+      gastosEssenciaisMes: essenciaisValor,
+      mediaGastoDiario: mediaDiaria,
+      projecaoGastosMes: mediaDiaria * diasNoMes,
+      gastosPorCategoria: gastosPorCategoria.slice(0, 6),
+      categoriaMaisCara: topCategoria && totalGastosMes > 0
+        ? {
+            categoria: topCategoria.categoria,
+            valor: topCategoria.valor,
+            percentual: (topCategoria.valor / totalGastosMes) * 100,
+          }
+        : null,
+      custoTotalMes: despesasMesTotal + totalGastosMes,
     };
-  }, [servicos, clientes, instalacoes, despesas, emprestimos, dividasNegativadas]);
+  }, [servicos, clientes, instalacoes, despesas, emprestimos, dividasNegativadas, gastosDiarios]);
+
 
   const insights = useMemo<KemaInsight[]>(() => {
     const list: KemaInsight[] = [];
