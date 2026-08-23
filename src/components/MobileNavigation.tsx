@@ -10,7 +10,9 @@ import {
   CreditCard,
   Brain,
   User,
+  Wallet,
   Settings
+
 } from 'lucide-react';
 
 const menuItems = [
@@ -18,7 +20,9 @@ const menuItems = [
   { name: 'Clientes', icon: Users, path: '/clientes' },
   { name: 'Serviços', icon: Briefcase, path: '/servicos' },
   { name: 'Instalações', icon: Scissors, path: '/instalacoes' },
+  { name: 'Gastos', icon: Wallet, path: '/gastos-diarios' },
   { name: 'Despesas', icon: Receipt, path: '/despesas' },
+
   { name: 'Dívidas', icon: CreditCard, path: '/dividas' },
   { name: 'Relatórios', icon: FileText, path: '/relatorios' },
   { name: 'KemaAI', icon: Brain, path: '/agente' },

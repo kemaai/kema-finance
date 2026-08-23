@@ -1,6 +1,6 @@
 import React from 'react';
 import { Sidebar, SidebarContent, SidebarGroup, SidebarGroupContent, SidebarGroupLabel, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem, SidebarFooter } from "@/components/ui/sidebar";
-import { Home, Users, Briefcase, Wrench, BarChart3, Receipt, CreditCard, LogOut, User, UserPlus, Scissors, FileText, Moon, Sun, Brain, Settings } from "lucide-react";
+import { Home, Users, Briefcase, Wrench, BarChart3, Receipt, CreditCard, LogOut, User, UserPlus, Scissors, FileText, Moon, Sun, Brain, Settings, Wallet } from "lucide-react";
 import kemaIcon from "@/assets/kema-icon.png";
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
@@ -15,7 +15,9 @@ const navigation = [
   { title: "Clientes", url: "/clientes", icon: Users },
   { title: "Serviços", url: "/servicos", icon: Briefcase },
   { title: "Instalações", url: "/instalacoes", icon: Wrench },
+  { title: "Gastos Diários", url: "/gastos-diarios", icon: Wallet },
   { title: "Despesas", url: "/despesas", icon: Receipt },
+
   { title: "Dívidas", url: "/dividas", icon: CreditCard },
   { title: "Relatórios", url: "/relatorios", icon: BarChart3 },
   { title: "KemaFinance AI", url: "/agente", icon: Brain },
