@@ -6,6 +6,7 @@ import {
   useDespesas,
   useEmprestimos,
   useDividasNegativadas,
+  useGastosDiarios,
 } from './useSupabaseData';
 import { parseLocalDate } from '@/lib/utils';
 
@@ -13,11 +14,13 @@ export type InsightSeverity = 'critico' | 'atencao' | 'oportunidade' | 'info';
 export type InsightModule =
   | 'dashboard'
   | 'despesas'
+  | 'gastos'
   | 'instalacoes'
   | 'servicos'
   | 'clientes'
   | 'dividas'
   | 'relatorios';
+
 
 export interface KemaInsight {
   id: string;
@@ -53,6 +56,15 @@ export interface OperationalSnapshot {
   emprestimosAbertos: { qtd: number; valor: number };
   dividasNegativadasAbertas: { qtd: number; valor: number };
   concentracaoMaiorCliente: { nome: string; percentual: number } | null;
+  gastosDiariosMes: { qtd: number; valor: number };
+  gastosDiariosMesAnterior: number;
+  gastosSuperfluosMes: { qtd: number; valor: number };
+  gastosEssenciaisMes: number;
+  mediaGastoDiario: number;
+  projecaoGastosMes: number;
+  gastosPorCategoria: { categoria: string; valor: number }[];
+  categoriaMaisCara: { categoria: string; valor: number; percentual: number } | null;
+  custoTotalMes: number;
 }
 
 export function useKemaInsights() {
@@ -62,6 +74,8 @@ export function useKemaInsights() {
   const { data: despesas = [] } = useDespesas();
   const { data: emprestimos = [] } = useEmprestimos();
   const { data: dividasNegativadas = [] } = useDividasNegativadas();
+  const { data: gastosDiarios = [] } = useGastosDiarios();
+
 
   const snapshot = useMemo<OperationalSnapshot>(() => {
     const hoje = new Date();
@@ -138,6 +152,41 @@ export function useKemaInsights() {
 
     const soma = <T,>(arr: T[], f: (x: T) => number) => arr.reduce((t, x) => t + f(x), 0);
 
+    // ---- Gastos diários
+    const inicioMesAnterior = new Date(hoje.getFullYear(), hoje.getMonth() - 1, 1);
+    const fimMesAnterior = new Date(hoje.getFullYear(), hoje.getMonth(), 0);
+    const gastosMes = gastosDiarios.filter(g => {
+      const dt = parseLocalDate(g.data_gasto);
+      return dt >= inicioMes && dt <= fimMes;
+    });
+    const gastosAnterior = gastosDiarios.filter(g => {
+      const dt = parseLocalDate(g.data_gasto);
+      return dt >= inicioMesAnterior && dt <= fimMesAnterior;
+    });
+    const superfluos = gastosMes.filter(g => !g.essencial);
+    const totalGastosMes = soma(gastosMes, g => Number(g.valor));
+    const essenciaisValor = totalGastosMes - soma(superfluos, g => Number(g.valor));
+    const diasDecorridos = hoje.getDate();
+    const diasNoMes = fimMes.getDate();
+    const mediaDiaria = diasDecorridos > 0 ? totalGastosMes / diasDecorridos : 0;
+
+    const mapCategoria = new Map<string, number>();
+    gastosMes.forEach(g =>
+      mapCategoria.set(g.categoria, (mapCategoria.get(g.categoria) || 0) + Number(g.valor))
+    );
+    const gastosPorCategoria = [...mapCategoria.entries()]
+      .map(([categoria, valor]) => ({ categoria, valor }))
+      .sort((a, b) => b.valor - a.valor);
+    const topCategoria = gastosPorCategoria[0];
+
+    const despesasMesTotal = soma(
+      despesas.filter(d => {
+        const dt = parseLocalDate(d.data_vencimento);
+        return dt >= inicioMes && dt <= fimMes;
+      }),
+      d => Number(d.valor)
+    );
+
     return {
       despesasVencidas: { qtd: vencidas.length, valor: soma(vencidas, d => Number(d.valor)) },
       despesasProximos7Dias: { qtd: proximas.length, valor: soma(proximas, d => Number(d.valor)) },
@@ -167,12 +216,91 @@ export function useKemaInsights() {
         valor: soma(dividasNegativadas.filter(d => !d.pago), d => Number(d.valor_atual)),
       },
       concentracaoMaiorCliente: concentracao,
+      gastosDiariosMes: { qtd: gastosMes.length, valor: totalGastosMes },
+      gastosDiariosMesAnterior: soma(gastosAnterior, g => Number(g.valor)),
+      gastosSuperfluosMes: { qtd: superfluos.length, valor: soma(superfluos, g => Number(g.valor)) },
+      gastosEssenciaisMes: essenciaisValor,
+      mediaGastoDiario: mediaDiaria,
+      projecaoGastosMes: mediaDiaria * diasNoMes,
+      gastosPorCategoria: gastosPorCategoria.slice(0, 6),
+      categoriaMaisCara: topCategoria && totalGastosMes > 0
+        ? {
+            categoria: topCategoria.categoria,
+            valor: topCategoria.valor,
+            percentual: (topCategoria.valor / totalGastosMes) * 100,
+          }
+        : null,
+      custoTotalMes: despesasMesTotal + totalGastosMes,
     };
-  }, [servicos, clientes, instalacoes, despesas, emprestimos, dividasNegativadas]);
+  }, [servicos, clientes, instalacoes, despesas, emprestimos, dividasNegativadas, gastosDiarios]);
+
 
   const insights = useMemo<KemaInsight[]>(() => {
     const list: KemaInsight[] = [];
     const s = snapshot;
+
+    // ---- Gastos diários
+    if (s.gastosSuperfluosMes.valor > 0) {
+      const anual = s.gastosSuperfluosMes.valor * 12;
+      list.push({
+        id: 'gastos-superfluos',
+        modulo: 'gastos',
+        severidade: s.gastosDiariosMes.valor > 0 && s.gastosSuperfluosMes.valor / s.gastosDiariosMes.valor > 0.3
+          ? 'critico'
+          : 'atencao',
+        titulo: `${brl(s.gastosSuperfluosMes.valor)} em gastos supérfluos no mês`,
+        descricao: `${s.gastosSuperfluosMes.qtd} lançamento(s) não essenciais. Cortando isso você guardaria ~${brl(anual)} por ano.`,
+        acao: 'Revisar supérfluos',
+        rota: '/gastos-diarios',
+        pergunta: 'Analise meus gastos diários supérfluos e monte um plano de corte para eu economizar por mês.',
+        valor: s.gastosSuperfluosMes.valor,
+      });
+    }
+
+    if (s.categoriaMaisCara && s.categoriaMaisCara.percentual > 30) {
+      list.push({
+        id: 'gastos-categoria-concentrada',
+        modulo: 'gastos',
+        severidade: 'atencao',
+        titulo: `${s.categoriaMaisCara.categoria} consome ${s.categoriaMaisCara.percentual.toFixed(0)}% dos gastos diários`,
+        descricao: `${brl(s.categoriaMaisCara.valor)} concentrados nessa categoria no mês.`,
+        acao: 'Ver detalhamento',
+        rota: '/gastos-diarios',
+        pergunta: `Meus gastos com ${s.categoriaMaisCara.categoria} estão altos. Como reduzir sem perder qualidade de vida?`,
+        valor: s.categoriaMaisCara.valor,
+      });
+    }
+
+    if (
+      s.gastosDiariosMesAnterior > 0 &&
+      s.projecaoGastosMes > s.gastosDiariosMesAnterior * 1.15
+    ) {
+      list.push({
+        id: 'gastos-em-alta',
+        modulo: 'gastos',
+        severidade: 'critico',
+        titulo: 'Ritmo de gastos acima do mês passado',
+        descricao: `Projeção de ${brl(s.projecaoGastosMes)} contra ${brl(s.gastosDiariosMesAnterior)} no mês anterior (média de ${brl(s.mediaGastoDiario)}/dia).`,
+        acao: 'Frear os gastos',
+        rota: '/gastos-diarios',
+        pergunta: 'Meus gastos diários estão subindo em relação ao mês passado. O que devo cortar primeiro?',
+        valor: s.projecaoGastosMes,
+      });
+    }
+
+    if (s.gastosDiariosMes.qtd === 0) {
+      list.push({
+        id: 'gastos-sem-registro',
+        modulo: 'gastos',
+        severidade: 'oportunidade',
+        titulo: 'Nenhum gasto diário registrado neste mês',
+        descricao: 'Sem registrar o dia a dia é impossível saber para onde o dinheiro está indo.',
+        acao: 'Registrar gastos',
+        rota: '/gastos-diarios',
+        pergunta: 'Como criar o hábito de registrar meus gastos diários e usar isso para economizar?',
+      });
+    }
+
 
     if (s.despesasVencidas.qtd > 0) {
       list.push({
