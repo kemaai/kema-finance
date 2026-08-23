@@ -56,6 +56,15 @@ export interface OperationalSnapshot {
   emprestimosAbertos: { qtd: number; valor: number };
   dividasNegativadasAbertas: { qtd: number; valor: number };
   concentracaoMaiorCliente: { nome: string; percentual: number } | null;
+  gastosDiariosMes: { qtd: number; valor: number };
+  gastosDiariosMesAnterior: number;
+  gastosSuperfluosMes: { qtd: number; valor: number };
+  gastosEssenciaisMes: number;
+  mediaGastoDiario: number;
+  projecaoGastosMes: number;
+  gastosPorCategoria: { categoria: string; valor: number }[];
+  categoriaMaisCara: { categoria: string; valor: number; percentual: number } | null;
+  custoTotalMes: number;
 }
 
 export function useKemaInsights() {
@@ -65,6 +74,8 @@ export function useKemaInsights() {
   const { data: despesas = [] } = useDespesas();
   const { data: emprestimos = [] } = useEmprestimos();
   const { data: dividasNegativadas = [] } = useDividasNegativadas();
+  const { data: gastosDiarios = [] } = useGastosDiarios();
+
 
   const snapshot = useMemo<OperationalSnapshot>(() => {
     const hoje = new Date();
