@@ -50,24 +50,25 @@ export const KemaInsightsPanel: React.FC<Props> = ({ max = 3, scope = 'page', ti
 
   return (
     <div className={`card-tech p-4 md:p-5 ${className}`}>
-      <div className="flex items-center justify-between gap-3 mb-4">
-        <div className="flex items-center gap-2.5">
-          <div className="icon-tile w-9 h-9 grad-violet">
+      <div className="flex items-start justify-between gap-2 mb-4">
+        <div className="flex items-center gap-2.5 min-w-0 flex-1">
+          <div className="icon-tile w-9 h-9 grad-violet flex-shrink-0">
             <Sparkles className="w-[18px] h-[18px]" strokeWidth={2.2} />
           </div>
-          <div>
-            <h3 className="font-display text-base font-bold text-foreground">
+          <div className="min-w-0">
+            <h3 className="font-display text-base font-bold text-foreground truncate">
               {title ?? 'KEMA AI recomenda'}
             </h3>
-            <p className="text-xs text-muted-foreground">
+            <p className="text-xs text-muted-foreground truncate">
               {scope === 'all' ? 'Prioridades de toda a operação' : `Contexto: ${moduloLabel}`}
             </p>
           </div>
         </div>
-        <Button variant="ghost" size="sm" onClick={() => ask()} className="text-xs">
+        <Button variant="ghost" size="sm" onClick={() => ask()} className="text-xs flex-shrink-0 px-2">
           Falar com o KEMA
         </Button>
       </div>
+
 
       {list.length === 0 ? (
         <div className="flex items-center gap-2 p-3 rounded-xl border border-emerald-500/30 bg-emerald-500/[0.06]">
@@ -95,26 +96,27 @@ export const KemaInsightsPanel: React.FC<Props> = ({ max = 3, scope = 'page', ti
                       </span>
                     </div>
                     <p className="text-xs text-muted-foreground mt-0.5">{insight.descricao}</p>
-                    <div className="flex items-center gap-2 mt-2">
+                    <div className="flex flex-wrap items-center gap-2 mt-2">
                       <Button
                         size="sm"
                         variant="outline"
-                        className="h-7 text-xs rounded-full"
+                        className="h-7 text-xs rounded-full max-w-full whitespace-normal text-left"
                         onClick={() => navigate(insight.rota)}
                       >
-                        {insight.acao}
-                        <ArrowRight className="w-3 h-3 ml-1" />
+                        <span className="truncate">{insight.acao}</span>
+                        <ArrowRight className="w-3 h-3 ml-1 flex-shrink-0" />
                       </Button>
                       <Button
                         size="sm"
                         variant="ghost"
-                        className="h-7 text-xs rounded-full"
+                        className="h-7 text-xs rounded-full max-w-full px-2"
                         onClick={() => ask(insight.pergunta)}
                       >
-                        <MessageSquare className="w-3 h-3 mr-1" />
-                        Pedir orientação
+                        <MessageSquare className="w-3 h-3 mr-1 flex-shrink-0" />
+                        <span className="truncate">Pedir orientação</span>
                       </Button>
                     </div>
+
                   </div>
                 </div>
               </div>
