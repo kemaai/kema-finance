@@ -164,6 +164,48 @@ export type Database = {
         }
         Relationships: []
       }
+      gastos_diarios: {
+        Row: {
+          categoria: string
+          created_at: string
+          data_gasto: string
+          descricao: string
+          essencial: boolean
+          forma_pagamento: string
+          id: string
+          observacao: string | null
+          updated_at: string
+          user_id: string
+          valor: number
+        }
+        Insert: {
+          categoria?: string
+          created_at?: string
+          data_gasto?: string
+          descricao: string
+          essencial?: boolean
+          forma_pagamento?: string
+          id?: string
+          observacao?: string | null
+          updated_at?: string
+          user_id: string
+          valor?: number
+        }
+        Update: {
+          categoria?: string
+          created_at?: string
+          data_gasto?: string
+          descricao?: string
+          essencial?: boolean
+          forma_pagamento?: string
+          id?: string
+          observacao?: string | null
+          updated_at?: string
+          user_id?: string
+          valor?: number
+        }
+        Relationships: []
+      }
       instalacao_anexos: {
         Row: {
           created_at: string
