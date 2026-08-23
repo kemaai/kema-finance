@@ -14,6 +14,8 @@ const Clientes = lazy(() => import("./pages/Clientes").then(m => ({ default: m.C
 const Servicos = lazy(() => import("./pages/Servicos").then(m => ({ default: m.Servicos })));
 const Instalacoes = lazy(() => import("./pages/Instalacoes").then(m => ({ default: m.Instalacoes })));
 const Despesas = lazy(() => import("./pages/Despesas"));
+const GastosDiarios = lazy(() => import("./pages/GastosDiarios"));
+
 const Dividas = lazy(() => import("./pages/Dividas").then(m => ({ default: m.Dividas })));
 const Relatorios = lazy(() => import("./pages/Relatorios").then(m => ({ default: m.Relatorios })));
 const Agente = lazy(() => import("./pages/Agente").then(m => ({ default: m.Agente })));
@@ -106,6 +108,17 @@ function App() {
                 }
               />
               <Route
+                path="/gastos-diarios"
+                element={
+                  <ProtectedRoute>
+                    <Layout>
+                      <GastosDiarios />
+                    </Layout>
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+
                 path="/dividas"
                 element={
                   <ProtectedRoute>
