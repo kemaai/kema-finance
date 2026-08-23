@@ -239,6 +239,69 @@ export function useKemaInsights() {
     const list: KemaInsight[] = [];
     const s = snapshot;
 
+    // ---- Gastos diários
+    if (s.gastosSuperfluosMes.valor > 0) {
+      const anual = s.gastosSuperfluosMes.valor * 12;
+      list.push({
+        id: 'gastos-superfluos',
+        modulo: 'gastos',
+        severidade: s.gastosDiariosMes.valor > 0 && s.gastosSuperfluosMes.valor / s.gastosDiariosMes.valor > 0.3
+          ? 'critico'
+          : 'atencao',
+        titulo: `${brl(s.gastosSuperfluosMes.valor)} em gastos supérfluos no mês`,
+        descricao: `${s.gastosSuperfluosMes.qtd} lançamento(s) não essenciais. Cortando isso você guardaria ~${brl(anual)} por ano.`,
+        acao: 'Revisar supérfluos',
+        rota: '/gastos-diarios',
+        pergunta: 'Analise meus gastos diários supérfluos e monte um plano de corte para eu economizar por mês.',
+        valor: s.gastosSuperfluosMes.valor,
+      });
+    }
+
+    if (s.categoriaMaisCara && s.categoriaMaisCara.percentual > 30) {
+      list.push({
+        id: 'gastos-categoria-concentrada',
+        modulo: 'gastos',
+        severidade: 'atencao',
+        titulo: `${s.categoriaMaisCara.categoria} consome ${s.categoriaMaisCara.percentual.toFixed(0)}% dos gastos diários`,
+        descricao: `${brl(s.categoriaMaisCara.valor)} concentrados nessa categoria no mês.`,
+        acao: 'Ver detalhamento',
+        rota: '/gastos-diarios',
+        pergunta: `Meus gastos com ${s.categoriaMaisCara.categoria} estão altos. Como reduzir sem perder qualidade de vida?`,
+        valor: s.categoriaMaisCara.valor,
+      });
+    }
+
+    if (
+      s.gastosDiariosMesAnterior > 0 &&
+      s.projecaoGastosMes > s.gastosDiariosMesAnterior * 1.15
+    ) {
+      list.push({
+        id: 'gastos-em-alta',
+        modulo: 'gastos',
+        severidade: 'critico',
+        titulo: 'Ritmo de gastos acima do mês passado',
+        descricao: `Projeção de ${brl(s.projecaoGastosMes)} contra ${brl(s.gastosDiariosMesAnterior)} no mês anterior (média de ${brl(s.mediaGastoDiario)}/dia).`,
+        acao: 'Frear os gastos',
+        rota: '/gastos-diarios',
+        pergunta: 'Meus gastos diários estão subindo em relação ao mês passado. O que devo cortar primeiro?',
+        valor: s.projecaoGastosMes,
+      });
+    }
+
+    if (s.gastosDiariosMes.qtd === 0) {
+      list.push({
+        id: 'gastos-sem-registro',
+        modulo: 'gastos',
+        severidade: 'oportunidade',
+        titulo: 'Nenhum gasto diário registrado neste mês',
+        descricao: 'Sem registrar o dia a dia é impossível saber para onde o dinheiro está indo.',
+        acao: 'Registrar gastos',
+        rota: '/gastos-diarios',
+        pergunta: 'Como criar o hábito de registrar meus gastos diários e usar isso para economizar?',
+      });
+    }
+
+
     if (s.despesasVencidas.qtd > 0) {
       list.push({
         id: 'despesas-vencidas',
