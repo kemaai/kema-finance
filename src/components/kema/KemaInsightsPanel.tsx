@@ -50,24 +50,25 @@ export const KemaInsightsPanel: React.FC<Props> = ({ max = 3, scope = 'page', ti
 
   return (
     <div className={`card-tech p-4 md:p-5 ${className}`}>
-      <div className="flex items-center justify-between gap-3 mb-4">
-        <div className="flex items-center gap-2.5">
-          <div className="icon-tile w-9 h-9 grad-violet">
+      <div className="flex items-start justify-between gap-2 mb-4">
+        <div className="flex items-center gap-2.5 min-w-0 flex-1">
+          <div className="icon-tile w-9 h-9 grad-violet flex-shrink-0">
             <Sparkles className="w-[18px] h-[18px]" strokeWidth={2.2} />
           </div>
-          <div>
-            <h3 className="font-display text-base font-bold text-foreground">
+          <div className="min-w-0">
+            <h3 className="font-display text-base font-bold text-foreground truncate">
               {title ?? 'KEMA AI recomenda'}
             </h3>
-            <p className="text-xs text-muted-foreground">
+            <p className="text-xs text-muted-foreground truncate">
               {scope === 'all' ? 'Prioridades de toda a operação' : `Contexto: ${moduloLabel}`}
             </p>
           </div>
         </div>
-        <Button variant="ghost" size="sm" onClick={() => ask()} className="text-xs">
+        <Button variant="ghost" size="sm" onClick={() => ask()} className="text-xs flex-shrink-0 px-2">
           Falar com o KEMA
         </Button>
       </div>
+
 
       {list.length === 0 ? (
         <div className="flex items-center gap-2 p-3 rounded-xl border border-emerald-500/30 bg-emerald-500/[0.06]">
