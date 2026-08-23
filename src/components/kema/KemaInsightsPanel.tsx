@@ -96,26 +96,27 @@ export const KemaInsightsPanel: React.FC<Props> = ({ max = 3, scope = 'page', ti
                       </span>
                     </div>
                     <p className="text-xs text-muted-foreground mt-0.5">{insight.descricao}</p>
-                    <div className="flex items-center gap-2 mt-2">
+                    <div className="flex flex-wrap items-center gap-2 mt-2">
                       <Button
                         size="sm"
                         variant="outline"
-                        className="h-7 text-xs rounded-full"
+                        className="h-7 text-xs rounded-full max-w-full whitespace-normal text-left"
                         onClick={() => navigate(insight.rota)}
                       >
-                        {insight.acao}
-                        <ArrowRight className="w-3 h-3 ml-1" />
+                        <span className="truncate">{insight.acao}</span>
+                        <ArrowRight className="w-3 h-3 ml-1 flex-shrink-0" />
                       </Button>
                       <Button
                         size="sm"
                         variant="ghost"
-                        className="h-7 text-xs rounded-full"
+                        className="h-7 text-xs rounded-full max-w-full px-2"
                         onClick={() => ask(insight.pergunta)}
                       >
-                        <MessageSquare className="w-3 h-3 mr-1" />
-                        Pedir orientação
+                        <MessageSquare className="w-3 h-3 mr-1 flex-shrink-0" />
+                        <span className="truncate">Pedir orientação</span>
                       </Button>
                     </div>
+
                   </div>
                 </div>
               </div>
