@@ -56,6 +56,8 @@ export function useKemaFinanceAI() {
   const { data: despesas = [] } = useDespesas();
   const { data: emprestimos = [] } = useEmprestimos();
   const { data: dividasNegativadas = [] } = useDividasNegativadas();
+  const { data: gastosDiarios = [] } = useGastosDiarios();
+
 
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [isLoading, setIsLoading] = useState(false);
