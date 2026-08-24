@@ -1,0 +1,1 @@
+REVOKE ALL ON FUNCTION public.log_gasto_diario_historico() FROM PUBLIC, anon, authenticated;
