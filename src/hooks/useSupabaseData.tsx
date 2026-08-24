@@ -131,6 +131,46 @@ export const useGastosDiarios = () => {
   });
 };
 
+export interface GastoHistoricoAlteracao {
+  campo: string;
+  de: string;
+  para: string;
+}
+
+export interface GastoDiarioHistorico {
+  id: string;
+  user_id: string;
+  gasto_id: string;
+  acao: 'criado' | 'editado' | 'excluido';
+  descricao: string;
+  alteracoes: GastoHistoricoAlteracao[];
+  snapshot: Record<string, unknown>;
+  created_at: string;
+}
+
+export const useGastosDiariosHistorico = (gastoId?: string) => {
+  const { user } = useAuth();
+
+  return useQuery({
+    queryKey: ['gastos_diarios_historico', user?.id, gastoId ?? 'todos'],
+    queryFn: async (): Promise<GastoDiarioHistorico[]> => {
+      if (!user) return [];
+      let query = supabase
+        .from('gastos_diarios_historico')
+        .select('*')
+        .order('created_at', { ascending: false })
+        .limit(200);
+      if (gastoId) query = query.eq('gasto_id', gastoId);
+      const { data, error } = await query;
+      if (error) throw error;
+      return (data || []) as unknown as GastoDiarioHistorico[];
+    },
+    enabled: !!user,
+  });
+};
+
+
+
 
 
 export const useServicos = () => {
