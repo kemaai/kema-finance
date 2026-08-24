@@ -1,5 +1,5 @@
 import { useState, useMemo, useCallback } from 'react';
-import { useServicos, useClientes, useInstalacoes, useDespesas, useEmprestimos, useDividasNegativadas } from './useSupabaseData';
+import { useServicos, useClientes, useInstalacoes, useDespesas, useEmprestimos, useDividasNegativadas, useGastosDiarios } from './useSupabaseData';
 
 export interface DiagnosticoFinanceiro {
   receitaTotal: number;
@@ -8,6 +8,11 @@ export interface DiagnosticoFinanceiro {
   despesaTotal: number;
   despesasPagas: number;
   despesasPendentes: number;
+  gastosDiariosTotal: number;
+  gastosDiariosSuperfluos: number;
+  gastosDiariosEssenciais: number;
+  mediaGastoDiario: number;
+  custoTotalMes: number;
   saldoReal: number;
   percentualComprometido: number;
   scoreFinanceiro: number;
@@ -18,6 +23,7 @@ export interface DiagnosticoFinanceiro {
   totalEmprestimos: number;
   totalDividasNegativadas: number;
   capacidadeEconomia: number;
+  economiaPotencialCortes: number;
   metaReservaEmergencia: number;
   prazoReserva: number;
   sitesAtivos: number;
@@ -25,6 +31,7 @@ export interface DiagnosticoFinanceiro {
   totalClientes: number;
   despesasRecorrentes: number;
 }
+
 
 export interface Alerta {
   id: string;
@@ -49,6 +56,8 @@ export function useKemaFinanceAI() {
   const { data: despesas = [] } = useDespesas();
   const { data: emprestimos = [] } = useEmprestimos();
   const { data: dividasNegativadas = [] } = useDividasNegativadas();
+  const { data: gastosDiarios = [] } = useGastosDiarios();
+
 
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -86,6 +95,19 @@ export function useKemaFinanceAI() {
     const despesasPagasTotal = despesasDoMes.filter(d => d.paga).reduce((total, d) => total + Number(d.valor), 0);
     const despesasPendentesTotal = despesasDoMes.filter(d => !d.paga).reduce((total, d) => total + Number(d.valor), 0);
 
+    // Gastos diários do mês
+    const gastosDoMes = gastosDiarios.filter(g => {
+      const dt = new Date(g.data_gasto);
+      return dt >= inicioMesAtual && dt <= fimMesAtual;
+    });
+    const gastosDiariosTotal = gastosDoMes.reduce((total, g) => total + Number(g.valor), 0);
+    const gastosDiariosSuperfluos = gastosDoMes
+      .filter(g => !g.essencial)
+      .reduce((total, g) => total + Number(g.valor), 0);
+    const gastosDiariosEssenciais = gastosDiariosTotal - gastosDiariosSuperfluos;
+    const diasDecorridos = Math.max(1, hoje.getDate());
+    const mediaGastoDiario = gastosDiariosTotal / diasDecorridos;
+
     // Dívidas
     const totalEmprestimos = emprestimos.reduce((total, e) => total + e.valor_atual, 0);
     const totalDividasNegativadas = dividasNegativadas
@@ -93,9 +115,11 @@ export function useKemaFinanceAI() {
       .reduce((total, d) => total + d.valor_atual, 0);
     const totalDividas = totalEmprestimos + totalDividasNegativadas;
 
-    // Cálculos
-    const saldoReal = receitaTotal - despesaTotal;
-    const percentualComprometido = receitaTotal > 0 ? ((despesaTotal + (totalDividas * 0.1)) / receitaTotal) * 100 : 100;
+    // Cálculos (custo total = contas fixas + gastos do dia a dia)
+    const custoTotalMes = despesaTotal + gastosDiariosTotal;
+    const saldoReal = receitaTotal - custoTotalMes;
+    const percentualComprometido = receitaTotal > 0 ? ((custoTotalMes + (totalDividas * 0.1)) / receitaTotal) * 100 : 100;
+
 
     // Score financeiro (0-100)
     let scoreFinanceiro = 100;
@@ -142,7 +166,7 @@ export function useKemaFinanceAI() {
     const capacidadeEconomia = saldoReal > 0 ? saldoReal * 0.3 : 0;
 
     // Reserva de emergência
-    const despesaMediaMensal = despesaTotal || 3000;
+    const despesaMediaMensal = custoTotalMes || 3000;
     const metaReservaEmergencia = despesaMediaMensal * 6;
     const prazoReserva = capacidadeEconomia > 0 ? Math.ceil(metaReservaEmergencia / capacidadeEconomia) : 0;
 
@@ -153,6 +177,11 @@ export function useKemaFinanceAI() {
       despesaTotal,
       despesasPagas: despesasPagasTotal,
       despesasPendentes: despesasPendentesTotal,
+      gastosDiariosTotal,
+      gastosDiariosSuperfluos,
+      gastosDiariosEssenciais,
+      mediaGastoDiario,
+      custoTotalMes,
       saldoReal,
       percentualComprometido,
       scoreFinanceiro,
@@ -163,6 +192,7 @@ export function useKemaFinanceAI() {
       totalEmprestimos,
       totalDividasNegativadas,
       capacidadeEconomia,
+      economiaPotencialCortes: gastosDiariosSuperfluos,
       metaReservaEmergencia,
       prazoReserva,
       sitesAtivos: servicosDoMes.length,
@@ -170,7 +200,8 @@ export function useKemaFinanceAI() {
       totalClientes: clientes.length,
       despesasRecorrentes: despesasDoMes.length,
     };
-  }, [servicos, clientes, instalacoes, despesas, emprestimos, dividasNegativadas, inicioMesAtual, fimMesAtual]);
+  }, [servicos, clientes, instalacoes, despesas, emprestimos, dividasNegativadas, gastosDiarios, inicioMesAtual, fimMesAtual]);
+
 
   // Generate smart alerts
   const alertas = useMemo<Alerta[]>(() => {
