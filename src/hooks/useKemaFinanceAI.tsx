@@ -200,7 +200,7 @@ export function useKemaFinanceAI() {
       totalClientes: clientes.length,
       despesasRecorrentes: despesasDoMes.length,
     };
-  }, [servicos, clientes, instalacoes, despesas, emprestimos, dividasNegativadas, gastosDiarios, hoje, inicioMesAtual, fimMesAtual]);
+  }, [servicos, clientes, instalacoes, despesas, emprestimos, dividasNegativadas, gastosDiarios, inicioMesAtual, fimMesAtual]);
 
 
   // Generate smart alerts
