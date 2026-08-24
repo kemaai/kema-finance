@@ -166,7 +166,7 @@ export function useKemaFinanceAI() {
     const capacidadeEconomia = saldoReal > 0 ? saldoReal * 0.3 : 0;
 
     // Reserva de emergência
-    const despesaMediaMensal = despesaTotal || 3000;
+    const despesaMediaMensal = custoTotalMes || 3000;
     const metaReservaEmergencia = despesaMediaMensal * 6;
     const prazoReserva = capacidadeEconomia > 0 ? Math.ceil(metaReservaEmergencia / capacidadeEconomia) : 0;
 
@@ -177,6 +177,11 @@ export function useKemaFinanceAI() {
       despesaTotal,
       despesasPagas: despesasPagasTotal,
       despesasPendentes: despesasPendentesTotal,
+      gastosDiariosTotal,
+      gastosDiariosSuperfluos,
+      gastosDiariosEssenciais,
+      mediaGastoDiario,
+      custoTotalMes,
       saldoReal,
       percentualComprometido,
       scoreFinanceiro,
@@ -187,6 +192,7 @@ export function useKemaFinanceAI() {
       totalEmprestimos,
       totalDividasNegativadas,
       capacidadeEconomia,
+      economiaPotencialCortes: gastosDiariosSuperfluos,
       metaReservaEmergencia,
       prazoReserva,
       sitesAtivos: servicosDoMes.length,
@@ -194,7 +200,8 @@ export function useKemaFinanceAI() {
       totalClientes: clientes.length,
       despesasRecorrentes: despesasDoMes.length,
     };
-  }, [servicos, clientes, instalacoes, despesas, emprestimos, dividasNegativadas, inicioMesAtual, fimMesAtual]);
+  }, [servicos, clientes, instalacoes, despesas, emprestimos, dividasNegativadas, gastosDiarios, hoje, inicioMesAtual, fimMesAtual]);
+
 
   // Generate smart alerts
   const alertas = useMemo<Alerta[]>(() => {
