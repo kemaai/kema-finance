@@ -95,6 +95,19 @@ export function useKemaFinanceAI() {
     const despesasPagasTotal = despesasDoMes.filter(d => d.paga).reduce((total, d) => total + Number(d.valor), 0);
     const despesasPendentesTotal = despesasDoMes.filter(d => !d.paga).reduce((total, d) => total + Number(d.valor), 0);
 
+    // Gastos diários do mês
+    const gastosDoMes = gastosDiarios.filter(g => {
+      const dt = new Date(g.data_gasto);
+      return dt >= inicioMesAtual && dt <= fimMesAtual;
+    });
+    const gastosDiariosTotal = gastosDoMes.reduce((total, g) => total + Number(g.valor), 0);
+    const gastosDiariosSuperfluos = gastosDoMes
+      .filter(g => !g.essencial)
+      .reduce((total, g) => total + Number(g.valor), 0);
+    const gastosDiariosEssenciais = gastosDiariosTotal - gastosDiariosSuperfluos;
+    const diasDecorridos = Math.max(1, hoje.getDate());
+    const mediaGastoDiario = gastosDiariosTotal / diasDecorridos;
+
     // Dívidas
     const totalEmprestimos = emprestimos.reduce((total, e) => total + e.valor_atual, 0);
     const totalDividasNegativadas = dividasNegativadas
@@ -102,9 +115,11 @@ export function useKemaFinanceAI() {
       .reduce((total, d) => total + d.valor_atual, 0);
     const totalDividas = totalEmprestimos + totalDividasNegativadas;
 
-    // Cálculos
-    const saldoReal = receitaTotal - despesaTotal;
-    const percentualComprometido = receitaTotal > 0 ? ((despesaTotal + (totalDividas * 0.1)) / receitaTotal) * 100 : 100;
+    // Cálculos (custo total = contas fixas + gastos do dia a dia)
+    const custoTotalMes = despesaTotal + gastosDiariosTotal;
+    const saldoReal = receitaTotal - custoTotalMes;
+    const percentualComprometido = receitaTotal > 0 ? ((custoTotalMes + (totalDividas * 0.1)) / receitaTotal) * 100 : 100;
+
 
     // Score financeiro (0-100)
     let scoreFinanceiro = 100;
