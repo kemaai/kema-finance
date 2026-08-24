@@ -1,5 +1,5 @@
 import { useState, useMemo, useCallback } from 'react';
-import { useServicos, useClientes, useInstalacoes, useDespesas, useEmprestimos, useDividasNegativadas } from './useSupabaseData';
+import { useServicos, useClientes, useInstalacoes, useDespesas, useEmprestimos, useDividasNegativadas, useGastosDiarios } from './useSupabaseData';
 
 export interface DiagnosticoFinanceiro {
   receitaTotal: number;
@@ -8,6 +8,11 @@ export interface DiagnosticoFinanceiro {
   despesaTotal: number;
   despesasPagas: number;
   despesasPendentes: number;
+  gastosDiariosTotal: number;
+  gastosDiariosSuperfluos: number;
+  gastosDiariosEssenciais: number;
+  mediaGastoDiario: number;
+  custoTotalMes: number;
   saldoReal: number;
   percentualComprometido: number;
   scoreFinanceiro: number;
@@ -18,6 +23,7 @@ export interface DiagnosticoFinanceiro {
   totalEmprestimos: number;
   totalDividasNegativadas: number;
   capacidadeEconomia: number;
+  economiaPotencialCortes: number;
   metaReservaEmergencia: number;
   prazoReserva: number;
   sitesAtivos: number;
@@ -25,6 +31,7 @@ export interface DiagnosticoFinanceiro {
   totalClientes: number;
   despesasRecorrentes: number;
 }
+
 
 export interface Alerta {
   id: string;
