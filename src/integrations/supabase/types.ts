@@ -206,6 +206,39 @@ export type Database = {
         }
         Relationships: []
       }
+      gastos_diarios_historico: {
+        Row: {
+          acao: string
+          alteracoes: Json
+          created_at: string
+          descricao: string
+          gasto_id: string
+          id: string
+          snapshot: Json
+          user_id: string
+        }
+        Insert: {
+          acao: string
+          alteracoes?: Json
+          created_at?: string
+          descricao?: string
+          gasto_id: string
+          id?: string
+          snapshot?: Json
+          user_id: string
+        }
+        Update: {
+          acao?: string
+          alteracoes?: Json
+          created_at?: string
+          descricao?: string
+          gasto_id?: string
+          id?: string
+          snapshot?: Json
+          user_id?: string
+        }
+        Relationships: []
+      }
       instalacao_anexos: {
         Row: {
           created_at: string
