@@ -295,6 +295,14 @@ export default function GastosDiarios() {
                             <Button
                               variant="ghost"
                               size="sm"
+                              aria-label="Ver histórico deste gasto"
+                              onClick={() => setHistorico({ open: true, gasto })}
+                            >
+                              <History className="w-4 h-4" />
+                            </Button>
+                            <Button
+                              variant="ghost"
+                              size="sm"
                               aria-label="Editar gasto"
                               onClick={() => { setEditing(gasto); setIsFormOpen(true); }}
                             >
@@ -305,7 +313,7 @@ export default function GastosDiarios() {
                               size="sm"
                               aria-label="Excluir gasto"
                               className="text-destructive hover:text-destructive"
-                              onClick={() => handleDelete(gasto.id)}
+                              onClick={() => setConfirmDelete(gasto)}
                             >
                               <Trash2 className="w-4 h-4" />
                             </Button>
@@ -331,6 +339,39 @@ export default function GastosDiarios() {
         onSubmit={handleSubmit}
         gasto={editing}
       />
+
+      <GastoHistoricoDialog
+        isOpen={historico.open}
+        onClose={() => setHistorico({ open: false })}
+        gastoId={historico.gasto?.id}
+        titulo={historico.gasto?.descricao}
+      />
+
+      <AlertDialog open={!!confirmDelete} onOpenChange={(v) => !v && setConfirmDelete(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Excluir este gasto?</AlertDialogTitle>
+            <AlertDialogDescription>
+              {confirmDelete
+                ? `"${confirmDelete.descricao}" de ${brl(Number(confirmDelete.valor))} será removido dos seus totais. A exclusão fica registrada no histórico.`
+                : ''}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogAction
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              onClick={() => {
+                if (confirmDelete) handleDelete(confirmDelete.id);
+                setConfirmDelete(null);
+              }}
+            >
+              Excluir
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
+
   );
 }
