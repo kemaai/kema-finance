@@ -1,7 +1,7 @@
 import React, { useMemo, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Plus, Wallet, TrendingDown, PiggyBank, CalendarDays, Edit, Trash2, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Plus, Wallet, TrendingDown, PiggyBank, CalendarDays, Edit, Trash2, ChevronLeft, ChevronRight, History } from 'lucide-react';
 import { format, addMonths, isSameMonth, isSameDay } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { useGastosDiarios, type GastoDiario } from '@/hooks/useSupabaseData';
@@ -11,9 +11,21 @@ import { useToast } from '@/hooks/use-toast';
 import { useQueryClient } from '@tanstack/react-query';
 import { parseLocalDate } from '@/lib/utils';
 import { GastoDiarioForm, type GastoDiarioInput } from '@/components/GastoDiarioForm';
+import { GastoHistoricoDialog } from '@/components/GastoHistoricoDialog';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 import { KemaInsightsPanel } from '@/components/kema/KemaInsightsPanel';
 import { StatusBadge } from '@/components/ui/status-badge';
 import { corDaCategoria, getCategoria } from '@/lib/gastosCategorias';
+
 
 const brl = (v: number) =>
   v.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL', minimumFractionDigits: 2 });
