@@ -89,7 +89,9 @@ export default function GastosDiarios() {
 
   const invalidate = () => {
     queryClient.invalidateQueries({ queryKey: ['gastos_diarios'] });
+    queryClient.invalidateQueries({ queryKey: ['gastos_diarios_historico'] });
   };
+
 
   const handleSubmit = async (data: GastoDiarioInput) => {
     if (!user) return;
