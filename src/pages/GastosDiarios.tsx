@@ -145,7 +145,7 @@ export default function GastosDiarios() {
             {format(mesAtual, "MMMM 'de' yyyy", { locale: ptBR })}
           </p>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 flex-wrap">
           <Button variant="outline" size="icon" aria-label="Mês anterior" onClick={() => setMesAtual(addMonths(mesAtual, -1))}>
             <ChevronLeft className="w-4 h-4" />
           </Button>
@@ -153,6 +153,16 @@ export default function GastosDiarios() {
           <Button variant="outline" size="icon" aria-label="Próximo mês" onClick={() => setMesAtual(addMonths(mesAtual, 1))}>
             <ChevronRight className="w-4 h-4" />
           </Button>
+          <Button
+            variant="outline"
+            aria-label="Ver histórico de alterações"
+            data-testid="historico-gastos"
+            onClick={() => setHistorico({ open: true, gasto: null })}
+          >
+            <History className="w-4 h-4 sm:mr-1.5" />
+            <span className="hidden sm:inline">Histórico</span>
+          </Button>
+
           <Button className="btn-tech" data-testid="novo-gasto" onClick={() => { setEditing(null); setIsFormOpen(true); }}>
             <Plus className="w-4 h-4 mr-1.5" />
             Novo gasto
