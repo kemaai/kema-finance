@@ -39,6 +39,9 @@ export default function GastosDiarios() {
   const [mesAtual, setMesAtual] = useState(new Date());
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editing, setEditing] = useState<GastoDiario | null>(null);
+  const [historico, setHistorico] = useState<{ open: boolean; gasto?: GastoDiario | null }>({ open: false });
+  const [confirmDelete, setConfirmDelete] = useState<GastoDiario | null>(null);
+
 
   const gastosDoMes = useMemo(
     () => gastos.filter(g => isSameMonth(parseLocalDate(g.data_gasto), mesAtual)),
