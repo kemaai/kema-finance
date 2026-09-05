@@ -1,7 +1,7 @@
 import React, { useMemo, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Plus, Wallet, TrendingDown, PiggyBank, CalendarDays, Edit, Trash2, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Plus, Wallet, TrendingDown, PiggyBank, CalendarDays, Edit, Trash2, ChevronLeft, ChevronRight, History } from 'lucide-react';
 import { format, addMonths, isSameMonth, isSameDay } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { useGastosDiarios, type GastoDiario } from '@/hooks/useSupabaseData';
@@ -11,9 +11,21 @@ import { useToast } from '@/hooks/use-toast';
 import { useQueryClient } from '@tanstack/react-query';
 import { parseLocalDate } from '@/lib/utils';
 import { GastoDiarioForm, type GastoDiarioInput } from '@/components/GastoDiarioForm';
+import { GastoHistoricoDialog } from '@/components/GastoHistoricoDialog';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 import { KemaInsightsPanel } from '@/components/kema/KemaInsightsPanel';
 import { StatusBadge } from '@/components/ui/status-badge';
 import { corDaCategoria, getCategoria } from '@/lib/gastosCategorias';
+
 
 const brl = (v: number) =>
   v.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL', minimumFractionDigits: 2 });
@@ -27,6 +39,9 @@ export default function GastosDiarios() {
   const [mesAtual, setMesAtual] = useState(new Date());
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editing, setEditing] = useState<GastoDiario | null>(null);
+  const [historico, setHistorico] = useState<{ open: boolean; gasto?: GastoDiario | null }>({ open: false });
+  const [confirmDelete, setConfirmDelete] = useState<GastoDiario | null>(null);
+
 
   const gastosDoMes = useMemo(
     () => gastos.filter(g => isSameMonth(parseLocalDate(g.data_gasto), mesAtual)),
@@ -74,7 +89,9 @@ export default function GastosDiarios() {
 
   const invalidate = () => {
     queryClient.invalidateQueries({ queryKey: ['gastos_diarios'] });
+    queryClient.invalidateQueries({ queryKey: ['gastos_diarios_historico'] });
   };
+
 
   const handleSubmit = async (data: GastoDiarioInput) => {
     if (!user) return;
@@ -128,7 +145,7 @@ export default function GastosDiarios() {
             {format(mesAtual, "MMMM 'de' yyyy", { locale: ptBR })}
           </p>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 flex-wrap">
           <Button variant="outline" size="icon" aria-label="Mês anterior" onClick={() => setMesAtual(addMonths(mesAtual, -1))}>
             <ChevronLeft className="w-4 h-4" />
           </Button>
@@ -136,6 +153,16 @@ export default function GastosDiarios() {
           <Button variant="outline" size="icon" aria-label="Próximo mês" onClick={() => setMesAtual(addMonths(mesAtual, 1))}>
             <ChevronRight className="w-4 h-4" />
           </Button>
+          <Button
+            variant="outline"
+            aria-label="Ver histórico de alterações"
+            data-testid="historico-gastos"
+            onClick={() => setHistorico({ open: true, gasto: null })}
+          >
+            <History className="w-4 h-4 sm:mr-1.5" />
+            <span className="hidden sm:inline">Histórico</span>
+          </Button>
+
           <Button className="btn-tech" data-testid="novo-gasto" onClick={() => { setEditing(null); setIsFormOpen(true); }}>
             <Plus className="w-4 h-4 mr-1.5" />
             Novo gasto
@@ -268,6 +295,14 @@ export default function GastosDiarios() {
                             <Button
                               variant="ghost"
                               size="sm"
+                              aria-label="Ver histórico deste gasto"
+                              onClick={() => setHistorico({ open: true, gasto })}
+                            >
+                              <History className="w-4 h-4" />
+                            </Button>
+                            <Button
+                              variant="ghost"
+                              size="sm"
                               aria-label="Editar gasto"
                               onClick={() => { setEditing(gasto); setIsFormOpen(true); }}
                             >
@@ -278,7 +313,7 @@ export default function GastosDiarios() {
                               size="sm"
                               aria-label="Excluir gasto"
                               className="text-destructive hover:text-destructive"
-                              onClick={() => handleDelete(gasto.id)}
+                              onClick={() => setConfirmDelete(gasto)}
                             >
                               <Trash2 className="w-4 h-4" />
                             </Button>
@@ -304,6 +339,39 @@ export default function GastosDiarios() {
         onSubmit={handleSubmit}
         gasto={editing}
       />
+
+      <GastoHistoricoDialog
+        isOpen={historico.open}
+        onClose={() => setHistorico({ open: false })}
+        gastoId={historico.gasto?.id}
+        titulo={historico.gasto?.descricao}
+      />
+
+      <AlertDialog open={!!confirmDelete} onOpenChange={(v) => !v && setConfirmDelete(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Excluir este gasto?</AlertDialogTitle>
+            <AlertDialogDescription>
+              {confirmDelete
+                ? `"${confirmDelete.descricao}" de ${brl(Number(confirmDelete.valor))} será removido dos seus totais. A exclusão fica registrada no histórico.`
+                : ''}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogAction
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              onClick={() => {
+                if (confirmDelete) handleDelete(confirmDelete.id);
+                setConfirmDelete(null);
+              }}
+            >
+              Excluir
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
+
   );
 }
