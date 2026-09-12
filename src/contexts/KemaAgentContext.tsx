@@ -122,8 +122,22 @@ export const KemaAgentProvider: React.FC<{ children: React.ReactNode }> = ({ chi
       operacional: snapshot,
       insightsAtivos: insights.slice(0, 8).map(i => `[${i.severidade}] ${i.titulo} — ${i.descricao}`),
       historicoRecente: alertas.slice(0, 5).map(a => `${a.titulo}: ${a.mensagem}`).join(' | '),
+      metas: {
+        definidas: metasDefinidas,
+        metaReceita: metas.metaReceita,
+        metaCusto: metas.metaCusto,
+        gapReceita:
+          metas.metaReceita != null
+            ? Number(metas.metaReceita) - Number(diagnostico.receitaTotal || 0)
+            : null,
+        excedenteCusto:
+          metas.metaCusto != null
+            ? Number(diagnostico.custoTotalMes || 0) - Number(metas.metaCusto)
+            : null,
+        economiaPotencialSuperfluos: Number(diagnostico.economiaPotencialCortes || 0),
+      },
     }),
-    [diagnostico, snapshot, insights, alertas, modulo, location.pathname]
+    [diagnostico, snapshot, insights, alertas, modulo, location.pathname, metas, metasDefinidas]
   );
 
   const sendMessage = useCallback(
