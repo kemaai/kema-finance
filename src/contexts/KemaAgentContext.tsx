@@ -3,6 +3,7 @@ import { useLocation } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { useKemaFinanceAI, ChatMessage } from '@/hooks/useKemaFinanceAI';
 import { useKemaInsights, KemaInsight, InsightModule } from '@/hooks/useKemaInsights';
+import { useMetasOperacionais, MetasOperacionais } from '@/hooks/useMetasOperacionais';
 
 const FUNCTION_URL = 'https://asxxotyratempbuxetma.supabase.co/functions/v1/kema-finance-ai';
 
@@ -89,6 +90,10 @@ interface KemaAgentContextValue {
   moduloLabel: string;
   diagnostico: ReturnType<typeof useKemaFinanceAI>['diagnostico'];
   alertas: ReturnType<typeof useKemaFinanceAI>['alertas'];
+  metas: MetasOperacionais;
+  metasDefinidas: boolean;
+  salvarMetas: (receita: number | null, custo: number | null) => void;
+  pedirPlanoDeCortes: () => void;
 }
 
 const KemaAgentContext = createContext<KemaAgentContextValue | null>(null);
@@ -97,6 +102,7 @@ export const KemaAgentProvider: React.FC<{ children: React.ReactNode }> = ({ chi
   const location = useLocation();
   const { diagnostico, alertas } = useKemaFinanceAI();
   const { insights, snapshot } = useKemaInsights();
+  const { metas, definidas: metasDefinidas, salvarMetas } = useMetasOperacionais();
 
   const [open, setOpen] = useState(false);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
@@ -116,8 +122,22 @@ export const KemaAgentProvider: React.FC<{ children: React.ReactNode }> = ({ chi
       operacional: snapshot,
       insightsAtivos: insights.slice(0, 8).map(i => `[${i.severidade}] ${i.titulo} — ${i.descricao}`),
       historicoRecente: alertas.slice(0, 5).map(a => `${a.titulo}: ${a.mensagem}`).join(' | '),
+      metas: {
+        definidas: metasDefinidas,
+        metaReceita: metas.metaReceita,
+        metaCusto: metas.metaCusto,
+        gapReceita:
+          metas.metaReceita != null
+            ? Number(metas.metaReceita) - Number(diagnostico.receitaTotal || 0)
+            : null,
+        excedenteCusto:
+          metas.metaCusto != null
+            ? Number(diagnostico.custoTotalMes || 0) - Number(metas.metaCusto)
+            : null,
+        economiaPotencialSuperfluos: Number(diagnostico.economiaPotencialCortes || 0),
+      },
     }),
-    [diagnostico, snapshot, insights, alertas, modulo, location.pathname]
+    [diagnostico, snapshot, insights, alertas, modulo, location.pathname, metas, metasDefinidas]
   );
 
   const sendMessage = useCallback(
@@ -230,6 +250,17 @@ export const KemaAgentProvider: React.FC<{ children: React.ReactNode }> = ({ chi
 
   const clearMessages = useCallback(() => setMessages([]), []);
 
+  const pedirPlanoDeCortes = useCallback(() => {
+    const receita = metas.metaReceita != null ? `R$ ${metas.metaReceita}` : 'não definida';
+    const custo = metas.metaCusto != null ? `R$ ${metas.metaCusto}` : 'não definido';
+    setOpen(true);
+    sendMessage(
+      `Minha meta de receita mensal é ${receita} e meu teto de custo mensal é ${custo}. ` +
+        'Compare com meus números reais, calcule exatamente quanto falta de receita e quanto preciso cortar de custo, ' +
+        'e me dê uma lista de cortes reais por categoria com o valor de cada corte, o total mensal e o total anual economizado.'
+    );
+  }, [metas, sendMessage]);
+
   const suggestedQuestions = useMemo(() => {
     const fromInsights = pageInsights.slice(0, 2).map(i => i.pergunta);
     return Array.from(new Set([...fromInsights, ...MODULE_SUGGESTIONS[modulo]])).slice(0, 4);
@@ -250,6 +281,10 @@ export const KemaAgentProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     moduloLabel: MODULE_LABEL[modulo],
     diagnostico,
     alertas,
+    metas,
+    metasDefinidas,
+    salvarMetas,
+    pedirPlanoDeCortes,
   };
 
   return <KemaAgentContext.Provider value={value}>{children}</KemaAgentContext.Provider>;

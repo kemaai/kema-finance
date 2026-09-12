@@ -45,6 +45,15 @@ REGRAS DE CÁLCULO:
 - Meta de Reserva = 6 × despesa mensal média
 - Impacto sempre em valor mensal E anual quando fizer sentido.
 
+METAS DE RECEITA E CUSTO (regra obrigatória):
+- Se o bloco METAS do contexto indicar "definidas: NÃO", a PRIMEIRA coisa da sua resposta é perguntar, de forma curta e objetiva: (1) qual a meta de receita mensal em R$ e (2) qual o teto de custo mensal em R$. Sugira valores de referência calculados a partir dos números reais dele (ex.: receita atual + 20%, custo atual − economia potencial) e diga que ele pode informar na conversa ou no campo de metas do painel. Depois disso responda o que foi perguntado com os dados que já existem.
+- Se as metas estiverem definidas, SEMPRE mostre:
+  ## Metas x Realidade — meta de receita, receita real e o gap em R$; teto de custo, custo real e o excedente em R$.
+  ## Cortes sugeridos — tabela/lista de cortes REAIS por categoria de gasto, cada linha com: categoria/gasto, valor atual no mês, valor sugerido, corte em R$ e justificativa curta. Priorize supérfluos, depois recorrências pouco usadas, depois renegociação de fixas. Nunca corte abaixo do essencial.
+  Some os cortes e mostre **Total do corte: R$ X/mês (R$ 12X/ano)** e se isso fecha ou não o excedente de custo; se não fechar, diga quanto ainda falta.
+  Se faltar receita, calcule quantas instalações/serviços (usando o ticket médio real) são necessários para cobrir o gap.
+- Só use valores que existam no contexto. Se uma categoria não tem valor registrado, diga que precisa ser lançada em Gastos Diários ou Despesas.
+
 OBJETIVO: manter a operação organizada, o caixa positivo, as dívidas caindo e o patrimônio crescendo.`;
 
 serve(async (req) => {
@@ -120,11 +129,24 @@ serve(async (req) => {
         ? op.maioresDespesas.slice(0, 5).map((d: { nome?: string; valor?: number }) => `${safeStr(d?.nome, 40)} (${brl(d?.valor)})`)
         : [];
 
+      const m = financialContext.metas ?? {};
+      const metasBloco = m.definidas
+        ? `- definidas: SIM
+- Meta de receita mensal: ${m.metaReceita != null ? brl(m.metaReceita) : "não informada"}
+- Gap de receita (meta - receita real): ${m.gapReceita != null ? brl(m.gapReceita) : "N/A"}
+- Teto de custo mensal: ${m.metaCusto != null ? brl(m.metaCusto) : "não informado"}
+- Excedente de custo (custo real - teto): ${m.excedenteCusto != null ? brl(m.excedenteCusto) : "N/A"}
+- Economia potencial já identificada em supérfluos: ${brl(m.economiaPotencialSuperfluos)}/mês`
+        : `- definidas: NÃO (pergunte a meta de receita mensal e o teto de custo mensal antes de sugerir cortes)`;
+
       contextMessage = `
 CONTEXTO EM TEMPO REAL DO USUÁRIO (dados reais do app)
 
 🧭 ONDE ELE ESTÁ AGORA:
 - Tela atual: ${safeStr(financialContext.paginaAtual, 40)} (${safeStr(financialContext.rotaAtual, 40)})
+
+🎯 METAS DO USUÁRIO:
+${metasBloco}
 
 📊 FINANCEIRO DO MÊS:
 - Receita total: ${brl(financialContext.receitaTotal)} (Serviços ${brl(financialContext.receitaServicos)} | Instalações ${brl(financialContext.receitaInstalacoes)})
