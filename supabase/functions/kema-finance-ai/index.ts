@@ -129,11 +129,24 @@ serve(async (req) => {
         ? op.maioresDespesas.slice(0, 5).map((d: { nome?: string; valor?: number }) => `${safeStr(d?.nome, 40)} (${brl(d?.valor)})`)
         : [];
 
+      const m = financialContext.metas ?? {};
+      const metasBloco = m.definidas
+        ? `- definidas: SIM
+- Meta de receita mensal: ${m.metaReceita != null ? brl(m.metaReceita) : "não informada"}
+- Gap de receita (meta - receita real): ${m.gapReceita != null ? brl(m.gapReceita) : "N/A"}
+- Teto de custo mensal: ${m.metaCusto != null ? brl(m.metaCusto) : "não informado"}
+- Excedente de custo (custo real - teto): ${m.excedenteCusto != null ? brl(m.excedenteCusto) : "N/A"}
+- Economia potencial já identificada em supérfluos: ${brl(m.economiaPotencialSuperfluos)}/mês`
+        : `- definidas: NÃO (pergunte a meta de receita mensal e o teto de custo mensal antes de sugerir cortes)`;
+
       contextMessage = `
 CONTEXTO EM TEMPO REAL DO USUÁRIO (dados reais do app)
 
 🧭 ONDE ELE ESTÁ AGORA:
 - Tela atual: ${safeStr(financialContext.paginaAtual, 40)} (${safeStr(financialContext.rotaAtual, 40)})
+
+🎯 METAS DO USUÁRIO:
+${metasBloco}
 
 📊 FINANCEIRO DO MÊS:
 - Receita total: ${brl(financialContext.receitaTotal)} (Serviços ${brl(financialContext.receitaServicos)} | Instalações ${brl(financialContext.receitaInstalacoes)})
