@@ -19,11 +19,15 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
       '/': 'Dashboard',
       '/dashboard': 'Dashboard',
       '/clientes': 'Clientes',
-      '/sites': 'Sites',
+      '/servicos': 'Serviços',
       '/instalacoes': 'Instalações',
       '/despesas': 'Despesas',
+      '/gastos-diarios': 'Gastos Diários',
       '/dividas': 'Dívidas',
-      '/relatorios': 'Relatórios'
+      '/relatorios': 'Relatórios',
+      '/agente': 'KEMA AI',
+      '/perfil': 'Perfil',
+      '/configuracoes': 'Configurações'
     };
     
     return routes[pathname] || 'Dashboard';
