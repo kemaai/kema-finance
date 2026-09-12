@@ -250,6 +250,17 @@ export const KemaAgentProvider: React.FC<{ children: React.ReactNode }> = ({ chi
 
   const clearMessages = useCallback(() => setMessages([]), []);
 
+  const pedirPlanoDeCortes = useCallback(() => {
+    const receita = metas.metaReceita != null ? `R$ ${metas.metaReceita}` : 'não definida';
+    const custo = metas.metaCusto != null ? `R$ ${metas.metaCusto}` : 'não definido';
+    setOpen(true);
+    sendMessage(
+      `Minha meta de receita mensal é ${receita} e meu teto de custo mensal é ${custo}. ` +
+        'Compare com meus números reais, calcule exatamente quanto falta de receita e quanto preciso cortar de custo, ' +
+        'e me dê uma lista de cortes reais por categoria com o valor de cada corte, o total mensal e o total anual economizado.'
+    );
+  }, [metas, sendMessage]);
+
   const suggestedQuestions = useMemo(() => {
     const fromInsights = pageInsights.slice(0, 2).map(i => i.pergunta);
     return Array.from(new Set([...fromInsights, ...MODULE_SUGGESTIONS[modulo]])).slice(0, 4);
@@ -270,6 +281,10 @@ export const KemaAgentProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     moduloLabel: MODULE_LABEL[modulo],
     diagnostico,
     alertas,
+    metas,
+    metasDefinidas,
+    salvarMetas,
+    pedirPlanoDeCortes,
   };
 
   return <KemaAgentContext.Provider value={value}>{children}</KemaAgentContext.Provider>;
