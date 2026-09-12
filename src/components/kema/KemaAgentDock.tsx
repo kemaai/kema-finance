@@ -6,6 +6,7 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { Sheet, SheetContent } from '@/components/ui/sheet';
 import { useKemaAgent } from '@/contexts/KemaAgentContext';
 import { MarkdownLite } from './MarkdownLite';
+import { KemaMetasForm } from './KemaMetasForm';
 
 export const KemaAgentDock: React.FC = () => {
   const {
@@ -108,6 +109,8 @@ export const KemaAgentDock: React.FC = () => {
                     Eu enxergo seus serviços, instalações, clientes, despesas e dívidas em tempo real.
                   </p>
                 </div>
+
+                <KemaMetasForm />
 
                 {pageInsights.length > 0 && (
                   <div className="rounded-xl border border-border bg-muted/30 p-3 space-y-1.5">
