@@ -90,6 +90,10 @@ interface KemaAgentContextValue {
   moduloLabel: string;
   diagnostico: ReturnType<typeof useKemaFinanceAI>['diagnostico'];
   alertas: ReturnType<typeof useKemaFinanceAI>['alertas'];
+  metas: MetasOperacionais;
+  metasDefinidas: boolean;
+  salvarMetas: (receita: number | null, custo: number | null) => void;
+  pedirPlanoDeCortes: () => void;
 }
 
 const KemaAgentContext = createContext<KemaAgentContextValue | null>(null);
@@ -98,6 +102,7 @@ export const KemaAgentProvider: React.FC<{ children: React.ReactNode }> = ({ chi
   const location = useLocation();
   const { diagnostico, alertas } = useKemaFinanceAI();
   const { insights, snapshot } = useKemaInsights();
+  const { metas, definidas: metasDefinidas, salvarMetas } = useMetasOperacionais();
 
   const [open, setOpen] = useState(false);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
