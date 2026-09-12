@@ -3,6 +3,7 @@ import { useLocation } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { useKemaFinanceAI, ChatMessage } from '@/hooks/useKemaFinanceAI';
 import { useKemaInsights, KemaInsight, InsightModule } from '@/hooks/useKemaInsights';
+import { useMetasOperacionais, MetasOperacionais } from '@/hooks/useMetasOperacionais';
 
 const FUNCTION_URL = 'https://asxxotyratempbuxetma.supabase.co/functions/v1/kema-finance-ai';
 
