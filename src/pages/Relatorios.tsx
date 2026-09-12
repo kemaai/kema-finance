@@ -96,7 +96,10 @@ export const Relatorios = () => {
     const receitaInstalacoes = instalacoesConcluidas.reduce((total, instalacao) => total + instalacao.valor_total, 0);
     
     // Metragem total (valor / m²Price = M²)
-    const metragemTotal = instalacoesConcluidas.reduce((total, instalacao) => total + (instalacao.valor_total / m2Price), 0);
+    const metragemTotal = instalacoesConcluidas.reduce((total, instalacao) => {
+      const preco = Number(instalacao.valor_m2) > 0 ? Number(instalacao.valor_m2) : m2Price;
+      return total + (preco > 0 ? Number(instalacao.valor_total) / preco : 0);
+    }, 0);
 
     // Despesas
     const totalDespesas = dadosFiltrados.despesas.reduce((total, despesa) => total + despesa.valor, 0);
@@ -180,7 +183,10 @@ export const Relatorios = () => {
       });
       
       const receitaInstalacoes = instPeriodo.reduce((sum, inst) => sum + Number(inst.valor_total), 0);
-      const metragem = receitaInstalacoes / m2Price;
+      const metragem = instPeriodo.reduce((sum, inst) => {
+        const preco = Number(inst.valor_m2) > 0 ? Number(inst.valor_m2) : m2Price;
+        return sum + (preco > 0 ? Number(inst.valor_total) / preco : 0);
+      }, 0);
       
       // Filtrar serviços do período
       const servicosPeriodo = servicos.filter(s => {
@@ -307,7 +313,8 @@ export const Relatorios = () => {
         dados += `Média M² por Instalação: ${metricas.instalacoesConcluidas > 0 ? (metricas.metragemTotal / metricas.instalacoesConcluidas).toFixed(2) : '0.00'} M²\n\n`;
         dados += `=== DETALHAMENTO ===\n`;
         dadosFiltrados.instalacoes.forEach(inst => {
-          const metragem = inst.valor_total / m2Price;
+          const precoInst = Number(inst.valor_m2) > 0 ? Number(inst.valor_m2) : m2Price;
+          const metragem = precoInst > 0 ? Number(inst.valor_total) / precoInst : 0;
           dados += `\nPedido: ${inst.numero_pedido}\n`;
           dados += `Arquiteto: ${inst.arquiteto_nome}\n`;
           dados += `Data: ${new Date(inst.data_instalacao).toLocaleDateString('pt-BR')}\n`;
@@ -914,7 +921,10 @@ export const Relatorios = () => {
                 const instalacoesCanceladas = dadosFiltrados.instalacoes.filter(inst => inst.status === 'Cancelado');
                 
                 const receitaConcluidas = instalacoesConcluidas.reduce((sum, inst) => sum + Number(inst.valor_total), 0);
-                const metragemConcluidas = receitaConcluidas / m2Price;
+                const metragemConcluidas = instalacoesConcluidas.reduce((sum, inst) => {
+                  const preco = Number(inst.valor_m2) > 0 ? Number(inst.valor_m2) : m2Price;
+                  return sum + (preco > 0 ? Number(inst.valor_total) / preco : 0);
+                }, 0);
 
                 return (
                   <>

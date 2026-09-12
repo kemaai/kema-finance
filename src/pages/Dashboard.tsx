@@ -98,7 +98,10 @@ export const Dashboard = () => {
   });
 
   const receitaPeriodoInstalacoes = instalacoesDoPeriodo.reduce((total, instalacao) => total + Number(instalacao.valor_total), 0);
-  const totalM2Periodo = instalacoesDoPeriodo.reduce((total, instalacao) => total + Number(instalacao.valor_total) / m2Price, 0);
+  const totalM2Periodo = instalacoesDoPeriodo.reduce((total, instalacao) => {
+    const preco = Number(instalacao.valor_m2) > 0 ? Number(instalacao.valor_m2) : m2Price;
+    return total + (preco > 0 ? Number(instalacao.valor_total) / preco : 0);
+  }, 0);
   const receitaTotal = receitaMensalServicos + receitaPeriodoInstalacoes;
 
   const clientesAtivos = clientes.length;
