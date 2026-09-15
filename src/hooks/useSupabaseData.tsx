@@ -39,6 +39,7 @@ interface Instalacao {
   arquiteto_nome: string;
   ambiente: string;
   pedido_recebido: boolean;
+  valor_m2?: number | null;
 }
 
 interface Despesa {
